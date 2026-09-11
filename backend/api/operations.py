@@ -4,8 +4,8 @@ from typing import Annotated
 from fastapi import Depends
 from sqlmodel import Session, select
 
-from database import get_session
-from models import (
+from api.database import get_session
+from api.models import (
     BaseCreate,
     Booking,
     BookingCreate,

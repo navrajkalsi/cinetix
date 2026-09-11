@@ -3,15 +3,16 @@ from contextlib import asynccontextmanager
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
 
-from database import get_session, init_db, remove_db
-from models import (
+from api.database import get_session, init_db, remove_db
+from api.models import (
     Booking,
     BookingCreate,
     BookingUpdate,
 )
-from operations import create, delete, get, get_all, update
+from api.operations import create, delete, get, get_all, update
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -24,6 +25,18 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+origins = [
+    "http://localhost:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.post("/bookings/")

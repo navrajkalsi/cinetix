@@ -1,0 +1,29 @@
+[
+  {
+    "id": "ABCD1234",
+    "datetime": "2026-09-09T23:25:58+0000",
+    "seats": "A1",
+    "price": 20.0,
+    "movie": "The Odyssey",
+    "location": "Scotiabank Theatre Toronto",
+    "format": "IMAX"
+  },
+  {
+    "id": "ABCD1234",
+    "datetime": "2026-09-09T23:25:58+0000",
+    "seats": "A2",
+    "price": 30.0,
+    "movie": "The Odyssey - IMAX",
+    "location": "Cineplex Cinemas Mississauga Square One",
+    "format": "IMAX 70mm"
+  },
+  {
+    "id": "ABCD1234",
+    "datetime": "2026-09-09T23:25:58+0000",
+    "seats": "A3",
+    "price": 20.0,
+    "movie": "Spiderman",
+    "location": "Cineplex Cinemas Mississauga Square One",
+    "format": "Regular"
+  }
+]

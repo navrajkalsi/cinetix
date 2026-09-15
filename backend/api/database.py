@@ -1,20 +1,12 @@
-import os
-
-from dotenv import load_dotenv
 from sqlmodel import Session, SQLModel, create_engine
 
-if load_dotenv() is False:
-    raise FileNotFoundError(".env file not found")
+from api.config import settings
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-if DATABASE_URL is None:
-    raise OSError("DATABASE_URL not set")
-
-engine = create_engine(DATABASE_URL)
+engine = create_engine(settings.database_url)
 
 
 def get_session():
+    # ensures that we get a session and do not have multiple connections open to the db
     with Session(engine) as session:
         yield session
 

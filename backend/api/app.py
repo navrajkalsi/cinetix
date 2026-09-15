@@ -1,11 +1,14 @@
+import tomllib
 from collections.abc import Sequence
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
 
+from api.config import settings
 from api.database import get_session, init_db, remove_db
 from api.models import (
     Booking,
@@ -16,6 +19,21 @@ from api.operations import create, delete, get, get_all, update
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
+# Defaults
+DESCRIPTION = "api to manage movies database operations"
+VERSION = "0.1"
+
+with Path("pyproject.toml").open("rb") as f:
+    config: dict[str, str] | None = tomllib.load(f).get("project")
+
+
+if config:
+    description = config.get("description")
+    version = config.get("version")
+else:
+    description = None
+    version = None
+
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -24,15 +42,18 @@ async def lifespan(_app: FastAPI):
     remove_db()
 
 
-app = FastAPI(lifespan=lifespan)
+# Launch api with custom args or fallback to defaults
+app = FastAPI(
+    title="Cinetix API",
+    description=description if description else DESCRIPTION,
+    version=version if version else VERSION,
+    lifespan=lifespan,
+)
 
-origins = [
-    "http://localhost:5173",
-]
-
+# Allowing foreign origins to access the api
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

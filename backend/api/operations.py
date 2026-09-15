@@ -43,8 +43,7 @@ def create(data: BookingCreate, session: SessionDep) -> Booking:
     # validated full booking object, with unique id
     booking = Booking(
         booking_id=data.booking_id,
-        date=data.date,
-        time=data.time,
+        datetime=data.datetime,
         seats=data.seats,
         price=data.price,
         movie_id=movie_id,

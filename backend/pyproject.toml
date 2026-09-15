@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 authors = [{ name = "Navraj Kalsi", email = "navrajkalsi@icloud.com" }]
 dependencies = [
-  "fastapi[standard]>=0.141.1",
+  "fastapi[all]>=0.141.1",
   "psycopg2>=2.9.12",
   "sqlmodel>=0.0.42",
 ]
@@ -16,7 +16,7 @@ requires = ["uv_build>=0.12.9,<0.13.0"]
 build-backend = "uv_build"
 
 [tool.fastapi]
-entrypoint = "api.main:app"
+entrypoint = "api.app:app"
 
 [tool.uv]
 package = false

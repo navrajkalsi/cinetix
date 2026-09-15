@@ -1,4 +1,4 @@
-from datetime import date, time
+from datetime import datetime
 from decimal import Decimal
 
 from sqlmodel import Field, SQLModel
@@ -9,16 +9,22 @@ class BaseCreate(SQLModel):
 
 
 class Location(BaseCreate, table=True):
+    __tablename__: str = "locations"
+
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(unique=True)
 
 
 class Movie(BaseCreate, table=True):
+    __tablename__: str = "movies"
+
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(unique=True)
 
 
 class Format(BaseCreate, table=True):
+    __tablename__: str = "formats"
+
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(unique=True)
 
@@ -27,8 +33,7 @@ class BookingBase(SQLModel):
     booking_id: str | None = (
         None  # id from ticket vendor, some vendors may not provide this
     )
-    date: date
-    time: time
+    datetime: datetime
     seats: str | None = None
     price: Decimal
 
@@ -46,7 +51,9 @@ class BookingUpdate(SQLModel):
 
 
 class Booking(BookingBase, table=True):
+    __tablename__ = "bookings"
+
     id: int | None = Field(default=None, primary_key=True)  # internal unique id
-    movie_id: int = Field(foreign_key="movie.id")
-    location_id: int = Field(foreign_key="location.id")
-    format_id: int = Field(foreign_key="format.id")
+    movie_id: int = Field(foreign_key="movies.id")
+    location_id: int = Field(foreign_key="locations.id")
+    format_id: int = Field(foreign_key="formats.id")

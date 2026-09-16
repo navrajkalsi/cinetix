@@ -1,11 +1,17 @@
 import './App.css';
-import Booking from './Booking';
+import Booking from './components/Booking';
 import bookings from '../demo.json';
+import { useEffect } from 'react';
 
 export default function App() {
-  fetch("http://127.0.0.1:8000/bookings").then(res => {
-    res.json().then(json => console.log(json))
-  });
+
+  useEffect(
+    () => {
+      fetch("/api/bookings").then(res => {
+        res.json().then(json => console.log(json))
+      })
+    }
+  );
 
   return (
     <>

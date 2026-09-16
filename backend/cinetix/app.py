@@ -8,14 +8,14 @@ from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
 
-from api.config import settings
-from api.database import get_session, init_db, remove_db
-from api.models import (
+from .config import settings
+from .database import get_session, init_db, remove_db
+from .models import (
     Booking,
     BookingCreate,
     BookingUpdate,
 )
-from api.operations import create, delete, get, get_all, update
+from .operations import create, delete, get, get_all, update
 
 SessionDep = Annotated[Session, Depends(get_session)]
 

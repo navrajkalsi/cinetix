@@ -1,23 +1,14 @@
-import './App.css';
-import Booking from './components/Booking';
-import bookings from '../demo.json';
-import { useEffect } from 'react';
+import { useState } from "react";
+import Header, { type View } from "./components/Header";
+import List from "./components/List";
 
 export default function App() {
-
-  useEffect(
-    () => {
-      fetch("/api/bookings").then(res => {
-        res.json().then(json => console.log(json))
-      })
-    }
-  );
+  const [activeView, setView] = useState<View>("Bookings");
 
   return (
-    <>
-      <Booking {...bookings[0]} />
-      <Booking {...bookings[1]} />
-      <Booking {...bookings[2]} />
-    </>
+    <main>
+      <Header activeView={activeView} changeView={setView} />
+      <List />
+    </main>
   );
 }

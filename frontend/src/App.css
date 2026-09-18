@@ -1,0 +1,20 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
+
+:root {
+  --dark: 20, 20, 20;
+  --light: 240, 240, 240;
+  --accent: 40, 80, 255;
+  --primary: normal 500 16px "Oswald", sans-serif;
+  --secondary: normal 500 16px "Outfit", sans-serif;
+
+  background-color: rgb(var(--dark));
+  color: rgb(var(--light));
+  font: var(--primary);
+}
+
+main {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

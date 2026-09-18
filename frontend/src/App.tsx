@@ -1,14 +1,15 @@
 import { useState } from "react";
-import Header, { type View } from "./components/Header";
+import Nav, { type View } from "./components/Nav";
 import List from "./components/List";
+import "./App.css";
 
 export default function App() {
   const [activeView, setView] = useState<View>("Bookings");
 
   return (
     <main>
-      <Header activeView={activeView} changeView={setView} />
       <List />
+      <Nav activeView={activeView} changeView={setView} />
     </main>
   );
 }

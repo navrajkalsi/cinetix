@@ -1,0 +1,38 @@
+section {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  width: fit-content;
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  list-style: none;
+  scrollbar-width: none;
+  top: 0;
+  left: 0;
+  transition: all 0.5s ease;
+
+  li {
+    width: 50rem;
+    height: 80%;
+    margin: 0 2.5%;
+    background-color: rgba(var(--light), 0.2);
+    border-radius: 50px;
+    display: flex;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    /* box-shadow: 0 0 10px rgb(var(--light)); */
+  }
+
+  li:hover {
+    scale: 102.5%;
+  }
+}

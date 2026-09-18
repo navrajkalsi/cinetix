@@ -1,10 +1,10 @@
-import "./Header.css";
+import "./Nav.css";
 
 // possible active views union
 export const VIEWS = ["Bookings", "Movies", "Locations", "Formats"] as const;
 export type View = (typeof VIEWS)[number];
 
-export default function Header({
+export default function Nav({
   activeView,
   changeView,
 }: {
@@ -21,9 +21,5 @@ export default function Header({
     </button>
   ));
 
-  return (
-    <header>
-      <nav>{viewButtons}</nav>
-    </header>
-  );
+  return <nav>{viewButtons}</nav>;
 }

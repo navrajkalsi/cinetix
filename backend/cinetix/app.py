@@ -13,6 +13,7 @@ from .database import get_session, init_db, remove_db
 from .models import (
     Booking,
     BookingCreate,
+    BookingRead,
     BookingUpdate,
 )
 from .operations import create, delete, get, get_all, update
@@ -39,7 +40,7 @@ else:
 async def lifespan(_app: FastAPI):
     init_db()
     yield
-    remove_db()
+    # remove_db()
 
 
 # Launch api with custom args or fallback to defaults
@@ -68,12 +69,12 @@ def create_booking(data: BookingCreate, session: SessionDep) -> Booking:
 @app.get("/bookings/")
 def read_bookings(
     session: SessionDep, offset: int = 0, limit: Annotated[int, Query(le=100)] = 100
-) -> Sequence[Booking]:
+) -> Sequence[BookingRead]:
     return get_all(session, offset, limit)
 
 
 @app.get("/bookings/{id}")
-def read_booking(id: int, session: SessionDep) -> Booking:
+def read_booking(id: int, session: SessionDep) -> BookingRead:
     booking = get(id, session)
 
     if booking is None:
@@ -83,7 +84,7 @@ def read_booking(id: int, session: SessionDep) -> Booking:
 
 
 @app.patch("/bookings/{id}")
-def update_booking(id: int, data: BookingUpdate, session: SessionDep):
+def update_booking(id: int, data: BookingUpdate, session: SessionDep) -> BookingRead:
     booking = update(id, data, session)
 
     if booking is None:

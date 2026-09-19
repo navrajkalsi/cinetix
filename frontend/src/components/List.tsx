@@ -1,8 +1,9 @@
 import { useRef } from "react";
 import "./List.css";
-import type Booking from "../models/Booking";
+import type BookingModel from "../models/Booking";
+import Booking from "./Booking";
 
-export default function List({ items }: { items: Array<Booking> }) {
+export default function List({ items }: { items: Array<BookingModel> }) {
   const list = useRef<HTMLUListElement>(null);
 
   function handleScroll(e: React.WheelEvent<HTMLElement>) {
@@ -25,21 +26,7 @@ export default function List({ items }: { items: Array<Booking> }) {
 
   const list_items = items.map((item) => (
     <li key={item.id}>
-      ID: {item.id}
-      <br />
-      Booking ID: {item.booking_id}
-      <br />
-      Datetime: {item.datetime}
-      <br />
-      Seats: {item.seats}
-      <br />
-      Price: {item.price}
-      <br />
-      Movie: {item.movie}
-      <br />
-      Location: {item.location}
-      <br />
-      Format: {item.format}
+      <Booking booking={item} />
     </li>
   ));
 

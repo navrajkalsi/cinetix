@@ -9,6 +9,7 @@ from .models import (
     BaseCreate,
     Booking,
     BookingCreate,
+    BookingRead,
     BookingUpdate,
     Format,
     Location,
@@ -16,6 +17,17 @@ from .models import (
 )
 
 SessionDep = Annotated[Session, Depends(get_session)]
+
+
+def booking_read(booking: Booking, session: SessionDep) -> BookingRead:
+    movie = get_movie(booking.movie_id, session)
+    assert movie is not None
+    location = get_location(booking.movie_id, session)
+    assert location is not None
+    format = get_format(booking.movie_id, session)
+    assert format is not None
+
+    return BookingRead.from_booking(booking, movie, location, format)
 
 
 def get_or_create[T: BaseCreate](model: type[T], name: str, session: SessionDep) -> T:
@@ -58,15 +70,22 @@ def create(data: BookingCreate, session: SessionDep) -> Booking:
     return booking
 
 
-def get(id: int, session: SessionDep) -> Booking | None:
-    return session.get(Booking, id)
+def get(id: int, session: SessionDep) -> BookingRead | None:
+    booking = session.get(Booking, id)
+
+    if booking is None:
+        return None
+
+    return booking_read(booking, session)
 
 
-def get_all(session: SessionDep, offset: int, limit: int) -> Sequence[Booking]:
-    return session.exec(select(Booking).offset(offset).limit(limit)).all()
+def get_all(session: SessionDep, offset: int, limit: int) -> Sequence[BookingRead]:
+    bookings = session.exec(select(Booking).offset(offset).limit(limit)).all()
+
+    return [booking_read(booking, session) for booking in bookings]
 
 
-def update(id: int, data: BookingUpdate, session: SessionDep) -> Booking | None:
+def update(id: int, data: BookingUpdate, session: SessionDep) -> BookingRead | None:
     booking = get(id, session)
 
     if booking:
@@ -81,7 +100,7 @@ def update(id: int, data: BookingUpdate, session: SessionDep) -> Booking | None:
     return booking
 
 
-def delete(id: int, session: SessionDep) -> Booking | None:
+def delete(id: int, session: SessionDep) -> BookingRead | None:
     booking = get(id, session)
 
     if booking:
@@ -89,3 +108,15 @@ def delete(id: int, session: SessionDep) -> Booking | None:
         session.commit()
 
     return booking
+
+
+def get_movie(id: int, session: SessionDep) -> Movie | None:
+    return session.get(Movie, id)
+
+
+def get_location(id: int, session: SessionDep) -> Location | None:
+    return session.get(Location, id)
+
+
+def get_format(id: int, session: SessionDep) -> Format | None:
+    return session.get(Format, id)

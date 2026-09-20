@@ -1,0 +1,15 @@
+.field {
+  font-size: 125%;
+}
+
+.field-name {
+  font: var(--secondary);
+  font-weight: 750;
+  font-size: inherit;
+}
+
+.field-value {
+  font: var(--primary);
+  font-weight: 500;
+  font-size: inherit;
+}

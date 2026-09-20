@@ -9,7 +9,7 @@ export default function Nav({
   changeView,
 }: {
   activeView: View;
-  changeView: React.Dispatch<React.SetStateAction<View>>;
+  changeView: (view: View) => void;
 }) {
   const viewButtons = VIEWS.map((view) => (
     <button

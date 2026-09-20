@@ -120,3 +120,15 @@ def get_location(id: int, session: SessionDep) -> Location | None:
 
 def get_format(id: int, session: SessionDep) -> Format | None:
     return session.get(Format, id)
+
+
+def get_movies(session: SessionDep, offset: int, limit: int) -> Sequence[Movie]:
+    return session.exec(select(Movie).offset(offset).limit(limit)).all()
+
+
+def get_locations(session: SessionDep, offset: int, limit: int) -> Sequence[Location]:
+    return session.exec(select(Location).offset(offset).limit(limit)).all()
+
+
+def get_formats(session: SessionDep, offset: int, limit: int) -> Sequence[Format]:
+    return session.exec(select(Format).offset(offset).limit(limit)).all()

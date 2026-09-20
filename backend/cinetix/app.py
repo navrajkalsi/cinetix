@@ -15,8 +15,20 @@ from .models import (
     BookingCreate,
     BookingRead,
     BookingUpdate,
+    Format,
+    Location,
+    Movie,
 )
-from .operations import create, delete, get, get_all, update
+from .operations import (
+    create,
+    delete,
+    get,
+    get_all,
+    get_formats,
+    get_locations,
+    get_movies,
+    update,
+)
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -99,3 +111,24 @@ def delete_booking(id: int, session: SessionDep):
 
     if booking is None:
         raise HTTPException(status_code=404, detail="Booking not found")
+
+
+@app.get("/movies/")
+def read_movies(
+    session: SessionDep, offset: int = 0, limit: Annotated[int, Query(le=100)] = 100
+) -> Sequence[Movie]:
+    return get_movies(session, offset, limit)
+
+
+@app.get("/locations/")
+def read_locations(
+    session: SessionDep, offset: int = 0, limit: Annotated[int, Query(le=100)] = 100
+) -> Sequence[Location]:
+    return get_locations(session, offset, limit)
+
+
+@app.get("/formats/")
+def read_formats(
+    session: SessionDep, offset: int = 0, limit: Annotated[int, Query(le=100)] = 100
+) -> Sequence[Format]:
+    return get_formats(session, offset, limit)

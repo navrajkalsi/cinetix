@@ -45,14 +45,34 @@ def parse_seat(s: str) -> str:
     IMAX Row H - Seat 17 CineClub Member-Priced $19.99
     """
 
-    separated = s.split("-", 1)
+    row_separated = s.split("Row", 1)
+    seat_separated = s.split("Seat", 1)
 
-    assert len(separated) == 2
+    assert len(row_separated) == 2
+    assert len(seat_separated) == 2
 
-    row = separated[0].strip().split()[-1]
-    num = separated[1].strip().split()[1]  # skip the string literal 'Seat'
+    row = row_separated[1].strip().split()[0]
+    num = seat_separated[1].strip().split()[0]
 
     return row + num
+
+
+# the returned dict has all its keys and values strip()ed of any whitespace
+def transaction_dict(lines: list[str]) -> dict[str, tuple[int, str]]:
+    # only the strings with a field contain ':'.
+    # A line may contain more than one ':' therefore we only split at the first
+    # A line that does not contain ':' does not concern us and is just ignored
+
+    contains_colon = filter(lambda t: t[1].__contains__(":"), enumerate(lines))
+    # list of tuples
+    # each tuple contains the line index from lines and a list of two strs retrieved after
+    # spliting across ':'
+    separated = [(x[0], x[1].split(":", maxsplit=1)) for x in contains_colon]
+
+    return {
+        split[1][0].strip().lower().replace(" ", "_"): (split[0], split[1][1].strip())
+        for split in separated
+    }
 
 
 class Transaction:
@@ -65,33 +85,35 @@ class Transaction:
     price: Decimal
 
     def __init__(self, transaction_string: str):
-        fields = transaction_string.splitlines()
+        lines = transaction_string.splitlines()
+        fields = transaction_dict(lines)
 
-        self.id = fields[2].split(":", 1)[1].strip()
-        self.location = fields[3].split(":", 1)[1].strip()
-        self.movie = fields[4].split(":", 1)[1].strip()
+        self.id = fields["booking_id"][1]
+        self.location = fields["theater_location"][1]
+        self.movie = fields["film/performance"][1]
 
-        raw_datetime = fields[5].split(":", 1)[1].strip()
+        raw_datetime = fields["date/time"][1]
         self.datetime = parse_datetime(raw_datetime)
 
-        tickets_count = int(fields[7].split(":", 1)[1].strip())
-        self.format = fields[9].split(maxsplit=1)[
+        tickets_field = fields["number_of_tickets"]
+        tickets_count = int(tickets_field[1])
+        tickets_field_index = tickets_field[0]
+
+        self.format = "IMAX"
+        # seat information starts from the second row from 'number_of_tickets'
+        seats_start_index = tickets_field_index + 2
+        self.format = lines[seats_start_index].split(maxsplit=1)[
             0
         ]  # format will be same for all the tickets
 
         # maybe fragile as i have seen seats labelled as AAA,
         # there could be more edge cases like this
-        seat_fields = fields[9 : 9 + tickets_count]
+        seat_lines = lines[seats_start_index : seats_start_index + tickets_count]
 
-        self.seats = [parse_seat(field) for field in seat_fields]
+        self.seats = [parse_seat(line) for line in seat_lines]
         self.seats.sort()  # looks good this way
 
-        total_index = 9 + tickets_count + 2
-
-        if not fields[total_index].startswith("Total"):
-            total_index += 1  # bump up index if 'CineClub Discount' exists
-
-        self.price = Decimal(fields[total_index].split(":", 1)[1].strip()[1:])
+        self.price = Decimal(fields["total"][1][1:])  # skips dollar sign
 
     @override
     def __str__(self) -> str:
@@ -103,5 +125,5 @@ Date: {self.datetime.date()}
 Time: {self.datetime.time()}
 Format: {self.format}
 Seats: {self.seats}
-Price: {self.price}
+Price: ${self.price}
         """

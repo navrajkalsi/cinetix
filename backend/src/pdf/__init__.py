@@ -53,8 +53,14 @@ def main():
     if SAVE_IR:
         cropped.save(OUT_CROPPED_IMG)
 
+    # current page segmentation mode setting for reading complete lines:
     # 6|single_block            Assume a single uniform block of text.
-    TRANSACTION = pytesseract.image_to_string(cropped, config="--psm 6").__str__()
+
+    # current OCR engine mode setting that works great with numbers:
+    # 0|tesseract_only          Legacy engine only.
+    TRANSACTION = pytesseract.image_to_string(
+        cropped, config="--psm 6 --oem 0"
+    ).__str__()
 
     if SAVE_IR:
         with open(OUT_TRANSACTION, "w") as f:

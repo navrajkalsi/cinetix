@@ -22,9 +22,9 @@ SessionDep = Annotated[Session, Depends(get_session)]
 def booking_read(booking: Booking, session: SessionDep) -> BookingRead:
     movie = get_movie(booking.movie_id, session)
     assert movie is not None
-    location = get_location(booking.movie_id, session)
+    location = get_location(booking.location_id, session)
     assert location is not None
-    format = get_format(booking.movie_id, session)
+    format = get_format(booking.format_id, session)
     assert format is not None
 
     return BookingRead.from_booking(booking, movie, location, format)

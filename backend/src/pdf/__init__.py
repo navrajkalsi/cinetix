@@ -14,7 +14,7 @@ TRANSACTION_RECEIPT_HEIGHT = 1400
 # amount to remove from the end of the transaction receipt that does not concern us
 TRANSACTION_FOOTER_HEIGHT = 250
 
-SAVE_IR = False
+SAVE_IR = True
 
 
 def main():
@@ -54,15 +54,15 @@ def main():
         cropped.save(OUT_CROPPED_IMG)
 
     # 6|single_block            Assume a single uniform block of text.
-    TRANSACTION = pytesseract.image_to_string(
-        cropped, config="--psm 6", lang="eng"
-    ).__str__()
+    TRANSACTION = pytesseract.image_to_string(cropped, config="--psm 6").__str__()
 
     if SAVE_IR:
         with open(OUT_TRANSACTION, "w") as f:
             _ = f.write(TRANSACTION)
 
     transaction = Transaction(TRANSACTION)
+
+    print(transaction)
 
 
 if __name__ == "__main__":

@@ -10,11 +10,13 @@ dependencies = [
   "psycopg2>=2.9.12",
   "pypdf[image]>=6.19.0",
   "pytesseract>=0.3.13",
+  "requests>=2.34.2",
   "sqlmodel>=0.0.42",
 ]
 
 [project.scripts]
-pdf = "pdf:main"
+create = "scripts:create_booking"
+pdf = "pdf:from_args"
 
 [build-system]
 requires = ["uv_build>=0.12.9,<0.13.0"]

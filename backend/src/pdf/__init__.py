@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 import pytesseract
 from PIL.Image import Image
@@ -17,17 +18,12 @@ TRANSACTION_FOOTER_HEIGHT = 250
 SAVE_IR = True
 
 
-def main():
-    args = sys.argv
+def main(path: Path) -> Transaction:
+    reader = PdfReader(path)
 
-    if len(args) != 2:
-        raise AttributeError("invalid number of arguments supplied")
-
-    reader = PdfReader(args[1])
-
-    OUT_FULL_IMG = f"{args[1].split('.')[0]}-img.jpg"
-    OUT_CROPPED_IMG = f"{args[1].split('.')[0]}-cropped-img.jpg"
-    OUT_TRANSACTION = f"{args[1].split('.')[0]}-transaction.txt"
+    OUT_FULL_IMG = f"{path.stem}-img.jpg"
+    OUT_CROPPED_IMG = f"{path.stem}-cropped-img.jpg"
+    OUT_TRANSACTION = f"{path.stem}-transaction.txt"
 
     # since all the pages are just one single image lets just get the first image on the first page
     # get PIL image
@@ -35,16 +31,15 @@ def main():
 
     reader.close()
 
-    if full_img is None:
+    if not isinstance(full_img, Image):
         raise TypeError("failed to get PIL image from pypdf's ImageFile")
-    else:
-        assert isinstance(full_img, Image)
 
     if SAVE_IR:
         full_img.save(OUT_FULL_IMG)
 
     width = full_img.width
-    assert full_img.height > TRANSACTION_RECEIPT_HEIGHT
+    if full_img.height < TRANSACTION_RECEIPT_HEIGHT:
+        raise ValueError("image extracted from the pdf is not of exepected dimensions")
     top = full_img.height - TRANSACTION_RECEIPT_HEIGHT
     bottom = full_img.height - TRANSACTION_FOOTER_HEIGHT
 
@@ -66,10 +61,16 @@ def main():
         with open(OUT_TRANSACTION, "w") as f:
             _ = f.write(TRANSACTION)
 
-    transaction = Transaction(TRANSACTION)
+    return Transaction(TRANSACTION)
 
-    print(transaction)
+
+def from_args() -> Transaction:
+    args = sys.argv
+    if len(args) != 2:
+        raise ValueError("invalid number of arguments supplied")
+
+    return main(Path(args[1]))
 
 
 if __name__ == "__main__":
-    main()
+    print(from_args())

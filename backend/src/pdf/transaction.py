@@ -27,6 +27,61 @@ Collected points: 240
 GST/HST # 83454 5543 RT0001
 """
 
+# Although the format separators are just ':' (colon) and '-' (hyphen),
+# these may be recognized as other unicode chars as follows:
+FORMAT_SEPARATORS = [
+    "\u003a",  # colon
+    "\uff1a",  # fullwidth colon
+    "\u2236",  # ratio
+    "\u02f8",  # modified letter raised colon
+    "\u0589",  # armenian full stop
+    "\u16ec",  # runtime multiple punctuation
+    "\u002d",  # hyphen-minux
+    "\u2010",  # hyphen
+    "\u2011",  # non-breaking hyphen
+    "\u2013",  # en dash
+    "\u2014",  # em dash
+    "\u2015",  # horizontal bar
+    "\u2016",  # minus
+]
+
+
+def remove_suffixes(text: str, suffixes: list[str]) -> str:
+    """
+    Removes the first matched suffix in `suffixes` from `text` exactly once,
+    after stripping the input `text` of any whitespace.
+    Also strips the returned value of any whitespace.
+
+    If suffix is not found, a stripped version of the input `text` would be returned.
+    """
+
+    text = text.strip()
+
+    for suffix in suffixes:
+        removed = text.removesuffix(suffix)
+        if removed != text:
+            return removed.strip()
+
+    return text  # already stripped at the first line
+
+
+# the returned dict has all its keys and values strip()ed of any whitespace
+def transaction_dict(lines: list[str]) -> dict[str, tuple[int, str]]:
+    # only the strings with a field contain ':'.
+    # A line may contain more than one ':' therefore we only split at the first
+    # A line that does not contain ':' does not concern us and is just ignored
+
+    contains_colon = filter(lambda t: ":" in t[1], enumerate(lines))
+    # list of tuples
+    # each tuple contains the line index from lines and a list of two strs retrieved after
+    # spliting across ':'
+    separated = [(x[0], x[1].split(":", maxsplit=1)) for x in contains_colon]
+
+    return {
+        split[1][0].strip().lower().replace(" ", "_"): (split[0], split[1][1].strip())
+        for split in separated
+    }
+
 
 def parse_datetime(s: str) -> datetime:
     """
@@ -38,26 +93,6 @@ def parse_datetime(s: str) -> datetime:
     return datetime.strptime(s, "%A, %B %d, %Y - %I:%M %p").astimezone()
 
     # Parsing identifiers and their meanings: https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior
-
-
-def parse_seat(s: str) -> str:
-    """
-    Parses seat row and number in the following format:
-    IMAX Row H - Seat 17 CineClub Member-Priced $19.99
-    """
-
-    row_separated = s.split("Row", 1)
-    seat_separated = s.split("Seat", 1)
-
-    if len(row_separated) != 2 or len(seat_separated) != 2:
-        raise ValueError(
-            "seat line could not be parsed. Number of tickets is probably wrong"
-        )
-
-    row = row_separated[1].strip().split()[0]
-    num = seat_separated[1].strip().split()[0]
-
-    return row + num
 
 
 # takes in any seat row, as format remains the same for all the seats
@@ -107,38 +142,51 @@ def parse_format(s: str) -> str:
 # needs to return 'Avatar: Fire and Ash'
 #
 # WHAT IN THE ACTUAL Fk!?
-def parse_movie_format(movie: str, format: str) -> tuple[str, str]:
-    if "The IMAX Experience®" in movie:  # 2d imax
-        split = movie.split("The IMAX Experience®")
-        movie = (
-            split[0]
-            .strip()
-            .removesuffix(":")
-            .removesuffix("-")
-            .removesuffix("—")
-            .strip()
-        )
+def parse_movie(movie: str, format: str) -> tuple[str, str | None]:
+    """
+    returns movie name and optional format
+    """
 
-        if format != "IMAX":
-            raise ValueError(f"IMAX format parsed from seats as: {format}")
+    format: str | None = None
 
-        format = "IMAX 70MM" if "70" in split[1] else format
+    if "IMAX" in movie:
+        format = "IMAX"
 
-    elif "An IMAX 3D Experience®" in movie:  # 3d imax
-        split = movie.split("An IMAX 3D Experience®")
-        movie = (
-            split[0]
-            .strip()
-            .removesuffix(":")
-            .removesuffix("-")
-            .removesuffix("—")
-            .strip()
-        )
+        if "The IMAX Experience®" in movie:  # 2d imax
+            """
+                This is the most common IMAX movie naming convention for 2D screenings.
+                The checked string is appended to the movie name with a ':' or '-' separator.
 
-        if format != "IMAX":
-            raise ValueError(f"IMAX format parsed from seats as: {format}")
+                Example:
+                    'The Odyssey - The IMAX Experience®'
 
-        format = "IMAX 3D HFR" if "HFR" in split[1] else "IMAX 3D"
+                Furthermore, very few screenings of 2D IMAX are presented on 70MM Film.
+                The tickets for these screenings append 'in 70MM Film' on top of the IMAX identifier.
+
+                Example:
+                    'Dune: Part 3: The IMAX Experience® in 70MM Film'
+            """
+
+            separated = movie.split("The IMAX Experience®")
+            movie = remove_suffixes(separated[0], FORMAT_SEPARATORS)
+            # append 70MM if this is a 70MM screening
+            format += " 70MM" if "70MM" in separated[1] else ""
+
+        elif "An IMAX 3D Experience®" in movie:  # 3d imax
+            split = movie.split("An IMAX 3D Experience®")
+            movie = (
+                split[0]
+                .strip()
+                .removesuffix(":")
+                .removesuffix("-")
+                .removesuffix("—")
+                .strip()
+            )
+
+            if format != "IMAX":
+                raise ValueError(f"IMAX format parsed from seats as: {format}")
+
+            format = "IMAX 3D HFR" if "HFR" in split[1] else "IMAX 3D"
 
     elif "Special Engagement" in movie:  # 3d imax
         split = movie.split("Special Engagement")
@@ -173,22 +221,24 @@ def parse_movie_format(movie: str, format: str) -> tuple[str, str]:
     ).strip(), format
 
 
-# the returned dict has all its keys and values strip()ed of any whitespace
-def transaction_dict(lines: list[str]) -> dict[str, tuple[int, str]]:
-    # only the strings with a field contain ':'.
-    # A line may contain more than one ':' therefore we only split at the first
-    # A line that does not contain ':' does not concern us and is just ignored
+def parse_seat(s: str) -> str:
+    """
+    Parses seat row and number in the following format:
+    IMAX Row H - Seat 17 CineClub Member-Priced $19.99
+    """
 
-    contains_colon = filter(lambda t: ":" in t[1], enumerate(lines))
-    # list of tuples
-    # each tuple contains the line index from lines and a list of two strs retrieved after
-    # spliting across ':'
-    separated = [(x[0], x[1].split(":", maxsplit=1)) for x in contains_colon]
+    row_separated = s.split("Row", 1)
+    seat_separated = s.split("Seat", 1)
 
-    return {
-        split[1][0].strip().lower().replace(" ", "_"): (split[0], split[1][1].strip())
-        for split in separated
-    }
+    if len(row_separated) != 2 or len(seat_separated) != 2:
+        raise ValueError(
+            "seat line could not be parsed. Number of tickets is probably wrong"
+        )
+
+    row = row_separated[1].strip().split()[0]
+    num = seat_separated[1].strip().split()[0]
+
+    return row + num
 
 
 class Transaction:

@@ -10,6 +10,7 @@ dependencies = [
   "psycopg2>=2.9.12",
   "pypdf[image]>=6.19.0",
   "pytesseract>=0.3.13",
+  "pytest>=9.1.1",
   "requests>=2.34.2",
   "sqlmodel>=0.0.42",
 ]
@@ -24,6 +25,15 @@ build-backend = "uv_build"
 
 [tool.fastapi]
 entrypoint = "src.api:app"
+
+[tool.pytest]
+# https://docs.pytest.org/en/stable/reference/reference.html#command-line-flags
+addopts = ["-ra", "-q"]
+minversion = "9.0"
+testpaths = [
+  "integration",
+  "tests",
+]
 
 [tool.uv]
 package = true

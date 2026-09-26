@@ -15,7 +15,7 @@ TRANSACTION_RECEIPT_HEIGHT = 1400
 # amount to remove from the end of the transaction receipt that does not concern us
 TRANSACTION_FOOTER_HEIGHT = 250
 
-SAVE_IR = True
+SAVE_IR = False
 
 
 def main(path: Path) -> Transaction:

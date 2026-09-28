@@ -52,7 +52,7 @@ else:
 async def lifespan(_app: FastAPI):
     init_db()
     yield
-    # remove_db()
+    remove_db()
 
 
 # Launch api with custom args or fallback to defaults

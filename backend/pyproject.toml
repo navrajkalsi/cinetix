@@ -16,6 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
+config = "config:print_config"
 create = "scripts:create_booking"
 pdf = "pdf:from_args"
 

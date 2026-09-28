@@ -27,8 +27,7 @@ COLON_TRANSLATION = str.maketrans({c: ":" for c in COLON_LOOKALIKES})
 
 
 def transaction_dict(receipt: list[str]) -> dict[str, tuple[int, str]]:
-    """
-    Extracts key-value pairs from a transaction receipt.
+    """Extracts key-value pairs from a transaction receipt.
 
     Scans each line for a colon or a colon lookalike (see COLON_LOOKALIKES)
     and splits on the first occurrence found. Everything before the split is set as the key.
@@ -58,8 +57,7 @@ def transaction_dict(receipt: list[str]) -> dict[str, tuple[int, str]]:
 
 
 def remove_suffixes(text: str, suffixes: list[str]) -> str:
-    """
-    Removes the first matched suffix in `suffixes` from `text` exactly once,
+    """Removes the first matched suffix in `suffixes` from `text` exactly once,
     after stripping the input `text` of any whitespace.
     Also strips the returned value of any whitespace.
 
@@ -77,8 +75,7 @@ def remove_suffixes(text: str, suffixes: list[str]) -> str:
 
 
 def parse_movie(movie: str) -> tuple[str, str | None]:
-    """
-    Parses movie name from value of 'Film/Performance' key in a transaction receipt.
+    """Parses movie name from value of 'Film/Performance' key in a transaction receipt.
     Removes any common format identifiers, and release-year and anniversary information.
 
     Returns a tuple of normalized 'movie name' and an 'optional format' parsed from the supplied
@@ -215,8 +212,7 @@ def parse_movie(movie: str) -> tuple[str, str | None]:
 
 
 def parse_datetime(s: str) -> datetime:
-    """
-    Parses date and time in the following format:
+    """Parses date and time in the following format:
     'Friday, September 11, 2026 - 7:00 PM'
 
     The time is assumed to be in the local machine timezone.
@@ -227,8 +223,7 @@ def parse_datetime(s: str) -> datetime:
 
 
 def parse_format(s: str) -> str:
-    """
-    Parses movie screening format from a row-seat line in the following format:
+    """Parses movie screening format from a row-seat line in the following format:
     'IMAX Row H - Seat 17 CineClub Member-Priced $19.99'
 
     Other examples:
@@ -261,8 +256,7 @@ def parse_format(s: str) -> str:
 
 
 def parse_seat(s: str) -> str:
-    """
-    Parses seat row and number in the following format:
+    """Parses seat row and number in the following format:
     'IMAX Row H - Seat 17 CineClub Member-Priced $19.99'
 
     Returns a seat number like: 'H17'

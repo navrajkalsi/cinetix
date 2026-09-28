@@ -1,67 +1,17 @@
+"""PDF
+
+This module is used to read, scan and parse a ticket booking confirmation.
+This confirmation contains a transaction receipt with all the informaton required to create a
+`Booking`.
+
+The final parsed receipt is represented as a `Transaction` which can be added to the database as a
+`Booking`.
+"""
+
 import sys
 from pathlib import Path
 
-import pytesseract
-from PIL.Image import Image
-from pypdf import PdfReader
-
 from pdf.transaction import Transaction
-
-# cineplex only allows buying 18 tickets at once, therefore listings will never overflow the cropped
-# image area
-
-# minimum height of a valid transation image that will be cropped from the end
-TRANSACTION_RECEIPT_HEIGHT = 1400
-# amount to remove from the end of the transaction receipt that does not concern us
-TRANSACTION_FOOTER_HEIGHT = 250
-
-SAVE_IR = False
-
-
-def main(path: Path) -> Transaction:
-    reader = PdfReader(path)
-
-    OUT_FULL_IMG = f"{path.stem}-img.jpg"
-    OUT_CROPPED_IMG = f"{path.stem}-cropped-img.jpg"
-    OUT_TRANSACTION = f"{path.stem}-transaction.txt"
-
-    # since all the pages are just one single image lets just get the first image on the first page
-    # get PIL image
-    full_img = reader.pages[0].images[0].image
-
-    reader.close()
-
-    if not isinstance(full_img, Image):
-        raise TypeError("failed to get PIL image from pypdf's ImageFile")
-
-    if SAVE_IR:
-        full_img.save(OUT_FULL_IMG)
-
-    width = full_img.width
-    if full_img.height < TRANSACTION_RECEIPT_HEIGHT:
-        raise ValueError("image extracted from the pdf is not of exepected dimensions")
-    top = full_img.height - TRANSACTION_RECEIPT_HEIGHT
-    bottom = full_img.height - TRANSACTION_FOOTER_HEIGHT
-
-    cropped = full_img.crop((0, top, width, bottom))
-
-    if SAVE_IR:
-        cropped.save(OUT_CROPPED_IMG)
-
-    # current page segmentation mode setting for reading complete lines:
-    # 6|single_block            Assume a single uniform block of text.
-
-    # current OCR engine mode setting that works great with numbers:
-    # 0|tesseract_only          Legacy engine only.
-    TRANSACTION = pytesseract.image_to_string(
-        cropped, config="--psm 6 --oem 0"
-    ).__str__()
-
-    if SAVE_IR:
-        with open(OUT_TRANSACTION, "w") as f:
-            _ = f.write(TRANSACTION)
-
-    return Transaction(TRANSACTION)
 
 
 def from_args() -> Transaction:
@@ -69,7 +19,7 @@ def from_args() -> Transaction:
     if len(args) != 2:
         raise ValueError("invalid number of arguments supplied")
 
-    return main(Path(args[1]))
+    return Transaction.from_pdf(Path(args[1]))
 
 
 if __name__ == "__main__":

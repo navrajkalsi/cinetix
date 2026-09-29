@@ -1,5 +1,12 @@
 from typing import Any
 
+from config import config
+
+
+def print_debug(s: str):
+    if config.debug:
+        print(s)
+
 
 def pretty_dict(d: dict[str, Any]):
     print("{")

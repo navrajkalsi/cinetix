@@ -1,5 +1,7 @@
-from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import Annotated
+
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Config(BaseSettings):
@@ -15,9 +17,10 @@ class Config(BaseSettings):
     )
     debug: bool = Field(default=False, description="print debug info to stdout")
     database_url: str = Field(description="database connection string")
-    allowed_origins: str | None = Field(
-        default=None, description="list of origins for allowing cross origin requests"
-    )
+    allowed_origins: Annotated[list[str], NoDecode] = Field(
+        default_factory=list,
+        description="list of origins for allowing cross origin requests",
+    )  # skip decoding so that we can have the raw str in field_validator
     email: str = Field(description="email to check for new transacton receipts")
     tmdb_api_key: str | None = Field(
         default=None,
@@ -41,6 +44,11 @@ class Config(BaseSettings):
         cli_hide_none_type=True,
         cli_ignore_unknown_args=True,  # for passing non-consumed args to sub commands, like pytest
     )
+
+    @field_validator("allowed_origins", mode="before")
+    @classmethod
+    def parse_allowed_origins(cls, v: str | None) -> list[str]:
+        return v.split(",") if v is not None else []
 
 
 config = Config()

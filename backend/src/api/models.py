@@ -8,15 +8,16 @@ class BaseCreate(SQLModel):
     name: str
 
 
-class Location(BaseCreate, table=True):
-    __tablename__: str = "locations"
+class Movie(BaseCreate, table=True):
+    __tablename__: str = "movies"
 
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(unique=True)
+    poster_url: str | None = Field(unique=True)
 
 
-class Movie(BaseCreate, table=True):
-    __tablename__: str = "movies"
+class Location(BaseCreate, table=True):
+    __tablename__: str = "locations"
 
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(unique=True)
@@ -42,6 +43,7 @@ class BookingCreate(BookingBase):
     movie: str
     location: str
     format: str
+    movie_poster_url: str | None
 
 
 # different for getting a request object, instead of query params

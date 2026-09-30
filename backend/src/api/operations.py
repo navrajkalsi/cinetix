@@ -30,11 +30,17 @@ def booking_read(booking: Booking, session: SessionDep) -> BookingRead:
     return BookingRead.from_booking(booking, movie, location, format)
 
 
-def get_or_create[T: BaseCreate](model: type[T], name: str, session: SessionDep) -> T:
+def get_or_create[T: BaseCreate](
+    model: type[T], name: str, poster_url: str | None, session: SessionDep
+) -> T:
     record = session.exec(select(model).where(model.name == name)).first()
 
     if record is None:
-        record = model(name=name)
+        record = (
+            model(name=name, poster_url=poster_url)
+            if model is Movie
+            else model(name=name)
+        )
         session.add(record)
         session.commit()
         session.refresh(record)
@@ -43,9 +49,9 @@ def get_or_create[T: BaseCreate](model: type[T], name: str, session: SessionDep)
 
 
 def create(data: BookingCreate, session: SessionDep) -> Booking:
-    movie_id = get_or_create(Movie, data.movie, session).id
-    location_id = get_or_create(Location, data.location, session).id
-    format_id = get_or_create(Format, data.format, session).id
+    movie_id = get_or_create(Movie, data.movie, data.movie_poster_url, session).id
+    location_id = get_or_create(Location, data.location, None, session).id
+    format_id = get_or_create(Format, data.format, None, session).id
 
     # silence type checks
     assert movie_id is not None

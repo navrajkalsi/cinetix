@@ -8,7 +8,8 @@ from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
 
-from .config import settings
+from config import config
+
 from .database import get_session, init_db, remove_db
 from .models import (
     Booking,
@@ -37,15 +38,7 @@ DESCRIPTION = "api to manage movies database operations"
 VERSION = "0.1"
 
 with Path("pyproject.toml").open("rb") as f:
-    config: dict[str, str] | None = tomllib.load(f).get("project")
-
-
-if config:
-    description = config.get("description")
-    version = config.get("version")
-else:
-    description = None
-    version = None
+    project_config: dict[str, str] = tomllib.load(f).get("project", {})
 
 
 @asynccontextmanager
@@ -58,15 +51,15 @@ async def lifespan(_app: FastAPI):
 # Launch api with custom args or fallback to defaults
 app = FastAPI(
     title="Cinetix API",
-    description=description if description else DESCRIPTION,
-    version=version if version else VERSION,
+    description=project_config.get("description", DESCRIPTION),
+    version=project_config.get("version", VERSION),
     lifespan=lifespan,
 )
 
 # Allowing foreign origins to access the api
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins,
+    allow_origins=config.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -234,7 +234,7 @@ def parse_format(s: str) -> str:
     room = s.split("Row", maxsplit=1)[0].lower()  # before row
 
     if "avx" in room:
-        return "AVX"
+        return "UltraAVX"
 
     if "imax" in room:
         return "IMAX"

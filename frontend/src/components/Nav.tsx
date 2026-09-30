@@ -1,23 +1,13 @@
 import "./Nav.css";
 
-// possible active views union
-export const VIEWS = ["Bookings", "Movies", "Locations", "Formats"] as const;
-export type View = (typeof VIEWS)[number];
+// possible filters union
+export const FILTERS = ["Movie", "Format", "Location"] as const;
+export type filters = (typeof FILTERS)[number];
 
-export default function Nav({
-  activeView,
-  changeView,
-}: {
-  activeView: View;
-  changeView: (view: View) => void;
-}) {
-  const viewButtons = VIEWS.map((view) => (
-    <button
-      key={view}
-      onClick={() => changeView(view)}
-      id={view === activeView ? "active" : ""}
-    >
-      {view}
+export default function Nav() {
+  const viewButtons = FILTERS.map((filter) => (
+    <button key={filter} className={filter === "Movie" ? "active" : ""}>
+      {filter}
     </button>
   ));
 

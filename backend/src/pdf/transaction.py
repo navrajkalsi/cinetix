@@ -11,7 +11,6 @@ from pdf.parser import (
     transaction_dict,
 )
 from pdf.scanner import scan_pdf
-from tmdb.client import search_movie
 
 
 class Transaction:
@@ -27,8 +26,6 @@ class Transaction:
         format: Name of the screening format.
         seats: List of seats, where each seat is row followed by seat number ('H17').
         price: Total price of the transaction.
-        poster_url: URL of the poster from TMDB. `None` if no movie match was found or the match did
-            not have a `poster_url` specified.
     """
 
     id: str
@@ -38,7 +35,6 @@ class Transaction:
     format: str
     seats: list[str]
     price: Decimal
-    poster_url: str | None
 
     def __init__(
         self,
@@ -50,16 +46,13 @@ class Transaction:
         seats: list[str],
         price: Decimal,
     ):
-        tmdb_result = search_movie(movie)
-
         self.id = id
         self.location = location
-        self.movie = movie if tmdb_result is None else tmdb_result[0]
+        self.movie = movie
         self.datetime = datetime
         self.format = format
         self.seats = seats
         self.price = price
-        self.poster_url = None if tmdb_result is None else tmdb_result[1]
 
     @classmethod
     def from_pdf(cls, path: Path) -> Self:

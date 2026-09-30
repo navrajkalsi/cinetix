@@ -11,7 +11,7 @@ URLS = {
     # movie url is set to always just the first page
     "movie": "https://api.themoviedb.org/3/search/movie?language=en-US&page=1&query=",
     # image url is set to always fetch the poster image of width 780 pixels
-    "image": "http://image.tmdb.org/t/p/w780",
+    "image": "https://image.tmdb.org/t/p/w780",
 }
 # only headers required for accessing all movie search endpoint
 HEADERS = {"accept": "application/json", "Authorization": f"Bearer {KEY}"}
@@ -25,6 +25,12 @@ def search_movie(name: str) -> tuple[str, str | None] | None:
 
     The main purpose of having this validation is to get correctly formatted movie names,
     and their posters as a bonus!
+    For Example:
+        ["odyssey", "the odyssey", "The Odyssey"] all resolve to "The Odyssey"
+        ["dune: part 3", "Dune: Part Three"] all resolve to "Dune: Part Three"
+        ["Avengers endgame", "avengers endgame: encore"] all resolve to "Avengers: Endgame"
+
+        Every slightly varied name resolve to a single official release title.
 
     Args:
         name: Name of the movie to search for.

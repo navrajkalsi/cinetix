@@ -3,6 +3,8 @@ import type Booking from "../models/Booking";
 import Field from "./Field";
 import "./ListItem.css";
 
+// list items apect ratio is decided based on the preferred aspect ratio of the movie posters from TMDB
+// https://www.themoviedb.org/bible/image/59f7582c9251416e7100005f
 export default function ListItem({ booking }: { booking: Booking }) {
   const [active, setActive] = useState(false);
 
@@ -16,20 +18,39 @@ export default function ListItem({ booking }: { booking: Booking }) {
   }
 
   return (
-    <>
+    <li>
       <div
-        className={active ? "list-item active" : "list-item"}
+        className={active ? "card active" : "card"}
+        style={{ backgroundImage: `url(${booking.movie.poster_url})` }}
         onClick={toggleActive}
       >
-        <Field name="Booking ID" value={booking.booking_id} />
-        <Field name="Date" value={date} />
-        <Field name="Time" value={time} />
-        <Field name="Seats" value={booking.seats} />
-        <Field name="Price" value={`$${booking.price.toString()}`} />
-        <Field name="Movie" value={booking.movie.name} />
-        <Field name="Location" value={booking.location.name} />
-        <Field name="Format" value={booking.format.name} />
+        <div className="fields">
+          <Field
+            name="Movie"
+            value={booking.movie.name}
+            link="https://navrajkalsi.com"
+          />
+          <Field
+            name="Location"
+            value={booking.location.name}
+            link="https://navrajkalsi.com"
+          />
+          <Field
+            name="Format"
+            value={booking.format.name}
+            link="https://navrajkalsi.com"
+          />
+          <Field name="Date" value={date} link={null} />
+          <Field name="Time" value={time} link={null} />
+          <Field name="Seats" value={booking.seats} link={null} />
+          <Field
+            name="Price"
+            value={`$${booking.price.toString()}`}
+            link={null}
+          />
+          <Field name="Booking ID" value={booking.booking_id} link={null} />
+        </div>
       </div>
-    </>
+    </li>
   );
 }

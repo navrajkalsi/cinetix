@@ -1,31 +1,7 @@
 ul {
-  width: fit-content;
   height: 100%;
   display: flex;
   flex-direction: row;
   align-items: center;
   list-style: none;
-  justify-content: space-evenly;
-  margin: 0;
-  padding: 0;
-
-  li {
-    height: 80%;
-    aspect-ratio: 2/3;
-    width: fit-content;
-    margin: 0 2%;
-    background-size: cover;
-    background-position: center;
-    background-color: rgba(var(--light), 0.2);
-    border-radius: 50px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px;
-    transition: all 0.3s ease;
-    border: solid 5px rgba(var(--dark));
-    box-shadow: 0 0 10px rgba(var(--light), 0.25);
-    cursor: default;
-  }
 }

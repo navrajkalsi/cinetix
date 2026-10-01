@@ -1,15 +1,34 @@
 .field {
-  font-size: 125%;
+  font-size: 1.25rem;
+  margin: 10px 50px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .field-name {
   font: var(--secondary);
   font-weight: 600;
   font-size: inherit;
+  text-align: left;
+  opacity: 0.4;
+}
+
+.field-separator {
+  width: 20%;
 }
 
 .field-value {
-  font: var(--primary);
+  /* font: var(--primary); */
+  font: var(--secondary);
   font-weight: 400;
+  opacity: 0.8;
   font-size: inherit;
+  text-align: right;
+}
+
+.field-value.link {
+  opacity: 1;
+  text-decoration: underline solid 1px;
+  cursor: pointer;
 }

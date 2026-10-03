@@ -1,7 +1,47 @@
-ul {
+.list-container {
   height: 100%;
+  width: max-content;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.list {
+  height: 80%;
+  width: max-content;
   display: flex;
   flex-direction: row;
   align-items: center;
   list-style: none;
+  border-radius: 50px;
+  gap: 2.5%;
+}
+
+.indicator {
+  margin-top: 3em;
+  background-color: rgba(var(--light), 0.25);
+  width: 100%;
+  height: 0.25rem;
+  border-radius: 0.5rem;
+  position: relative;
+}
+
+.indicator::after {
+  color: rgb(var(--light));
+  background-color: rgb(var(--dark));
+  padding: 0.5rem;
+  position: absolute;
+  bottom: -1rem;
+  left: 0.5rem;
+  font: var(--secondary);
+  font-size: 110%;
+}
+
+.indicator.upcoming::after {
+  content: "Upcoming";
+}
+
+.indicator.recent::after {
+  content: "Recent";
 }

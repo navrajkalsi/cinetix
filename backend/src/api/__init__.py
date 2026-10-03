@@ -28,6 +28,8 @@ from .operations import (
     get_formats,
     get_locations,
     get_movies,
+    get_upcoming_current,
+    get_year,
     update,
 )
 
@@ -71,21 +73,17 @@ def create_booking(data: BookingCreate, session: SessionDep) -> Booking:
     return create(data, session)
 
 
+# returns upcoming and recent bookings of current year
 @app.get("/bookings/")
-def read_bookings(
-    session: SessionDep, offset: int = 0, limit: Annotated[int, Query(le=100)] = 100
+def read_current_bookings(
+    session: SessionDep, _offset: int = 0, _limit: Annotated[int, Query(le=100)] = 100
 ) -> Sequence[BookingRead]:
-    return get_all(session, offset, limit)
+    return get_upcoming_current(session)
 
 
-@app.get("/bookings/{id}")
-def read_booking(id: int, session: SessionDep) -> BookingRead:
-    booking = get(id, session)
-
-    if booking is None:
-        raise HTTPException(status_code=404, detail="Booking not found")
-
-    return booking
+@app.get("/bookings/{year}")
+def read_booking(year: int, session: SessionDep) -> Sequence[BookingRead]:
+    return get_year(year, session)
 
 
 @app.patch("/bookings/{id}")

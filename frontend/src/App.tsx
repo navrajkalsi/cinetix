@@ -1,49 +1,55 @@
-import { useEffect, useRef, useState } from "react";
-import Nav from "./components/Nav";
-import List from "./components/List";
-import "./App.css";
-import type Booking from "./models/Booking";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
+import Bookings from "./pages/bookings/Bookings";
 import { getBookings } from "./api/booking";
 
+const router = createBrowserRouter([
+  // redirect root to bookings
+  { index: true, element: <Navigate replace to="/bookings" /> },
+
+  {
+    // get OPTIONAL year from path segment
+    path: "/bookings/:year?",
+    loader: async ({ params }) => {
+      const { year } = params;
+
+      // verify if year is a number, if not null
+      if (year && !/^\d{4}$/.test(year)) {
+        throw new Response("Invalid year", { status: 404 });
+      }
+
+      const yearNum = year ? Number(year) : null;
+      const bookings = await getBookings(yearNum);
+
+      return { yearNum, bookings };
+    },
+    Component: Bookings,
+  },
+  // {
+  //   path: "/",
+  //   Component: Root,
+  //   children: [
+  //     { index: true, Component: Home },
+  //     { path: "about", Component: About },
+  //     {
+  //       path: "auth",
+  //       Component: AuthLayout,
+  //       children: [
+  //         { path: "login", Component: Login },
+  //         { path: "register", Component: Register },
+  //       ],
+  //     },
+  //     {
+  //       path: "concerts",
+  //       children: [
+  //         { index: true, Component: ConcertsHome },
+  //         { path: ":city", Component: ConcertsCity },
+  //         { path: "trending", Component: ConcertsTrending },
+  //       ],
+  //     },
+  //   ],
+  // },
+]);
+
 export default function App() {
-  const [bookings, setBookings] = useState<Booking[] | null>(null);
-  const main = useRef<HTMLElement>(null);
-  const scrollOffset = useRef<number>(0);
-
-  function handleScroll(e: React.WheelEvent<HTMLElement>) {
-    if (main.current == null) {
-      return;
-    }
-
-    const currentOffset = scrollOffset.current,
-      // clamped to bounds
-      newOffset = Math.max(
-        Math.min(
-          (isNaN(currentOffset) ? 0 : currentOffset) - e.deltaY - e.deltaX,
-          0,
-        ),
-        window.innerWidth > main.current.scrollWidth
-          ? 0
-          : window.innerWidth - main.current.scrollWidth,
-      );
-
-    main.current.style.setProperty("left", `${newOffset}px`);
-    scrollOffset.current = newOffset;
-  }
-
-  function refreshData() {
-    getBookings().then(setBookings).catch(console.error);
-  }
-
-  // start with all bookings and no filters
-  useEffect(refreshData, []);
-
-  return bookings === null ? (
-    <main id="loading">Loading Data</main>
-  ) : (
-    <main ref={main} onWheel={handleScroll}>
-      <Nav />
-      <List bookings={bookings} />
-    </main>
-  );
+  return <RouterProvider router={router} />;
 }

@@ -5,7 +5,13 @@ import "./ListItem.css";
 
 // list items apect ratio is decided based on the preferred aspect ratio of the movie posters from TMDB
 // https://www.themoviedb.org/bible/image/59f7582c9251416e7100005f
-export default function ListItem({ booking }: { booking: Booking }) {
+export default function ListItem({
+  upcoming,
+  booking,
+}: {
+  upcoming: boolean;
+  booking: Booking;
+}) {
   const [active, setActive] = useState(false);
 
   const dateObj = new Date(booking.datetime);
@@ -18,9 +24,17 @@ export default function ListItem({ booking }: { booking: Booking }) {
   }
 
   return (
-    <li>
+    <div className="card-container">
       <div
-        className={active ? "card active" : "card"}
+        className={
+          active
+            ? upcoming
+              ? "card active upcoming"
+              : "card active"
+            : upcoming
+              ? "card upcoming"
+              : "card"
+        }
         style={{ backgroundImage: `url(${booking.movie.poster_url})` }}
         onClick={toggleActive}
       >
@@ -51,6 +65,6 @@ export default function ListItem({ booking }: { booking: Booking }) {
           <Field name="Booking ID" value={booking.booking_id} link={null} />
         </div>
       </div>
-    </li>
+    </div>
   );
 }

@@ -6,10 +6,13 @@ export type filters = (typeof FILTERS)[number];
 
 export default function Nav() {
   const viewButtons = FILTERS.map((filter) => (
-    <button key={filter} className={filter === "Movie" ? "active" : ""}>
+    <div
+      key={filter}
+      className={filter === "Movie" ? "button active" : "button"}
+    >
       {filter}
-    </button>
+    </div>
   ));
 
-  return <nav>{viewButtons}</nav>;
+  return <div id="nav">{viewButtons}</div>;
 }

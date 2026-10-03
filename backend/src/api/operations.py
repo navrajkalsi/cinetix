@@ -1,8 +1,9 @@
 from collections.abc import Sequence
+from datetime import datetime, tzinfo
 from typing import Annotated
 
 from fastapi import Depends
-from sqlmodel import Session, select
+from sqlmodel import Session, desc, select
 
 from .database import get_session
 from .models import (
@@ -74,6 +75,29 @@ def create(data: BookingCreate, session: SessionDep) -> Booking:
     session.refresh(booking)
 
     return booking
+
+
+def get_year(year: int, session: SessionDep) -> Sequence[BookingRead]:
+    bookings = session.exec(
+        select(Booking)
+        .where(
+            Booking.datetime >= datetime(year, 1, 1),
+            Booking.datetime < datetime(year + 1, 1, 1),
+        )
+        .order_by(desc(Booking.datetime))
+    ).all()
+
+    return [booking_read(booking, session) for booking in bookings]
+
+
+def get_upcoming_current(session: SessionDep) -> Sequence[BookingRead]:
+    bookings = session.exec(
+        select(Booking)
+        .where(Booking.datetime > datetime(datetime.now().year, 1, 1))
+        .order_by(desc(Booking.datetime))
+    ).all()
+
+    return [booking_read(booking, session) for booking in bookings]
 
 
 def get(id: int, session: SessionDep) -> BookingRead | None:

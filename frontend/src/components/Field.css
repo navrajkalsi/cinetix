@@ -29,6 +29,10 @@
 
 .field-value.link {
   opacity: 1;
-  text-decoration: underline solid 1px;
+  text-decoration: underline solid 2px;
   cursor: pointer;
+}
+
+.field-value.link:hover {
+  text-decoration: underline solid 3px rgb(var(--accent));
 }

@@ -1,16 +1,16 @@
+html,
 body {
-  overflow: hidden;
   width: 100vw;
   height: 100vh;
-  position: relative;
+  overflow: hidden;
 }
 
-main {
+#main {
   width: fit-content;
-  position: absolute;
   height: 100vh;
   display: flex;
   flex-direction: row;
   align-items: center;
+  gap: 2.5%;
   transition: all 0.5s ease;
 }

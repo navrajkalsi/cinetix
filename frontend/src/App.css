@@ -6,11 +6,12 @@ body {
 }
 
 #main {
+  padding: 0 1vw;
   width: fit-content;
   height: 100vh;
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 2.5%;
+  gap: 7.5rem;
   transition: all 0.5s ease;
 }

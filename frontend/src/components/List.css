@@ -15,7 +15,7 @@
   align-items: center;
   list-style: none;
   border-radius: 50px;
-  gap: 2.5%;
+  gap: 4rem;
 }
 
 .indicator {
@@ -43,5 +43,5 @@
 }
 
 .indicator.recent::after {
-  content: "Recent";
+  content: "Recently Watched";
 }

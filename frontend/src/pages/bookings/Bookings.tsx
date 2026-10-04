@@ -12,9 +12,7 @@ export default function Bookings() {
 
   const upcomingBookings = year
     ? null
-    : bookings.filter(
-      (booking) => new Date(booking.datetime) > new Date(2026, 9, 1),
-    ),
+    : bookings.filter((booking) => new Date(booking.datetime) > new Date()),
     pastBookings = year
       ? bookings
       : bookings.filter((booking) => new Date(booking.datetime) <= new Date());

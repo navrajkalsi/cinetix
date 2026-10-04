@@ -19,6 +19,7 @@
 }
 
 .field-value {
+  color: inherit;
   /* font: var(--primary); */
   font: var(--secondary);
   font-weight: 400;
@@ -35,4 +36,8 @@
 
 .field-value.link:hover {
   text-decoration: underline solid 3px rgb(var(--accent));
+}
+
+.nav-link {
+  all: inherit;
 }

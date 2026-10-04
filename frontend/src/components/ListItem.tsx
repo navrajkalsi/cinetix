@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type Booking from "../models/Booking";
 import Field from "./Field";
 import "./ListItem.css";
@@ -13,6 +13,7 @@ export default function ListItem({
   booking: Booking;
 }) {
   const [active, setActive] = useState(false);
+  const container = useRef<HTMLDivElement | null>(null);
 
   const dateObj = new Date(booking.datetime);
   const date = dateObj.toDateString();
@@ -24,7 +25,7 @@ export default function ListItem({
   }
 
   return (
-    <div className="card-container">
+    <div className="card-container" ref={container}>
       <div
         className={
           active
@@ -42,26 +43,22 @@ export default function ListItem({
           <Field
             name="Movie"
             value={booking.movie.name}
-            link="https://navrajkalsi.com"
+            link={`/movies/${booking.movie.id}`}
           />
           <Field
             name="Location"
             value={booking.location.name}
-            link="https://navrajkalsi.com"
+            link={`/locations/${booking.location.id}`}
           />
           <Field
             name="Format"
             value={booking.format.name}
-            link="https://navrajkalsi.com"
+            link={`/formats/${booking.format.id}`}
           />
           <Field name="Date" value={date} link={null} />
           <Field name="Time" value={time} link={null} />
           <Field name="Seats" value={booking.seats} link={null} />
-          <Field
-            name="Price"
-            value={`$${booking.price.toString()}`}
-            link={null}
-          />
+          <Field name="Price" value={`$${booking.price}`} link={null} />
           <Field name="Booking ID" value={booking.booking_id} link={null} />
         </div>
       </div>

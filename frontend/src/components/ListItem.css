@@ -17,19 +17,20 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-}
 
-.fields {
-  width: 100%;
-  height: fit-content;
-  border-radius: 50px 50px 0 0;
-  background-color: rgba(var(--dark), 0.5);
-  transition: inherit;
-  translate: 0 100%;
-  display: flex;
-  flex-direction: column;
-  backdrop-filter: blur(10px);
-  padding: 25px 0;
+  .fields {
+    color: rgb(var(--light));
+    width: 100%;
+    height: fit-content;
+    border-radius: 50px 50px 0 0;
+    background-color: rgba(var(--dark), 0.5);
+    transition: inherit;
+    translate: 0 100%;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+    padding: 25px 0;
+  }
 }
 
 .card.active {
@@ -50,5 +51,7 @@
 }
 
 .card.upcoming {
-  box-shadow: 0 0 50px rgba(var(--accent), 0.75);
+  /* border: solid 5px rgba(var(--dark), 0.25); */
+  /* color comes from parent set in the component */
+  box-shadow: 0 0 25px 5px;
 }

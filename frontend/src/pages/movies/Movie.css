@@ -1,0 +1,77 @@
+.movie {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  overflow: hidden;
+}
+
+.movie-info {
+  width: 60%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  grid-row: 1;
+  grid-column: 1;
+  gap: 1em;
+  overflow: hidden scroll;
+  scrollbar-width: none;
+
+  .title {
+    margin: 1% 2.5%;
+    font: var(--secondary);
+    font-size: 7.5rem;
+    overflow-wrap: break-word;
+    text-align: center;
+  }
+
+  .visits {
+    font: var(--primary);
+    color: rgba(var(--light), 0.5);
+    font-size: 1.25rem;
+
+    .visits-count {
+      font-weight: 600;
+    }
+  }
+
+  .movie-bookings {
+    margin: 1% 0;
+    height: max-content;
+    width: 85%;
+    background-color: rgba(var(--light), 0.08);
+    border-radius: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: baseline;
+    gap: 2.5rem;
+    padding: 2.5rem;
+  }
+}
+
+.movie-poster {
+  height: 100%;
+  width: 40%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  grid-row: 1 / span 2;
+
+  img {
+    max-height: 80%;
+    max-width: 80%;
+    object-fit: cover;
+    aspect-ratio: 2/3 !important;
+    border-radius: 50px;
+    padding: 10px;
+    /* border: solid 5px rgba(var(--light)); */
+    transition: all 0.5s ease;
+  }
+
+  img:hover {
+    scale: 102.5%;
+    box-shadow: 0 0 25px 25px black;
+  }
+}

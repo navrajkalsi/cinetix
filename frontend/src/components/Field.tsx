@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import "./Field.css";
 
 export default function Field({
@@ -9,17 +10,19 @@ export default function Field({
   value: string;
   link: string | null;
 }) {
-  function visit() {
-    console.log(`visiting ${link}`);
-  }
-
   return (
-    <div className="field" onClick={visit}>
+    <div className="field">
       <span className="field-name">{name}</span>
       <span className="field-separator"></span>
-      <span className={link === null ? "field-value" : "field-value link"}>
-        {value}
-      </span>
+      {link === null ? (
+        <span className="field-value">{value}</span>
+      ) : (
+        <span className="field-value link">
+          <Link to={link} className="nav-link">
+            {value}
+          </Link>
+        </span>
+      )}
     </div>
   );
 }

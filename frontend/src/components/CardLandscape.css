@@ -1,0 +1,27 @@
+.card-landscape {
+  background-color: rgb(var(--dark));
+  border-radius: 50px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  transition: all 0.5s ease;
+
+  .fields {
+    width: 100%;
+    padding: 2.5rem 0;
+  }
+
+  .poster {
+    height: 100%;
+    background-repeat: no-repeat;
+    aspect-ratio: 2/3 !important;
+    background-size: cover;
+    background-position: center;
+    border-radius: 0 50px 50px 0;
+  }
+}
+
+.card-landscape:hover {
+  scale: 102.5%;
+  box-shadow: 0 0 5px 5px rgba(var(--dark));
+}

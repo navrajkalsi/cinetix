@@ -1,10 +1,10 @@
 import type Location from "../models/Location";
 
-export async function getLocations(): Promise<Location[]> {
-  const response = await fetch("/api/locations");
+export default async function getMovie(id: number): Promise<Location> {
+  const response = await fetch(`/api/locations/${id}`);
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch locations: ${response.statusText}`);
+    throw new Error(`Failed to fetch location: ${response.statusText}`);
   }
 
   return response.json();

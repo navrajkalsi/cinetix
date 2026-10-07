@@ -5,9 +5,9 @@ import getMovie from "./api/movie";
 import getLocation from "./api/location";
 import Movie from "./pages/movies/Movie";
 import Location from "./pages/locations/Location";
-// import Format from "./pages/formats/Format";
 import getFormat from "./api/format";
 import Format from "./pages/formats/Format";
+import BookingNew from "./pages/bookings/BookingNew";
 
 const router = createBrowserRouter([
   // redirect root to bookings
@@ -16,24 +16,34 @@ const router = createBrowserRouter([
   {
     // get OPTIONAL year from query params
     path: "/bookings",
-    loader: async ({ request }) => {
-      const url = new URL(request.url);
-      const year = url.searchParams.get("year");
+    children: [
+      {
+        path: "new",
+        Component: BookingNew,
+      },
 
-      // verify if year is a number, if not null
-      if (year && !/^\d{4}$/.test(year)) {
-        throw new Response("Invalid year", { status: 404 });
-      }
+      {
+        index: true,
+        loader: async ({ request }) => {
+          const url = new URL(request.url);
+          const year = url.searchParams.get("year");
 
-      const yearNum = year ? Number(year) : new Date().getFullYear();
-      const bookings = await getBookings({
-        year: yearNum,
-        includeFuture: year ? false : true,
-      });
+          // verify if year is a number, if not null
+          if (year && !/^\d{4}$/.test(year)) {
+            throw new Response("Invalid year", { status: 404 });
+          }
 
-      return { yearNum, bookings };
-    },
-    Component: Bookings,
+          const yearNum = year ? Number(year) : new Date().getFullYear();
+          const bookings = await getBookings({
+            year: yearNum,
+            includeFuture: year ? false : true,
+          });
+
+          return { yearNum, bookings };
+        },
+        Component: Bookings,
+      },
+    ],
   },
 
   {

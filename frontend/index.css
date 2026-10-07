@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Oswald:wght@200..700&family=Outfit:wght@100..900&display=swap");
 
 :root,
 html,
@@ -6,8 +6,9 @@ body {
   --dark: 20, 20, 20;
   --light: 240, 240, 240;
   --accent: 40, 80, 255;
-  --primary: normal 500 16px "Oswald", sans-serif;
-  --secondary: normal 500 16px "Outfit", sans-serif;
+  --primary: normal 500 16px "Outfit", sans-serif;
+  /* --secondary: normal 500 16px "Lora", serif; */
+  --secondary: normal 600 16px "Oswald", sans-serif;
 
   background-color: rgb(var(--dark));
   color: rgb(var(--light));

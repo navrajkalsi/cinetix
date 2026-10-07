@@ -20,13 +20,12 @@
   .title {
     margin: 0 5%;
     text-align: center;
-    font: var(--secondary);
     font-size: 7.5rem;
     word-wrap: break-word;
   }
 
   .visits {
-    font: var(--primary);
+    font: var(--secondary);
     color: rgba(var(--light), 0.5);
     font-size: 1.25rem;
 

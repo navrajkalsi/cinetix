@@ -1,8 +1,10 @@
+from collections.abc import Sequence
+
 from fastapi import APIRouter, HTTPException
 
 from api.dependencies import SessionDep
 from api.models import Format
-from api.operations.formats import read_format
+from api.operations.formats import read_format, read_formats
 
 router = APIRouter(
     prefix="/formats",
@@ -19,3 +21,13 @@ def get_format(id: int, session: SessionDep) -> Format:
         raise HTTPException(status_code=404)
 
     return format
+
+
+@router.get("/")
+def get_formats(
+    session: SessionDep,
+    names_only: bool = False,
+) -> Sequence[Format | str]:
+    """Returns a list of requested data of all formats in the database."""
+
+    return read_formats(names_only, session)

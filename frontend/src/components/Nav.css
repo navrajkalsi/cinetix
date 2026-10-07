@@ -10,7 +10,6 @@
 .button {
   background-color: rgb(var(--light));
   color: rgb(var(--dark));
-  font: var(--secondary);
   text-align: center;
   height: fit-content;
   width: fit-content;

@@ -21,14 +21,13 @@
 
   .title {
     margin: 1% 2.5%;
-    font: var(--secondary);
     font-size: 7.5rem;
     overflow-wrap: break-word;
     text-align: center;
   }
 
   .visits {
-    font: var(--primary);
+    font: var(--secondary);
     color: rgba(var(--light), 0.5);
     font-size: 1.25rem;
 

@@ -3,8 +3,8 @@ from collections.abc import Sequence
 from fastapi import APIRouter, HTTPException
 
 from api.dependencies import SessionDep
-from api.models import Format
-from api.operations.formats import read_format, read_formats
+from api.models.formats import FormatCreate, FormatRead
+from api.operations.formats import create_format, read_format, read_formats
 
 router = APIRouter(
     prefix="/formats",
@@ -14,7 +14,9 @@ router = APIRouter(
 
 
 @router.get("/{id}")
-def get_format(id: int, session: SessionDep) -> Format:
+def get_format(id: int, session: SessionDep) -> FormatRead:
+    """Retrieves the format with provided ID."""
+
     format = read_format(id, session)
 
     if format is None:
@@ -24,10 +26,14 @@ def get_format(id: int, session: SessionDep) -> Format:
 
 
 @router.get("/")
-def get_formats(
-    session: SessionDep,
-    names_only: bool = False,
-) -> Sequence[Format | str]:
-    """Returns a list of requested data of all formats in the database."""
+def get_formats(session: SessionDep) -> Sequence[FormatRead]:
+    """Returns the list of all formats in the database."""
 
-    return read_formats(names_only, session)
+    return read_formats(session)
+
+
+@router.post("/")
+def post_format(model: FormatCreate, session: SessionDep) -> FormatRead:
+    """Adds a new format record in the database."""
+
+    return create_format(model, session)

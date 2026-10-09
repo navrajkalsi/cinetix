@@ -1,78 +1,16 @@
 from collections.abc import Sequence
-from datetime import datetime
+from datetime import date
 
 from sqlmodel import desc, select
 
 from api.dependencies import SessionDep
-from api.models import (
-    Booking,
-    BookingCreate,
-    BookingRead,
-    BookingUpdate,
-    Format,
-    Location,
-    Movie,
-)
-from api.operations.common import get_or_create
-from api.operations.formats import read_format
-from api.operations.locations import read_location
-from api.operations.movies import read_movie
-
-# Current time in locale timezone
-now = datetime.now().astimezone()
-
-
-def into_booking_read(booking: Booking, session: SessionDep) -> BookingRead:
-    movie = read_movie(booking.movie_id, session)
-    location = read_location(booking.location_id, session)
-    format = read_format(booking.format_id, session)
-
-    assert movie is not None and location is not None and format is not None
-
-    return BookingRead.from_booking(booking, movie, location, format)
-
-
-def create_booking(model: BookingCreate, session: SessionDep) -> Booking:
-    """Creates a new booking record in the database.
-
-    Translates supplied `model` to a new `Booking` by using or creating new entries for `Movie`,
-    `Location` and `Format`.
-    """
-
-    movie_id = get_or_create(Movie, model.movie, model.movie_poster_url, session).id
-    location_id = get_or_create(Location, model.location, None, session).id
-    format_id = get_or_create(Format, model.format, None, session).id
-
-    # silence none type checks
-    assert movie_id is not None and location_id is not None and format_id is not None
-
-    # validated full booking object, with unique id
-    booking = Booking(
-        booking_id=model.booking_id,
-        datetime=model.datetime,
-        seats=model.seats,
-        price=model.price,
-        movie_id=movie_id,
-        location_id=location_id,
-        format_id=format_id,
-    )
-
-    session.add(booking)
-    session.commit()
-    session.refresh(booking)
-
-    return booking
+from api.models.bookings import Booking, BookingCreate, BookingRead
 
 
 def read_booking(id: int, session: SessionDep) -> BookingRead | None:
     """Returns the booking with the provided `id`, if found."""
 
-    booking = session.get(Booking, id)
-
-    if booking is None:
-        return None
-
-    return into_booking_read(booking, session)
+    return BookingRead.model_validate(session.get(Booking, id))
 
 
 def read_bookings(
@@ -104,13 +42,10 @@ def read_bookings(
 
     if year:
         if include_future:
-            statement = statement.where(
-                Booking.datetime >= datetime(year, 1, 1, tzinfo=now.tzinfo),
-            )
+            statement = statement.where(Booking.date >= date(year, 1, 1))
         else:
             statement = statement.where(
-                Booking.datetime >= datetime(year, 1, 1, tzinfo=now.tzinfo),
-                Booking.datetime < datetime(year + 1, 1, 1, tzinfo=now.tzinfo),
+                Booking.date >= date(year, 1, 1), Booking.date < date(year + 1, 1, 1)
             )
 
     if movie_id:
@@ -121,37 +56,24 @@ def read_bookings(
         statement = statement.where(Booking.format_id == format_id)
 
     # order
-    bookings = session.exec(statement.order_by(desc(Booking.datetime))).all()
+    bookings = session.exec(
+        statement.order_by(desc(Booking.date), desc(Booking.time))
+    ).all()
 
-    return [into_booking_read(booking, session) for booking in bookings]
+    return [BookingRead.model_validate(booking) for booking in bookings]
 
 
-def update_booking(
-    id: int, model: BookingUpdate, session: SessionDep
-) -> BookingRead | None:
-    """Updates the booking in database with `id` to the fields of provided `model`.
+def create_booking(model: BookingCreate, session: SessionDep) -> BookingRead:
+    """Creates a new booking row in the database."""
 
-    Args:
-        id: ID of the booking to update.
-        model: Updated model with changes.
+    # booking with None id
+    booking = Booking.model_validate(model)
 
-    Returns:
-        Updated version of the booking on success or `None` if no booking was found with the
-        requested `id`.
-    """
+    session.add(booking)
+    session.commit()  # assigned an id here by the db
+    session.refresh(booking)  # fetch the booking with id filled
 
-    booking = read_booking(id, session)
-
-    if booking is not None:
-        # retrieve only fields that are set in booking_update by the client
-        # then update those in db booking
-        _ = booking.sqlmodel_update(model.model_dump(exclude_unset=True))
-
-        session.add(booking)
-        session.commit()
-        session.refresh(booking)
-
-    return booking
+    return BookingRead.model_validate(booking)
 
 
 def remove_booking(id: int, session: SessionDep) -> BookingRead | None:
@@ -164,10 +86,38 @@ def remove_booking(id: int, session: SessionDep) -> BookingRead | None:
         Removed booking on success or `None` if no booking was found with the requested `id`.
     """
 
-    booking = read_booking(id, session)
+    booking = session.get(Booking, id)
 
     if booking is not None:
         session.delete(booking)
         session.commit()
 
-    return booking
+    return BookingRead.model_validate(booking)
+
+
+# def update_booking(
+#     id: int, model: BookingUpdate, session: SessionDep
+# ) -> BookingRead | None:
+#     """Updates the booking in database with `id` to the fields of provided `model`.
+#
+#     Args:
+#         id: ID of the booking to update.
+#         model: Updated model with changes.
+#
+#     Returns:
+#         Updated version of the booking on success or `None` if no booking was found with the
+#         requested `id`.
+#     """
+#
+#     booking = read_booking(id, session)
+#
+#     if booking is not None:
+#         # retrieve only fields that are set in booking_update by the client
+#         # then update those in db booking
+#         _ = booking.sqlmodel_update(model.model_dump(exclude_unset=True))
+#
+#         session.add(booking)
+#         session.commit()
+#         session.refresh(booking)
+#
+#     return booking

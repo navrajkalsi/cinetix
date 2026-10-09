@@ -1,7 +1,12 @@
-import requests
+import operator
+from collections.abc import Sequence
 
+import requests
+from toolz.itertoolz import unique
+
+from api.models.movies import MovieCreate
 from config import config
-from tmdb.models import SearchMovie
+from tmdb.models import Movie, SearchMovie
 from utils import print_debug
 
 KEY = config.tmdb_api_key
@@ -17,8 +22,8 @@ URLS = {
 HEADERS = {"accept": "application/json", "Authorization": f"Bearer {KEY}"}
 
 
-def search_movie(name: str) -> tuple[str, str | None] | None:
-    """Searches TMDB for any matching movie names.
+def search_movie(name: str) -> Movie | None:
+    """Searches TMDB for any matching movie name.
 
     If multiple matches are found the first one is returned.
     No custom sorting is applied. TMDB data is used as-is.
@@ -36,18 +41,8 @@ def search_movie(name: str) -> tuple[str, str | None] | None:
         name: Name of the movie to search for.
 
     Returns:
-        Returns a tuple of validated movie-name and a URL for the movie's poster if a match is
-        found. Otherwise returns `None`.
-
-        Also returns `None` if TMDB is not setup at startup.
-
-    Raises:
-        HTTPError: An error occurred when requesting data from TMDB.
+        Returns a validated `Movie` if a match is found. Otherwise returns `None`.
     """
-
-    if KEY is None:
-        print_debug("tmdb_api_key not provided, skipping cross-validation of the movie")
-        return None
 
     response = requests.get(url=f"{URLS['movie']}{name}", headers=HEADERS)
 
@@ -67,17 +62,63 @@ def search_movie(name: str) -> tuple[str, str | None] | None:
         return None
 
     movie = model.results[0]
-    poster_url = (
+    movie.poster_path = (
         None if movie.poster_path is None else f"{URLS['image']}{movie.poster_path}"
     )
 
-    if config.save_movie_posters and poster_url is not None:
-        poster_ext = poster_url.split(".")[-1]  # poster_paths end with file extensions
+    if config.save_movie_posters and movie.poster_path is not None:
+        poster_ext = movie.poster_path.split(".")[
+            -1
+        ]  # poster_paths end with file extensions
 
-        img_res = requests.get(poster_url)
+        img_res = requests.get(movie.poster_path)
         img_res.raise_for_status()
 
         with open(movie.title + "." + poster_ext, "wb") as img:
             _ = img.write(img_res.content)
 
-    return movie.title, poster_url
+    return movie
+
+
+def search_movie_matches(name: str) -> Sequence[MovieCreate]:
+    """Searches TMDB for all movie names matching the `name`.
+
+    If multiple matches are found with the same title, the first one is returned.
+    No custom sorting is applied. TMDB data is used as-is.
+
+    Args:
+        name: Closely typed movie name.
+
+    Returns:
+        Returns the list of all `MovieCreate`s matching the supplied string from the first page of
+        TMDB response. Returns an empty list if no matches were found.
+    """
+
+    response = requests.get(url=f"{URLS['movie']}{name}", headers=HEADERS)
+
+    response.raise_for_status()  # raises exception for any status code less than 400
+
+    if response.status_code != 200:
+        raise requests.HTTPError(
+            f"failed to get a 200 OK response from TMDB, got: {response.status_code}"
+        )
+
+    model = SearchMovie.model_validate(response.json())
+
+    if model.total_results == 0:
+        print_debug(f"could not find any matching movie names for: {name}")
+        return []
+
+    # filter out movies with duplicate titles
+    uniques = unique(model.results, key=operator.attrgetter("title"))
+
+    return [
+        MovieCreate(
+            name=movie.title,
+            external_id=movie.id,
+            poster_url=None
+            if movie.poster_path is None
+            else f"{URLS['image']}{movie.poster_path}",
+        )
+        for movie in uniques
+    ]

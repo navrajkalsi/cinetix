@@ -11,7 +11,7 @@ The final parsed receipt is represented as a `Transaction` which can be added to
 import sys
 from pathlib import Path
 
-from pdf.transaction import Transaction
+from .transaction import Transaction
 
 
 def from_args() -> Transaction:

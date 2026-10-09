@@ -22,9 +22,11 @@ class Config(BaseSettings):
         description="list of origins for allowing cross origin requests",
     )  # skip decoding so that we can have the raw str in field_validator
     email: str = Field(description="email to check for new transacton receipts")
-    tmdb_api_key: str | None = Field(
-        default=None,
-        description="optional TMDB API read access key for validating parsed transactions against official TMDB entries",
+    tmdb_api_key: str = Field(
+        description="TMDB API read access key for validating parsed transactions against official TMDB entries and generating movie autocomplete names",
+    )
+    google_maps_api_key: str = Field(
+        description="Google Maps API key for validating parsed transaction locations against official Google Maps entries and generating location autocompletes"
     )
 
     # make all attributes immutable

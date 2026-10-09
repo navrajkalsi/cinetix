@@ -3,25 +3,36 @@ from collections.abc import Sequence
 from sqlmodel import select
 
 from api.dependencies import SessionDep
-from api.models import Location
+from api.models.locations import Location, LocationCreate, LocationRead
 
 
-def read_location(id: int, session: SessionDep) -> Location | None:
+def read_location(id: int, session: SessionDep) -> LocationRead | None:
     """Returns the location with the provided `id`, if found."""
 
-    return session.get(Location, id)
+    return LocationRead.model_validate(session.get(Location, id))
 
 
-def read_locations(names_only: bool, session: SessionDep) -> Sequence[Location | str]:
-    """Returns requested data from all the locations in the database.
+def read_locations(session: SessionDep) -> Sequence[LocationRead]:
+    """Returns the list of all the formats in the database."""
 
-    Args:
-        names_only: Flag for only requesting the name of every location.
+    return [
+        LocationRead.model_validate(location)
+        for location in session.exec(select(Location)).all()
+    ]
 
-    Returns:
-        A list of full data of all locations or just their names.
+
+def create_location(model: LocationCreate, session: SessionDep) -> LocationRead:
+    """Creates a new location row in the database.
+
+    The returned `LocationRead` has all the attribute values from the provided `model`,
+    plus a database assigned `id`.
     """
 
-    statement = select(Location.name) if names_only else select(Location)
+    # location with None id
+    location = Location.model_validate(model)
 
-    return session.exec(statement).all()
+    session.add(location)
+    session.commit()  # assigned an id here by the db
+    session.refresh(location)  # fetch the location with id filled
+
+    return LocationRead.model_validate(location)

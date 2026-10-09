@@ -3,25 +3,36 @@ from collections.abc import Sequence
 from sqlmodel import select
 
 from api.dependencies import SessionDep
-from api.models import Format
+from api.models.formats import Format, FormatCreate, FormatRead
 
 
-def read_format(id: int, session: SessionDep) -> Format | None:
+def read_format(id: int, session: SessionDep) -> FormatRead | None:
     """Returns the format with the provided `id`, if found."""
 
-    return session.get(Format, id)
+    return FormatRead.model_validate(session.get(Format, id))
 
 
-def read_formats(names_only: bool, session: SessionDep) -> Sequence[Format | str]:
-    """Returns requested data from all the formats in the database.
+def read_formats(session: SessionDep) -> Sequence[FormatRead]:
+    """Returns the list of all the formats in the database."""
 
-    Args:
-        names_only: Flag for only requesting the name of every format.
+    return [
+        FormatRead.model_validate(format)
+        for format in session.exec(select(Format)).all()
+    ]
 
-    Returns:
-        A list of full data of all formats or just their names.
+
+def create_format(model: FormatCreate, session: SessionDep) -> FormatRead:
+    """Creates a new format row in the database.
+
+    The returned `FormatRead` has all the attribute values from the provided `model`,
+    plus a database assigned `id`.
     """
 
-    statement = select(Format.name) if names_only else select(Format)
+    # format with None id
+    format = Format.model_validate(model)
 
-    return session.exec(statement).all()
+    session.add(format)
+    session.commit()  # assigned an id here by the db
+    session.refresh(format)  # fetch the format with id filled
+
+    return FormatRead.model_validate(format)

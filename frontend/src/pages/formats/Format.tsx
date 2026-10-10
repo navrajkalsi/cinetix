@@ -1,13 +1,17 @@
 import { useLoaderData } from "react-router";
-import type Booking from "../../models/Booking";
 import "./Format.css";
 import CardLandscape from "../../components/CardLandscape";
-import type Format from "../../models/Format";
+import type { Booking } from "../../models/Booking";
+import useFormat from "../../hooks/useFormat";
+import useBookingCompletes from "../../hooks/useBookingCompletes";
 
 export default function Format() {
-  // format and bookings fetched during routing
-  const { format, bookings }: { format: Format; bookings: Booking[] } =
+  // formatid and bookings fetched during routing
+  const { formatId, bookings }: { formatId: number; bookings: Booking[] } =
     useLoaderData();
+
+  const format = useFormat(formatId);
+  const bookingCompletes = useBookingCompletes(bookings);
 
   return (
     <div className="format">
@@ -22,7 +26,7 @@ export default function Format() {
       </div>
 
       <div className="format-bookings">
-        {bookings.map((booking) => (
+        {bookingCompletes.map((booking) => (
           <CardLandscape
             booking={booking}
             key={booking.id}

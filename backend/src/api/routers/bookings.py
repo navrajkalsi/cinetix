@@ -35,7 +35,10 @@ def get_booking(id: int, session: SessionDep) -> BookingRead:
 def get_bookings(
     session: SessionDep,
     year: Annotated[
-        int | None, Query(description="Year the returned booking should be from.")
+        int | None,
+        Query(
+            description="Year the returned booking should be from. If no provided, bookings from all the years are returned."
+        ),
     ] = None,
     movie_id: Annotated[
         int | None, Query(description="Return bookings for only certain movie.")
@@ -49,7 +52,7 @@ def get_bookings(
     include_future: Annotated[
         bool,
         Query(
-            description="Include bookings from future years as well with the current `year`. If `year` is not provided, this filter is ignored."
+            description="Include bookings from future years as well with the provided `year`. If `year` is not provided, this filter is ignored."
         ),
     ] = False,
 ) -> Sequence[BookingRead]:

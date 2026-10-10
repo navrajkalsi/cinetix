@@ -1,4 +1,4 @@
-import type Booking from "../models/Booking";
+import { type Booking } from "../models/Booking";
 
 export default async function getBookings({
   year,
@@ -6,15 +6,18 @@ export default async function getBookings({
   locationId,
   formatId,
   includeFuture,
+  signal,
 }: {
   year?: number;
   movieId?: number;
   locationId?: number;
   formatId?: number;
   includeFuture?: boolean;
+  signal?: AbortSignal;
 }): Promise<Booking[]> {
   const response = await fetch(
-    `/api/bookings/?${year ? `year=${year}&` : ""}${movieId ? `movie=${movieId}&` : ""}${locationId ? `location=${locationId}&` : ""}${formatId ? `format=${formatId}&` : ""}${includeFuture ? `future=${includeFuture}` : ""}`,
+    `/api/bookings/?${year ? `year=${year}&` : ""}${movieId ? `movie_id=${movieId}&` : ""}${locationId ? `location_id=${locationId}&` : ""}${formatId ? `format_id=${formatId}&` : ""}${includeFuture ? `future=${includeFuture}` : ""}`,
+    { signal },
   );
 
   if (!response.ok) {

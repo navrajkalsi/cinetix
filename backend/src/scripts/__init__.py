@@ -51,5 +51,3 @@ def create_booking():
         res.raise_for_status()
 
     booking = Booking.model_validate(res.json())
-
-    print("Added new booking\n:", booking)

@@ -50,6 +50,6 @@ def get_locations(session: SessionDep) -> Sequence[LocationRead]:
 
 @router.post("/")
 def post_location(model: LocationCreate, session: SessionDep) -> LocationRead:
-    """Adds a new location row in the database."""
+    """Adds a new location row in the database if no location is found with same `external_id`."""
 
     return create_location(model, session)

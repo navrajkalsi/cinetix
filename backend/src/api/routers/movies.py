@@ -50,6 +50,6 @@ def get_movies(session: SessionDep) -> Sequence[MovieRead]:
 
 @router.post("/")
 def post_movie(model: MovieCreate, session: SessionDep) -> MovieRead:
-    """Adds a new movie record in the database."""
+    """Adds a new movie record in the database if no movie is found with same `external_id`."""
 
     return create_movie(model, session)

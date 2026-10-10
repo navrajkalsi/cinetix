@@ -7,16 +7,22 @@ class MovieBase(SQLModel):
     name: str = Field(
         min_length=1, description="Title as it appears in TMDB for `external_id`."
     )
-    external_id: int | None = Field(
-        default=None, unique=True, description="TMDB ID of the movie."
+    external_id: int = Field(
+        unique=True, index=True, description="TMDB ID of the movie."
     )
-    poster_url: str | None = Field(
-        default=None, description="TMDB poster URL, can be null if TMDB has none."
+    poster_url: str = Field(
+        description="TMDB poster URL, can be null if TMDB has none."
     )
 
 
 class MovieCreate(MovieBase):
     """Request body for creating a movie."""
+
+
+class MovieRead(MovieBase):
+    """Response body for quering a movie from the database."""
+
+    id: int
 
 
 class Movie(MovieBase, table=True):
@@ -25,9 +31,3 @@ class Movie(MovieBase, table=True):
     __tablename__: str = "movies"
 
     id: int | None = Field(default=None, primary_key=True)
-
-
-class MovieRead(MovieBase):
-    """Response body for quering a movie from the database."""
-
-    id: int

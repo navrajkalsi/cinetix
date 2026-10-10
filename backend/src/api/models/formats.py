@@ -4,7 +4,9 @@ from sqlmodel import Field, SQLModel
 class FormatBase(SQLModel):
     """Fields shared by every format model."""
 
-    name: str = Field(min_length=1, unique=True, description="Name of the format.")
+    name: str = Field(
+        min_length=1, unique=True, index=True, description="Name of the format."
+    )
 
 
 class FormatCreate(FormatBase):

@@ -165,13 +165,14 @@ def parse_movie(movie: str) -> tuple[str, str | None]:
             #
             # Example:
             #     'Dune (2021) IMAX REISSUE'
+            #     'Disclosure Day: IMAX Live Pre-Show Q&A with Steven Spielberg and Emily Blunt'
             #
             # These can have 70MM variants.
             #
             # Example:
             #     'Sinners IMAX 70MM Film reissue'
             separated = movie.split("IMAX")
-            movie = separated[0]
+            movie = remove_suffixes(separated[0], FORMAT_SEPARATORS)
             format += " 70MM" if "70" in separated[1] else ""
 
     if "Special Engagement" in movie:
@@ -185,12 +186,17 @@ def parse_movie(movie: str) -> tuple[str, str | None]:
         format = "70MM" if "70" in separated[1] else format
 
     # Rereleases may have the original release year in a pair of parenthesis after the movie name.
+    # Foreign language movies can also have the original language in these parenthesis.
     # Therefore, we need to remove these.
     # This implementation does not check the actual contents of the parenthesis before discarding.
     #
     # Example:
     # 'Dune (2021) IMAX REISSUE' on reaching at this point will become:
     # 'Dune (2021)'
+    #
+    # 'Godzilla Minus Zero (Japanese w/e.s.t.) - Early Access – The IMAX Experience®' at this point will be:
+    # 'Godzilla Minus Zero (Japanese w/e.s.t.) - Early Access' and will become:
+    # 'Godzilla Minus Zero'
     paranthesis = re.search("\\(.*\\)", movie, re.DOTALL)
     if paranthesis:
         movie = movie[: paranthesis.start()]

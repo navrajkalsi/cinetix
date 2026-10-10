@@ -1,13 +1,11 @@
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
 import Bookings from "./pages/bookings/Bookings";
-import getBookings from "./api/booking";
-import getMovie from "./api/movie";
-import getLocation from "./api/location";
-import Movie from "./pages/movies/Movie";
+import getBookings from "./api/bookings";
 import Location from "./pages/locations/Location";
-import getFormat from "./api/format";
 import Format from "./pages/formats/Format";
 import BookingNew from "./pages/bookings/BookingNew";
+import { LookupsProvider } from "./context/LookupProvider";
+import Movie from "./pages/movies/Movie";
 
 const router = createBrowserRouter([
   // redirect root to bookings
@@ -64,12 +62,16 @@ const router = createBrowserRouter([
       }
 
       const movieId = Number(id);
-      const movie = await getMovie(movieId);
       const bookings = await getBookings({ movieId: movieId });
 
-      return { movie, bookings };
+      return { movieId, bookings };
     },
-    Component: Movie,
+
+    element: (
+      <LookupsProvider>
+        <Movie />
+      </LookupsProvider>
+    ),
   },
 
   {
@@ -90,12 +92,16 @@ const router = createBrowserRouter([
       }
 
       const locationId = Number(id);
-      const location = await getLocation(locationId);
       const bookings = await getBookings({ locationId: locationId });
 
-      return { location, bookings };
+      return { locationId, bookings };
     },
-    Component: Location,
+
+    element: (
+      <LookupsProvider>
+        <Location />
+      </LookupsProvider>
+    ),
   },
 
   {
@@ -116,12 +122,16 @@ const router = createBrowserRouter([
       }
 
       const formatId = Number(id);
-      const format = await getFormat(formatId);
       const bookings = await getBookings({ formatId: formatId });
 
-      return { format, bookings };
+      return { formatId, bookings };
     },
-    Component: Format,
+
+    element: (
+      <LookupsProvider>
+        <Format />
+      </LookupsProvider>
+    ),
   },
 ]);
 

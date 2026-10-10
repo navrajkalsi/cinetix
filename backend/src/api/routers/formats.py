@@ -34,6 +34,6 @@ def get_formats(session: SessionDep) -> Sequence[FormatRead]:
 
 @router.post("/")
 def post_format(model: FormatCreate, session: SessionDep) -> FormatRead:
-    """Adds a new format record in the database."""
+    """Adds a new format record in the database if no format is found with same `name`."""
 
     return create_format(model, session)

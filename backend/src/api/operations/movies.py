@@ -23,9 +23,20 @@ def read_movies(session: SessionDep) -> Sequence[MovieRead]:
 def create_movie(model: MovieCreate, session: SessionDep) -> MovieRead:
     """Creates a new movie row in the database.
 
+    If a movie already exists with the same `external_id`, no new movie is created and the
+    already present movie is returned.
+
     The returned `MovieRead` has all the attribute values from the provided `model`,
     plus a database assigned `id`.
     """
+
+    # does a movie already exist with same external id
+    present = session.exec(
+        select(Movie).where(Movie.external_id == model.external_id)
+    ).first()
+
+    if present is not None:  # do not create new
+        return MovieRead.model_validate(present)
 
     # movie with None id
     movie = Movie.model_validate(model)

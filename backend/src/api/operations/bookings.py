@@ -1,10 +1,13 @@
 from collections.abc import Sequence
-from datetime import date
+from datetime import datetime
 
 from sqlmodel import desc, select
 
 from api.dependencies import SessionDep
 from api.models.bookings import Booking, BookingCreate, BookingRead
+
+# Current time in locale timezone
+now = datetime.now().astimezone()
 
 
 def read_booking(id: int, session: SessionDep) -> BookingRead | None:
@@ -29,7 +32,7 @@ def read_bookings(
         movie_id: Return bookings for only certain movie.
         location_id: Return bookings for only certain location.
         format_id: Return bookings for only certain format.
-        include_future: Flag to include bookings from future years as well with the current `year`.
+        include_future: Flag to include bookings from future years as well with the provided `year`.
             If `year` is not provided, this flag is ignored.
 
     Returns:
@@ -42,10 +45,13 @@ def read_bookings(
 
     if year:
         if include_future:
-            statement = statement.where(Booking.date >= date(year, 1, 1))
+            statement = statement.where(
+                Booking.date_time >= datetime(year, 1, 1, tzinfo=now.tzinfo)
+            )
         else:
             statement = statement.where(
-                Booking.date >= date(year, 1, 1), Booking.date < date(year + 1, 1, 1)
+                Booking.date_time >= datetime(year, 1, 1, tzinfo=now.tzinfo),
+                Booking.date_time < datetime(year + 1, 1, 1, tzinfo=now.tzinfo),
             )
 
     if movie_id:
@@ -56,9 +62,7 @@ def read_bookings(
         statement = statement.where(Booking.format_id == format_id)
 
     # order
-    bookings = session.exec(
-        statement.order_by(desc(Booking.date), desc(Booking.time))
-    ).all()
+    bookings = session.exec(statement.order_by(desc(Booking.date_time))).all()
 
     return [BookingRead.model_validate(booking) for booking in bookings]
 

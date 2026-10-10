@@ -1,8 +1,8 @@
-// Model with common fields for all subsequent movie models.
+// Model with common fields for all movie models.
 interface MovieBase {
   name: string;
-  poster_url?: string;
-  external_id: string;
+  poster_url: string;
+  external_id: number;
 }
 
 // Model recived from database api

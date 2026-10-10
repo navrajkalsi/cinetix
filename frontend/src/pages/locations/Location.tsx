@@ -1,35 +1,59 @@
-import { useLoaderData } from "react-router";
-import type Booking from "../../models/Booking";
-import type Location from "../../models/Location";
+import { Link, useLoaderData } from "react-router";
 import "./Location.css";
 import CardLandscape from "../../components/CardLandscape";
+import useLocation from "../../hooks/useLocation";
+import type { Booking } from "../../models/Booking";
+import useBookingCompletes from "../../hooks/useBookingCompletes";
 
 export default function Location() {
-  // location and bookings fetched during routing
-  const { location, bookings }: { location: Location; bookings: Booking[] } =
+  // locationid and bookings fetched during routing
+  const { locationId, bookings }: { locationId: number; bookings: Booking[] } =
     useLoaderData();
+
+  const location = useLocation(locationId);
+  const bookingCompletes = useBookingCompletes(bookings);
+  const mapsUrl = new URL(
+    `https://www.google.com/maps/search/?api=1&query=${location.name}&query_place_id=${location.external_id}`,
+  );
+  const mapsApiKey = "AIzaSyBXmTWlDVPBKtxFm2pejH0CII8jGJZ6vvU";
 
   return (
     <div className="location">
       <div className="location-info">
-        <div className="title">{location.name}</div>
+        <div
+          className="title"
+          title="Visit the Google Maps page for this location."
+        >
+          <Link to={mapsUrl.toString()} className="link">
+            {location.name}
+          </Link>
+        </div>
 
         <div className="visits">
           <span className="visits-count">{bookings.length}</span>
           {bookings.length > 1 ? " bookings " : " booking "}found at this
           location.
         </div>
+
+        <div className="location-bookings">
+          {bookingCompletes.map((booking) => (
+            <CardLandscape
+              booking={booking}
+              key={booking.id}
+              suppress="location"
+              posterUrl={new URL(booking.movie.poster_url)}
+            />
+          ))}
+        </div>
       </div>
 
-      <div className="location-bookings">
-        {bookings.map((booking) => (
-          <CardLandscape
-            booking={booking}
-            key={booking.id}
-            suppress="location"
-            posterUrl={new URL(booking.movie.poster_url)}
-          />
-        ))}
+      <div className="location-map">
+        <iframe
+          loading="lazy"
+          src={`https://www.google.com/maps/embed/v1/place?q=place_id:${location.external_id}&key=${mapsApiKey}`}
+        >
+          Loading...
+        </iframe>
       </div>
     </div>
   );

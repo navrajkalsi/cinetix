@@ -24,9 +24,20 @@ def read_locations(session: SessionDep) -> Sequence[LocationRead]:
 def create_location(model: LocationCreate, session: SessionDep) -> LocationRead:
     """Creates a new location row in the database.
 
+    If a location already exists with the same `external_id`, no new location is created and the
+    already present location is returned.
+
     The returned `LocationRead` has all the attribute values from the provided `model`,
     plus a database assigned `id`.
     """
+
+    # does a location already exist with same external id
+    present = session.exec(
+        select(Location).where(Location.external_id == model.external_id)
+    ).first()
+
+    if present is not None:  # do not create new
+        return LocationRead.model_validate(present)
 
     # location with None id
     location = Location.model_validate(model)

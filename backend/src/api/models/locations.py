@@ -8,8 +8,15 @@ class LocationBase(SQLModel):
         min_length=1,
         description="Display name as it appears in Google Maps for `external_id`.",
     )
+    full_address: str = Field(
+        min_length=1,
+        description="Full Google Maps address for `external_id`.",
+    )
     external_id: str = Field(
-        min_length=1, unique=True, description="Google Maps Place ID of the theater."
+        min_length=1,
+        unique=True,
+        index=True,
+        description="Google Maps Place ID of the theater.",
     )
 
 

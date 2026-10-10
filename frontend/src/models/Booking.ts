@@ -1,13 +1,29 @@
-import type Format from "./Format";
-import type Location from "./Location";
-import type Movie from "./Movie";
+import type { Format } from "./Format";
+import type { Location } from "./Location";
+import type { Movie } from "./Movie";
 
-export default interface Booking {
-  id: number;
-  booking_id: string;
-  datetime: string;
-  seats: string;
+// Model with common fields for all booking models.
+interface BookingBase {
+  external_id?: string;
+  date_time: string;
+  seats: string[];
   price: number;
+  movie_id: number;
+  location_id: number;
+  format_id: number;
+  source: "manual" | "auto" | "auto_edit";
+}
+
+// Model recived from database api
+export interface Booking extends BookingBase {
+  id: number;
+}
+
+// Model for creating a new booking in the database from user input
+export interface BookingCreate extends BookingBase { }
+
+// Model with included references
+export interface BookingComplete extends Booking {
   movie: Movie;
   location: Location;
   format: Format;

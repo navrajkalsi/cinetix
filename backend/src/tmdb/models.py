@@ -13,13 +13,13 @@ class Movie(BaseModel):
         original_title: Title of the movie in the original language of release.
         title: Official translated title. Same as `original_title` for most releases.
         poster_path: Relative path of the movie poster from TMDB. The path also contains the image
-            file extension
+            file extension.
     """
 
     id: int
     original_title: str
     title: str
-    poster_path: str | None
+    poster_path: str | None = None
 
     model_config = ConfigDict(extra="ignore")
 

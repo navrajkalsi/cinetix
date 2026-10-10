@@ -13,17 +13,28 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  grid-row: 1;
-  grid-column: 1;
   gap: 1em;
   overflow: hidden scroll;
   scrollbar-width: none;
 
   .title {
-    margin: 1% 2.5%;
+    margin: 2.5%;
     font-size: 7.5rem;
     overflow-wrap: break-word;
+    word-wrap: break-word;
     text-align: center;
+    cursor: pointer;
+    transition: all 0.5s ease;
+
+    .link {
+      color: inherit;
+      text-decoration: none;
+    }
+  }
+
+  .title:hover {
+    scale: 102.5%;
+    text-decoration: underline solid 8px rgb(var(--accent));
   }
 
   .visits {
@@ -56,7 +67,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  grid-row: 1 / span 2;
 
   img {
     max-height: 80%;

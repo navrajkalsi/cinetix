@@ -65,6 +65,10 @@ def search_place_matches(name: str) -> Sequence[LocationCreate]:
     model = Autocomplete.model_validate(response.json())
 
     return [
-        LocationCreate(name=place.address, external_id=place.id)
+        LocationCreate(
+            name=place.address.split(",")[0],
+            full_address=place.address,
+            external_id=place.id,
+        )
         for place in model.places
     ]

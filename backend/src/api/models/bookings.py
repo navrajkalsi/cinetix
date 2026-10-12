@@ -24,8 +24,8 @@ class BookingBase(SQLModel):
     date_time: datetime = Field(
         description="Date, and optional time with no timezone info, of the showing."
     )
-    seats: list[str] | None = Field(
-        default=None,
+    seats: list[str] = Field(
+        default_factory=list,
         min_length=1,
         sa_type=ARRAY(String),
         description="List of seats with each seat being a row and seat number.",

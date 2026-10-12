@@ -10,7 +10,7 @@ class MovieBase(SQLModel):
     external_id: int = Field(
         unique=True, index=True, description="TMDB ID of the movie."
     )
-    poster_url: str = Field(
+    poster_url: str | None = Field(
         description="TMDB poster URL, can be null if TMDB has none."
     )
 

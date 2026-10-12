@@ -1,12 +1,27 @@
-interface InputProps {
-  name: string;
-  type: "datetime-local" | "number" | "text";
-  required: boolean;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
+import type { InputHTMLAttributes } from "react";
+import "./Input.css";
 
-export default function Input({ name, type, required, onChange }: InputProps) {
+export default function Input(props: InputHTMLAttributes<HTMLInputElement>) {
+  function handleFocus(e: React.FocusEvent<HTMLInputElement>) {
+    e.target.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }
+
   return (
-    <input name={name} type={type} required={required} onChange={onChange} />
+    <label
+      className={
+        props.className ? props.className + " input-label" : "input-label"
+      }
+    >
+      {props.placeholder}:
+      <input
+        {...props}
+        autoComplete="off"
+        className="input"
+        onFocus={handleFocus}
+      />
+    </label>
   );
 }

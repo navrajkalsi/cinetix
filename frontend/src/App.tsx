@@ -17,7 +17,12 @@ const router = createBrowserRouter([
     children: [
       {
         path: "new",
-        Component: BookingNew,
+
+        element: (
+          <LookupsProvider>
+            <BookingNew />
+          </LookupsProvider>
+        ),
       },
 
       {

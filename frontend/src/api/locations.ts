@@ -1,4 +1,4 @@
-import { type Location } from "../models/Location";
+import { type Location, type LocationCreate } from "../models/Location";
 
 export default async function getMovie(
   id: number,
@@ -19,6 +19,38 @@ export async function getLocations(signal?: AbortSignal): Promise<Location[]> {
   if (!response.ok) {
     throw new Error(`Failed to fetch locations: ${response.statusText}`);
   }
+
+  return response.json();
+}
+
+export async function getLocationMatches(
+  searchTerm: string,
+  signal?: AbortSignal,
+): Promise<LocationCreate[]> {
+  const response = await fetch(
+    `/api/locations/search?search_term=${searchTerm}`,
+    {
+      signal,
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch location matches: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function postLocation(model: LocationCreate): Promise<Location> {
+  const headers = new Headers();
+  headers.set("Content-Type", "application/json");
+  headers.set("Accept", "application/json");
+
+  const response = await fetch("/api/locations/", {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(model),
+  });
 
   return response.json();
 }

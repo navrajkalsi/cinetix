@@ -5,6 +5,8 @@ import useLocation from "../../hooks/useLocation";
 import type { Booking } from "../../models/Booking";
 import useBookingCompletes from "../../hooks/useBookingCompletes";
 
+const mapsApiKey = "AIzaSyBXmTWlDVPBKtxFm2pejH0CII8jGJZ6vvU";
+
 export default function Location() {
   // locationid and bookings fetched during routing
   const { locationId, bookings }: { locationId: number; bookings: Booking[] } =
@@ -15,7 +17,6 @@ export default function Location() {
   const mapsUrl = new URL(
     `https://www.google.com/maps/search/?api=1&query=${location.name}&query_place_id=${location.external_id}`,
   );
-  const mapsApiKey = "AIzaSyBXmTWlDVPBKtxFm2pejH0CII8jGJZ6vvU";
 
   return (
     <div className="location">

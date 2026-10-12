@@ -1,0 +1,15 @@
+.select-label {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2.5rem;
+
+  .select {
+    all: inherit;
+    background-color: rgba(var(--light), 0.25);
+    border-radius: 1rem;
+    padding: 0.5rem;
+    text-align: right;
+  }
+}

@@ -6,6 +6,7 @@ body {
   --dark: 20, 20, 20;
   --light: 240, 240, 240;
   --accent: 40, 80, 255;
+  --error: 210, 4, 45;
   --primary: normal 500 16px "Outfit", sans-serif;
   /* --secondary: normal 500 16px "Lora", serif; */
   --secondary: normal 600 16px "Oswald", sans-serif;

@@ -1,0 +1,72 @@
+.input-container {
+  position: relative;
+
+  .suggestions {
+    border: solid white 2px;
+    left: -1rem;
+    right: -1rem;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    background-color: rgb(var(--dark));
+    border-radius: 1rem;
+    margin-top: 1rem;
+    color: rgba(var(--light), 0.75);
+    max-height: 50vh;
+
+    .external-loader {
+      width: 100%;
+      color: rgb(var(--light));
+      text-decoration: underline 3px white;
+      text-align: center;
+      padding: 10px 0;
+      background-color: rgba(var(--light), 0.1);
+      cursor: pointer;
+    }
+
+    .loading,
+    .database-title,
+    .external-title {
+      width: 100%;
+      height: 1.5rem;
+      color: rgb(var(--light));
+      text-align: center;
+      padding: 20px 0;
+      background-color: rgba(var(--light), 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .database,
+    .external {
+      display: flex;
+      flex-direction: column;
+      max-height: 25vh;
+      overflow: hidden scroll;
+      scroll-snap-type: y mandatory;
+      scrollbar-width: none;
+
+      .suggestion {
+        border-radius: 0.5rem;
+        cursor: pointer;
+        padding: 10px;
+        text-align: center;
+      }
+
+      .suggestion.highlight {
+        background-color: rgba(var(--light), 0.3);
+      }
+
+      .suggestion:hover {
+        background-color: rgba(var(--light), 0.2);
+        color: rgb(var(--light));
+      }
+    }
+  }
+}
+
+.hidden {
+  display: none !important;
+}

@@ -1,0 +1,55 @@
+.booking-new {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+
+  .title {
+    font-size: 5rem;
+  }
+
+  .booking-form {
+    font-size: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    background-color: rgba(var(--light), 0.1);
+    border-radius: 50px;
+    border: solid 5px rgba(var(--light), 0.25);
+    padding: 2rem;
+    overflow: hidden scroll;
+    scrollbar-width: none;
+    transition: all 0.3s ease;
+
+    .submit {
+      appearance: none;
+      border: none;
+      background: none;
+      color: inherit;
+      align-self: center;
+      min-width: 30%;
+      padding: 0.5em;
+      border-radius: 2em;
+      font-size: 1.5rem !important;
+      text-align: center;
+      font: var(--secondary);
+      font-weight: 500;
+      background-color: rgb(var(--accent));
+      cursor: pointer;
+      box-shadow: 0 0 2px 2px rgb(var(--dark));
+      transition: all 0.3s ease;
+    }
+
+    .submit:hover:not(:disabled) {
+      box-shadow: 0 0 5px 5px rgb(var(--dark));
+      scale: 105%;
+    }
+
+    .submit:disabled {
+      opacity: 0.25;
+      cursor: unset !important;
+    }
+  }
+}

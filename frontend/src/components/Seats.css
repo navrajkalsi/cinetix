@@ -1,0 +1,45 @@
+.seats {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .seat-next {
+    align-items: center;
+    display: inline-flex;
+    width: 100%;
+    gap: 1rem;
+
+    .seat-add {
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      border: none;
+      border-radius: 1000px;
+      background: rgba(var(--light), 0.1);
+      cursor: pointer;
+      color: rgba(var(--light), 0.5);
+      font-size: 1.5rem;
+      transition: all 0.3 ease;
+    }
+
+    .seat-add:hover {
+      background: rgba(var(--light), 0.25);
+      color: white;
+    }
+  }
+
+  .seat-collection {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 1rem;
+    gap: 0.5rem;
+  }
+
+  .helper-text {
+    font-size: 0.75rem;
+    opacity: 0.75;
+    width: 100%;
+    margin: 0.5rem 0;
+    text-align: center;
+  }
+}

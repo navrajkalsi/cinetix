@@ -1,6 +1,6 @@
 import "./List.css";
 import ListItem from "./ListItem.tsx";
-import type Booking from "./../models/Booking.ts";
+import { type Booking } from "./../models/Booking.ts";
 
 export default function List({
   upcoming,

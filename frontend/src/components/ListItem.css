@@ -49,9 +49,3 @@
     translate: 0;
   }
 }
-
-.card.upcoming {
-  /* border: solid 5px rgba(var(--dark), 0.25); */
-  /* color comes from parent set in the component */
-  box-shadow: 0 0 25px 5px;
-}

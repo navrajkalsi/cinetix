@@ -1,15 +1,52 @@
-.select-label {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2.5rem;
+.select {
+  width: 100%;
+  position: relative;
 
-  .select {
-    all: inherit;
-    background-color: rgba(var(--light), 0.25);
+  .options-container {
+    justify-self: right;
+    border: solid white 2px;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    background-color: rgb(var(--dark));
     border-radius: 1rem;
-    padding: 0.5rem;
-    text-align: right;
+    margin-top: 1rem;
+    color: rgba(var(--light), 0.75);
+    max-height: 50vh;
+    height: fit-content;
+    width: fit-content;
+    transition: all 0.3s ease;
+    overflow: hidden;
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      max-height: 25vh;
+      overflow: hidden scroll;
+      scroll-snap-type: y mandatory;
+      scrollbar-width: none;
+
+      .option {
+        cursor: pointer;
+        padding: 10px;
+        text-align: center;
+      }
+
+      .option.highlight {
+        background-color: rgba(var(--light), 0.3);
+      }
+
+      .option:hover {
+        background-color: rgba(var(--light), 0.2);
+        color: rgb(var(--light));
+      }
+    }
   }
+}
+
+.options-container.hidden {
+  z-index: -100 !important;
+  opacity: 0;
+  scale: 95%;
 }

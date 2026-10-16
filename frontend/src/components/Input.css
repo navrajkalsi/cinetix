@@ -19,3 +19,20 @@
     background-color: rgba(var(--error), 0.5);
   }
 }
+
+.input[type="date"],
+.input[type="time"],
+.input[type="number"],
+.input[type="select"] {
+  color-scheme: dark;
+}
+
+.input[type="number"] {
+  appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

@@ -14,6 +14,9 @@
     margin-top: 1rem;
     color: rgba(var(--light), 0.75);
     max-height: 50vh;
+    height: fit-content;
+    overflow: hidden;
+    transition: all 0.3s ease;
 
     .external-loader {
       width: 100%;
@@ -49,7 +52,6 @@
       scrollbar-width: none;
 
       .suggestion {
-        border-radius: 0.5rem;
         cursor: pointer;
         padding: 10px;
         text-align: center;
@@ -67,6 +69,8 @@
   }
 }
 
-.hidden {
-  display: none !important;
+.suggestions.hidden {
+  z-index: -100 !important;
+  opacity: 0;
+  scale: 95%;
 }

@@ -28,11 +28,7 @@ export default function BookingNew() {
   const formRef = useRef<HTMLFormElement | null>(null);
   const [formValid, setFormValid] = useState(false);
   const [seats, setSeats] = useState<Set<string>>(new Set());
-
-  const rawFormats: [number, string][] = dbFormats.map((format) => [
-    format.id,
-    format.name,
-  ]);
+  const [format, setFormat] = useState(dbFormats[0].name);
 
   async function fetchExtMovies(searchTerm: string) {
     movieController.current?.abort();
@@ -77,14 +73,14 @@ export default function BookingNew() {
       extLocations?.find((l) => l.name === data.get("location"));
 
     const date = data.get("date") as string;
-    const time = data.get("time");
-    const dateTime = new Date(time != null ? `${date}T${time}` : date);
+    const time = data.get("time") as string;
+    const dateTime = new Date(time.length !== 0 ? `${date}T${time}` : date);
 
     const rawPrice = data.get("price");
     const price = rawPrice === null ? null : Number(rawPrice);
     const rawId = data.get("id");
     const bookingId = rawId === null ? null : String(rawId);
-    const rawFormatId = data.get("format_id");
+    const rawFormatId = dbFormats.find((v) => v.name === format)?.id;
     const formatId = rawFormatId === null ? null : Number(rawFormatId);
 
     if (!movie || !location || !formatId)
@@ -144,7 +140,11 @@ export default function BookingNew() {
           fetchExternal={fetchExtLocations}
           updateSelected={setSelectedLocationId}
         />
-        <Select placeholder="Format" name="format_id" options={rawFormats} />
+        <Select
+          entity="Format"
+          options={new Set(dbFormats.map((f) => f.name))}
+          updateSelected={setFormat}
+        />
         <Input placeholder="Date" name="date" type="date" required />
         <Input placeholder="Time" name="time" type="time" />
         <Input placeholder="Price" name="price" type="number" step="0.01" />

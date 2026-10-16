@@ -148,7 +148,7 @@ export default function AutocompleteInput<
                     ? "suggestion highlight"
                     : "suggestion"
                 }
-                key={record.external_id}
+                key={index}
                 onClick={() => handleSelect(record)}
               >
                 {record.name}

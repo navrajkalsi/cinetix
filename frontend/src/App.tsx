@@ -6,6 +6,8 @@ import Format from "./pages/formats/Format";
 import BookingNew from "./pages/bookings/BookingNew";
 import { LookupsProvider } from "./context/LookupProvider";
 import Movie from "./pages/movies/Movie";
+import RecordCombobox from "./components/RecordCombobox";
+import MovieCombobox from "./components/MovieCombobox";
 
 const router = createBrowserRouter([
   // redirect root to bookings
@@ -44,7 +46,12 @@ const router = createBrowserRouter([
 
           return { yearNum, bookings };
         },
-        Component: Bookings,
+
+        element: (
+          <LookupsProvider>
+            <Bookings />
+          </LookupsProvider>
+        ),
       },
     ],
   },
@@ -135,6 +142,16 @@ const router = createBrowserRouter([
     element: (
       <LookupsProvider>
         <Format />
+      </LookupsProvider>
+    ),
+  },
+
+  {
+    path: "/combo",
+
+    element: (
+      <LookupsProvider>
+        <MovieCombobox />
       </LookupsProvider>
     ),
   },

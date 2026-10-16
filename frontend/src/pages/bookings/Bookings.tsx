@@ -1,21 +1,20 @@
 import { useRef } from "react";
 import "./../../App.css";
-import type Booking from "../../models/Booking";
+import { type Booking } from "../../models/Booking";
 import Nav from "../../components/Nav";
 import List from "../../components/List";
 import { useLoaderData } from "react-router";
 
 export default function Bookings() {
   // bookings fetched during routing
-  const { year, bookings }: { year: number | null; bookings: Booking[] } =
-    useLoaderData();
+  const { bookings }: { year: number; bookings: Booking[] } = useLoaderData();
 
-  const upcomingBookings = year
-    ? null
-    : bookings.filter((booking) => new Date(booking.datetime) > new Date()),
-    pastBookings = year
-      ? bookings
-      : bookings.filter((booking) => new Date(booking.datetime) <= new Date());
+  const upcomingBookings = bookings.filter(
+    (booking) => new Date(booking.date_time) > new Date(),
+  ),
+    pastBookings = bookings.filter(
+      (booking) => new Date(booking.date_time) <= new Date(),
+    );
 
   // main div element for scroll offset setting
   const main = useRef<HTMLDivElement>(null);

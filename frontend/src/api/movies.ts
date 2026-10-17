@@ -1,4 +1,6 @@
+import { err, type AppError, type Result } from "@/types";
 import { type Movie, type MovieCreate } from "../models/Movie";
+import { resolve } from "@/utils";
 
 export async function getMovie(
   id: number,
@@ -38,7 +40,7 @@ export async function getMovieMatches(
   return response.json();
 }
 
-export async function postMovie(model: MovieCreate): Promise<Movie> {
+export async function postMovie(model: MovieCreate) {
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
   headers.set("Accept", "application/json");
@@ -50,4 +52,34 @@ export async function postMovie(model: MovieCreate): Promise<Movie> {
   });
 
   return response.json();
+}
+
+export async function fetchExternalMovies(
+  searchTerm: string,
+  signal: AbortSignal,
+): Promise<Result<MovieCreate[], AppError>> {
+  const params = new URLSearchParams({
+    search_term: searchTerm.trim(),
+  });
+
+  const headers = new Headers({
+    Accept: "application/json",
+  });
+
+  const [error, response] = await resolve(
+    fetch(`/api/movies/search?${params}`, {
+      signal,
+      headers: headers,
+    }),
+    "Could not connect to server.",
+  );
+
+  if (error === null) {
+    if (!response.ok)
+      return err({ reason: `Request failed (${response.status}).` });
+
+    return await resolve(response.json(), "Could not parse the response.");
+  }
+
+  return [error, null];
 }

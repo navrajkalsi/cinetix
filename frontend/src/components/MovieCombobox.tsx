@@ -1,5 +1,5 @@
 import useLookupArrays from "@/hooks/useLookupArrays";
-import type { Movie, MovieCreate } from "@/models/Movie";
+import { type MovieCreate } from "@/models/Movie";
 import {
   Combobox,
   ComboboxCollection,
@@ -12,17 +12,11 @@ import {
   ComboboxList,
   ComboboxSeparator,
 } from "./ui/combobox";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Spinner } from "./ui/spinner";
 import { Button } from "./ui/button";
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemSeparator,
-  ItemTitle,
-} from "./ui/item";
-import { Spinner2 } from "./ui/spinner2";
+import { fetchExternalMovies } from "@/api/movies";
+import { toast } from "./ui/toast";
 
 // interface Props { }
 
@@ -33,137 +27,202 @@ interface DataGroup {
 }
 
 export default function MovieCombobox() {
+  // trimmed query in inputhandler
   const [query, setQuery] = useState("");
-  // database records from context
+  // database records from context, already memoized
   const [database] = useLookupArrays();
   // did the user request external records
   const [extRequested, setExtRequested] = useState(false);
   // external records, null when ext not requested or when results not received yet
   const [external, setExternal] = useState<MovieCreate[] | null>(null);
+  // selected value is stored so no request is sent to tmdb when selected item is entered in the input
+  const [selected, setSelected] = useState<MovieCreate | null>(null);
+  // error during external records fetching
+  const [error, setError] = useState<string | null>(null);
+  // input ref for refocusing on button press
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
+  const queryLower = query.toLowerCase();
+  const loading =
+    extRequested && external === null && error === null && selected === null;
+
+  // memoized filtered items, at most 5 items
+  const databaseFiltered = useMemo(
+    () =>
+      database
+        .filter((m) => m.name.toLowerCase().includes(queryLower))
+        .slice(0, 5) as MovieCreate[],
+    [database, queryLower],
+  );
+  // external is already filtered with search term but may contain duplicates
+  const externalFiltered = useMemo(() => {
+    if (external === null) return null;
+
+    // unique movie ids already present, to prevent duplication
+    const databaseIds = new Set(databaseFiltered.map((m) => m.external_id));
+    return external.filter((m) => !databaseIds.has(m.external_id)).slice(0, 5);
+  }, [external, databaseFiltered]);
+
+  function handleInputChange(input: string) {
+    const value = input.trim();
+    if (query === value) return;
+
+    setQuery(value);
+    setExternal(null);
+
+    if (selected !== null) setSelected(null);
+    if (error !== null) setError(null);
+
+    // user cleared the input
+    // also reset tmdb on error
+    if (extRequested && (value.length === 0 || error !== null))
+      setExtRequested(false);
+  }
+
+  // use an effect so the request does not pause our rendering
+  useEffect(() => {
+    if (!extRequested || selected !== null || error !== null) return; // only fetch when no selected and the user requested
+
+    // fetch new res
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      const [error, response] = await fetchExternalMovies(
+        query,
+        controller.signal,
+      );
+
+      if (controller.signal.aborted) return; // only update if not aborted
+      if (error === null) return setExternal(response);
+
+      showErrorToast(error.reason);
+      setError(error.reason);
+    }, 300);
+
+    return () => {
+      controller.abort("fetched search term invalidated");
+      clearTimeout(timer);
+    };
+  }, [extRequested, query, selected, error]);
+
+  // filtered data
   const data: DataGroup[] = [
     {
       value: "Cinetix",
-      items: database as MovieCreate[],
+      items: databaseFiltered,
     },
   ];
 
   // push external records if they have been fetched
-  if (external !== null) {
-    data.push({ value: "TMDB", items: external });
+  if (externalFiltered !== null) {
+    data.push({ value: "TMDB", items: externalFiltered });
   }
-
-  useEffect(() => {
-    if (query.length === 0) {
-      setExtRequested(false);
-    } else if (extRequested) {
-      const timer = setTimeout(() => setExternal(database), 1000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [extRequested, query]);
 
   // just show db results
   // and ask to load tmdb results
-  if (!extRequested) {
-    return (
-      <div className="w-full h-full justify-center items-center flex">
-        <Combobox
-          itemToStringLabel={(m: MovieCreate) => m.name}
-          itemToStringValue={(m: MovieCreate) => m.external_id.toString()}
-          isItemEqualToValue={(i, v) => i.external_id === v.external_id}
-          onValueChange={(v: MovieCreate | null) =>
-            console.log("value change: ", v)
-          }
-          items={database}
-          onInputValueChange={(input) => setQuery(input)}
-          autoHighlight
-        >
-          <ComboboxInput placeholder="Select a Movie" />
-
-          <ComboboxContent className="p-1">
-            <ComboboxEmpty>No matches found in Cinetix.</ComboboxEmpty>
-
-            <ComboboxList className="scrollbar-none">
-              <ComboboxCollection>
-                {(movie: MovieCreate) => (
-                  <ComboboxItem key={movie.external_id} value={movie}>
-                    {movie.name}
-                  </ComboboxItem>
-                )}
-              </ComboboxCollection>
-            </ComboboxList>
-
-            {query.length > 0 && (
-              // only show the external fetch button when query is no empty
-              <Button
-                className="flex w-full"
-                onClick={() => setExtRequested(true)}
-              >
-                Load more results from TMDB.
-              </Button>
-            )}
-          </ComboboxContent>
-        </Combobox>
-      </div>
-    );
-  }
-
-  // results are loading from tmdb
-  if (external === null) {
-    return (
-      <div className="w-full h-full justify-center items-center flex">
-        <Combobox>
-          <ComboboxInput placeholder="Select a Movie" />
-
-          <ComboboxContent>
-            <ComboboxEmpty>
-              <Spinner2 className="size-4" />
-            </ComboboxEmpty>
-          </ComboboxContent>
-        </Combobox>
-      </div>
-    );
-  }
-
-  // external results were requested and now loaded
   return (
-    // itemtostringlabel calculates the string to show inside input on autocomplete
-    // itemtostringvalue calculates the string to pass on form submission
-    // onvaluechange is triggered when a value is selected or cleared
     <div className="w-full h-full justify-center items-center flex">
       <Combobox
         itemToStringLabel={(m: MovieCreate) => m.name}
         itemToStringValue={(m: MovieCreate) => m.external_id.toString()}
         isItemEqualToValue={(i, v) => i.external_id === v.external_id}
-        onValueChange={(v: MovieCreate | null) =>
-          console.log("value change: ", v)
-        }
-        items={data}
-        onInputValueChange={(input) => setQuery(input)}
+        onValueChange={(v) => {
+          setExtRequested(false);
+          setSelected(v);
+        }}
+        // if not grouped, the user has not requested data from tmdb yet
+        items={externalFiltered === null ? databaseFiltered : data}
+        filter={null} // filtering is manually handled
+        onInputValueChange={handleInputChange}
         autoHighlight
       >
-        <ComboboxInput placeholder="Select a Movie" />
+        <ComboboxInput
+          placeholder="Select a Movie"
+          aria-invalid={extRequested && error !== null}
+          ref={inputRef}
+        />
 
-        <ComboboxContent>
-          <ComboboxEmpty>No results found.</ComboboxEmpty>
+        <ComboboxContent className="p-1">
+          {loading ? (
+            <Spinner className="size-4 w-full flex" />
+          ) : (
+            <>
+              <ComboboxEmpty>
+                {externalFiltered === null
+                  ? "No results found in Cinetix."
+                  : "No results found."}
+              </ComboboxEmpty>
 
-          <ComboboxList className="scrollbar-none">
-            {(group: DataGroup) => (
-              <ComboboxGroup key={group.value} items={group.items}>
-                <ComboboxLabel>{group.value}</ComboboxLabel>
-                <ComboboxCollection>
-                  {(movie: MovieCreate) => (
-                    <ComboboxItem key={movie.external_id} value={movie}>
-                      {movie.name}
-                    </ComboboxItem>
-                  )}
-                </ComboboxCollection>
-              </ComboboxGroup>
-            )}
-          </ComboboxList>
+              <ComboboxList className="scrollbar-none">
+                {externalFiltered === null ? (
+                  <ComboboxCollection>
+                    {(movie: MovieCreate) => (
+                      <ComboboxItem key={movie.external_id} value={movie}>
+                        {movie.name}
+                      </ComboboxItem>
+                    )}
+                  </ComboboxCollection>
+                ) : (
+                  (group: DataGroup, index) => (
+                    <>
+                      <ComboboxGroup key={index} items={group.items}>
+                        <ComboboxLabel>{group.value}</ComboboxLabel>
+                        <ComboboxCollection>
+                          {(movie: MovieCreate) => (
+                            <ComboboxItem key={movie.external_id} value={movie}>
+                              {movie.name}
+                            </ComboboxItem>
+                          )}
+                        </ComboboxCollection>
+                      </ComboboxGroup>
+
+                      {databaseFiltered.length > 0 && index === 0 && (
+                        <ComboboxSeparator />
+                      )}
+                    </>
+                  )
+                )}
+              </ComboboxList>
+
+              {query.length > 0 && !extRequested && (
+                // only show the external fetch button when query is no empty
+                <Button
+                  className="flex w-full"
+                  onMouseDown={(e) => {
+                    e.preventDefault(); // stop blur so that keyboard shortcuts with focus on input
+                    inputRef.current?.focus();
+                    setExtRequested(true);
+                  }}
+                >
+                  Load more results from TMDB.
+                </Button>
+              )}
+
+              {extRequested && error !== null && (
+                <div className="w-full flex-col">
+                  <ComboboxSeparator />
+                  <div className="w-full text-center py-1 text-xs text-destructive">
+                    Failed to fetch TMDB results.
+                  </div>
+                  <Button
+                    className="w-full"
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // stop blur so that keyboard shortcuts with focus on input
+                      inputRef.current?.focus();
+                      setError(null);
+                    }}
+                  >
+                    Try again.
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </ComboboxContent>
       </Combobox>
     </div>
   );
+}
+
+function showErrorToast(error: string) {
+  toast.add({ description: error, type: "Error", priority: "high" });
 }

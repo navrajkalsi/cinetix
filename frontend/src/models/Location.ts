@@ -1,7 +1,7 @@
 // Model with common fields for all location models.
 interface LocationBase {
   name: string;
-  full_address: string;
+  address: string;
   external_id: string;
 }
 

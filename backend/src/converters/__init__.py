@@ -30,8 +30,8 @@ def transaction_to_location_create(t: Transaction) -> LocationCreate:
         raise ValueError("could not find the maps place id")
 
     return LocationCreate(
-        name=maps_result.address.split(",")[0],
-        full_address=maps_result.address,
+        name=maps_result.name,
+        address=maps_result.address,
         external_id=maps_result.id,
     )
 

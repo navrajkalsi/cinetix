@@ -13,7 +13,12 @@ URLS = {
     "autocomplete": "https://places.googleapis.com/v1/places:autocomplete",
 }
 
-HEADERS = {"Content-Type": "application/json", "X-Goog-Api-Key": KEY}
+HEADERS = {
+    "Content-Type": "application/json",
+    "X-Goog-Api-Key": KEY,
+    # field mask ensures that we are not requesting unwanted data.
+    "X-Goog-FieldMask": "suggestions.placePrediction.placeId,suggestions.placePrediction.structuredFormat.mainText.text,suggestions.placePrediction.structuredFormat.secondaryText.text",
+}
 
 
 def search_place(name: str) -> Place | None:
@@ -66,8 +71,8 @@ def search_place_matches(name: str) -> Sequence[LocationCreate]:
 
     return [
         LocationCreate(
-            name=place.address.split(",")[0],
-            full_address=place.address,
+            name=place.name,
+            address=place.address,
             external_id=place.id,
         )
         for place in model.places

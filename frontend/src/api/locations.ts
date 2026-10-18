@@ -1,4 +1,6 @@
+import { err, type AppError, type Result } from "@/types";
 import { type Location, type LocationCreate } from "../models/Location";
+import { resolve } from "@/utils";
 
 export default async function getMovie(
   id: number,
@@ -53,4 +55,34 @@ export async function postLocation(model: LocationCreate): Promise<Location> {
   });
 
   return response.json();
+}
+
+export async function fetchExternalLocations(
+  searchTerm: string,
+  signal: AbortSignal,
+): Promise<Result<LocationCreate[], AppError>> {
+  const params = new URLSearchParams({
+    search_term: searchTerm.trim(),
+  });
+
+  const headers = new Headers({
+    Accept: "application/json",
+  });
+
+  const [error, response] = await resolve(
+    fetch(`/api/locations/search?${params}`, {
+      signal,
+      headers: headers,
+    }),
+    "Could not connect to server.",
+  );
+
+  if (error === null) {
+    if (!response.ok)
+      return err({ reason: `Request failed (${response.status}).` });
+
+    return await resolve(response.json(), "Could not parse the response.");
+  }
+
+  return [error, null];
 }

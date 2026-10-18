@@ -6,11 +6,11 @@ class LocationBase(SQLModel):
 
     name: str = Field(
         min_length=1,
-        description="Display name as it appears in Google Maps for `external_id`.",
+        description="Name of the location retrieved as `structuredFormat.mainText` from Google Maps Autocomplete.",
     )
-    full_address: str = Field(
+    address: str = Field(
         min_length=1,
-        description="Full Google Maps address for `external_id`.",
+        description="Address of the location retrieved as `structuredFormat.secondaryText` from Google Maps Autocomplete. Append to `name` to get the full address.",
     )
     external_id: str = Field(
         min_length=1,

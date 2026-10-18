@@ -6,8 +6,8 @@ import Format from "./pages/formats/Format";
 import BookingNew from "./pages/bookings/BookingNew";
 import { LookupsProvider } from "./context/LookupProvider";
 import Movie from "./pages/movies/Movie";
-import RecordCombobox from "./components/RecordCombobox";
 import MovieCombobox from "./components/MovieCombobox";
+import LocationCombobox from "./components/LocationCombobox";
 
 const router = createBrowserRouter([
   // redirect root to bookings
@@ -151,7 +151,10 @@ const router = createBrowserRouter([
 
     element: (
       <LookupsProvider>
-        <MovieCombobox />
+        <div className="m-96 flex-col gap-10">
+          <MovieCombobox />
+          <LocationCombobox />
+        </div>
       </LookupsProvider>
     ),
   },

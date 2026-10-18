@@ -8,6 +8,7 @@ import { LookupsProvider } from "./context/LookupProvider";
 import Movie from "./pages/movies/Movie";
 import MovieCombobox from "./components/MovieCombobox";
 import LocationCombobox from "./components/LocationCombobox";
+import PosterHall from "./components/PosterHall";
 
 const router = createBrowserRouter([
   // redirect root to bookings
@@ -155,6 +156,16 @@ const router = createBrowserRouter([
           <MovieCombobox />
           <LocationCombobox />
         </div>
+      </LookupsProvider>
+    ),
+  },
+
+  {
+    path: "/posters",
+
+    element: (
+      <LookupsProvider>
+        <PosterHall />
       </LookupsProvider>
     ),
   },

@@ -1,4 +1,5 @@
 from sqlmodel import Field, SQLModel
+from datetime import date
 
 
 class MovieBase(SQLModel):
@@ -10,8 +11,11 @@ class MovieBase(SQLModel):
     external_id: int = Field(
         unique=True, index=True, description="TMDB ID of the movie."
     )
-    poster_url: str | None = Field(
-        description="TMDB poster URL, can be null if TMDB has none."
+    poster_path: str | None = Field(
+        description="TMDB poster path, can be null if TMDB has none."
+    )
+    release_date: date | None = Field(
+        description="TMDB movie release date, can be null if TMDB has none."
     )
 
 

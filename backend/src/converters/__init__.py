@@ -19,7 +19,8 @@ def transaction_to_movie_create(t: Transaction) -> MovieCreate:
     return MovieCreate(
         name=tmdb_result.title,
         external_id=tmdb_result.id,
-        poster_url=tmdb_result.poster_path,
+        poster_path=tmdb_result.poster_path,
+        release_date=tmdb_result.release_date,
     )
 
 

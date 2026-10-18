@@ -160,11 +160,14 @@ export default function MovieCombobox() {
                         <ItemContent>
                           <ItemTitle>{movie.name}</ItemTitle>
                         </ItemContent>
-                        <ItemContent>
-                          <ItemDescription className="text-xs flex-none text-center">
-                            2026
-                          </ItemDescription>
-                        </ItemContent>
+                        {movie.release_date !== null && (
+                          // show release year if available
+                          <ItemContent>
+                            <ItemDescription className="text-xs flex-none text-center">
+                              {movie.release_date.split("-", 1)[0]}
+                            </ItemDescription>
+                          </ItemContent>
+                        )}
                       </Item>
                     </ComboboxItem>
                   )}
@@ -181,11 +184,14 @@ export default function MovieCombobox() {
                               <ItemContent>
                                 <ItemTitle>{movie.name}</ItemTitle>
                               </ItemContent>
-                              <ItemContent>
-                                <ItemDescription className="text-xs flex-none text-center">
-                                  2026
-                                </ItemDescription>
-                              </ItemContent>
+                              {movie.release_date !== null && (
+                                // show release year if available
+                                <ItemContent>
+                                  <ItemDescription className="text-xs flex-none text-center">
+                                    {movie.release_date.split("-", 1)[0]}
+                                  </ItemDescription>
+                                </ItemContent>
+                              )}
                             </Item>
                           </ComboboxItem>
                         )}

@@ -9,9 +9,7 @@ from maps.models import Autocomplete, Place
 KEY = config.google_maps_api_key
 
 # GET endpoints for different data
-URLS = {
-    "autocomplete": "https://places.googleapis.com/v1/places:autocomplete",
-}
+AUTOCOMPLETE_URL = "https://places.googleapis.com/v1/places:autocomplete"
 
 HEADERS = {
     "Content-Type": "application/json",
@@ -37,7 +35,7 @@ def search_place(name: str) -> Place | None:
     # json request obj
     json = {"input": f"{name}", "includedPrimaryTypes": "movie_theater"}
 
-    response = requests.post(url=URLS["autocomplete"], json=json, headers=HEADERS)
+    response = requests.post(url=AUTOCOMPLETE_URL, json=json, headers=HEADERS)
 
     response.raise_for_status()  # raises exception for any status code less than 400
 
@@ -63,7 +61,7 @@ def search_place_matches(name: str) -> Sequence[LocationCreate]:
     # json request obj
     json = {"input": f"{name}", "includedPrimaryTypes": "movie_theater"}
 
-    response = requests.post(url=URLS["autocomplete"], json=json, headers=HEADERS)
+    response = requests.post(url=AUTOCOMPLETE_URL, json=json, headers=HEADERS)
 
     response.raise_for_status()  # raises exception for any status code less than 400
 

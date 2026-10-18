@@ -11,13 +11,8 @@ from utils import print_debug
 
 KEY = config.tmdb_api_key
 
-# GET endpoints for different data
-URLS = {
-    # movie url is set to always just the first page
-    "movie": "https://api.themoviedb.org/3/search/movie?language=en-US&page=1&query=",
-    # image url is set to always fetch the poster image of width 780 pixels
-    "image": "https://image.tmdb.org/t/p/w780",
-}
+MOVIE_URL = "https://api.themoviedb.org/3/search/movie"
+
 # only headers required for accessing all movie search endpoint
 HEADERS = {"accept": "application/json", "Authorization": f"Bearer {KEY}"}
 
@@ -29,7 +24,7 @@ def search_movie(name: str) -> Movie | None:
     No custom sorting is applied. TMDB data is used as-is.
 
     The main purpose of having this validation is to get correctly formatted movie names,
-    and their posters as a bonus!
+    and their posters and release dates as a bonus!
     For Example:
         ["odyssey", "the odyssey", "The Odyssey"] all resolve to "The Odyssey"
         ["dune: part 3", "Dune: Part Three"] all resolve to "Dune: Part Three"
@@ -44,7 +39,12 @@ def search_movie(name: str) -> Movie | None:
         Returns a validated `Movie` if a match is found. Otherwise returns `None`.
     """
 
-    response = requests.get(url=f"{URLS['movie']}{name}", headers=HEADERS)
+    # request only the first page
+    response = requests.get(
+        url=MOVIE_URL,
+        params={"language": "en-US", "page": 1, "query": name},
+        headers=HEADERS,
+    )
 
     response.raise_for_status()  # raises exception for any status code less than 400
 
@@ -62,16 +62,14 @@ def search_movie(name: str) -> Movie | None:
         return None
 
     movie = model.results[0]
-    movie.poster_path = (
-        None if movie.poster_path is None else f"{URLS['image']}{movie.poster_path}"
-    )
 
     if config.save_movie_posters and movie.poster_path is not None:
         poster_ext = movie.poster_path.split(".")[
             -1
         ]  # poster_paths end with file extensions
 
-        img_res = requests.get(movie.poster_path)
+        # temp absolute url
+        img_res = requests.get("https://image.tmdb.org/t/p/w500/" + movie.poster_path)
         img_res.raise_for_status()
 
         with open(movie.title + "." + poster_ext, "wb") as img:
@@ -94,7 +92,12 @@ def search_movie_matches(name: str) -> Sequence[MovieCreate]:
         TMDB response. Returns an empty list if no matches were found.
     """
 
-    response = requests.get(url=f"{URLS['movie']}{name}", headers=HEADERS)
+    # request only the first page
+    response = requests.get(
+        url=MOVIE_URL,
+        params={"language": "en-US", "page": 1, "query": name},
+        headers=HEADERS,
+    )
 
     response.raise_for_status()  # raises exception for any status code less than 400
 
@@ -116,9 +119,8 @@ def search_movie_matches(name: str) -> Sequence[MovieCreate]:
         MovieCreate(
             name=movie.title,
             external_id=movie.id,
-            poster_url=None
-            if movie.poster_path is None
-            else f"{URLS['image']}{movie.poster_path}",
+            poster_path=movie.poster_path,
+            release_date=movie.release_date,
         )
         for movie in uniques
     ]

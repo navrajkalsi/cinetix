@@ -1,6 +1,8 @@
 import useLookupArrays from "@/hooks/useLookupArrays";
 import { Marquee } from "./ui/marquee";
 import { useEffect, useMemo, useState } from "react";
+import { PauseIcon, PlayIcon } from "lucide-react";
+import { Toggle } from "./ui/toggle";
 
 const postersPerColumn = 5;
 
@@ -35,7 +37,7 @@ function PosterCard({ posterPath }: { posterPath: string | null }) {
 
   return (
     <div
-      className="aspect-2/3 w-full h-auto overflow-hidden rounded-xl opacity-50 hover:opacity-90 duration-300 ease-in-out
+      className="aspect-2/3 w-full h-auto overflow-hidden rounded-xl opacity-20 hover:opacity-50 duration-300 ease-in-out
         bg-gray-950/1 hover:bg-gray-950/5
         dark:bg-gray-50/10 dark:hover:bg-gray-50/15
     "
@@ -59,10 +61,16 @@ function PosterCard({ posterPath }: { posterPath: string | null }) {
 }
 
 // A netflix style movie posters scrolling vertically for background
-export default function PosterHall() {
+// Scrolling can be stopped with props
+export default function PosterHall({
+  autoScroll = true,
+}: {
+  autoScroll?: boolean;
+}) {
   const [portrait, setPortrait] = useState(
     window.innerWidth < window.innerHeight,
   );
+  const [paused, setPaused] = useState(!autoScroll);
   const [movies] = useLookupArrays();
 
   useEffect(() => {
@@ -102,13 +110,14 @@ export default function PosterHall() {
   }, [columnCount, movies]);
 
   return (
-    <div className="relative flex h-full w-full flex-row items-center justify-center overflow-hidden">
+    <div className="absolute flex h-full w-full top-0 left-0 flex-row items-center justify-center overflow-hidden">
       {columns.map((column, i) => (
         <Marquee
           vertical
           reverse={i % 2 === 0}
           key={i}
-          className="[--duration:250s] w-full"
+          className={`[--duration:250s] w-full`}
+          paused={paused}
         >
           {column.map((path, j) => (
             <PosterCard key={(path ? path : "") + j} posterPath={path} />
@@ -117,6 +126,16 @@ export default function PosterHall() {
       ))}
       <div className="from-background pointer-events-none absolute inset-x-0 top-0 h-1/4 bg-linear-to-b"></div>
       <div className="from-background pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-linear-to-t"></div>
+      <Toggle
+        className="absolute bottom-2.5 right-2.5"
+        aria-label="Toggle Background Motion"
+        onClick={() => setPaused(!paused)}
+        size="lg"
+        variant="outline"
+        title="Toggle Background Motion"
+      >
+        {paused ? <PlayIcon /> : <PauseIcon />}
+      </Toggle>
     </div>
   );
 }

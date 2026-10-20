@@ -11,7 +11,14 @@ import {
   ComboboxList,
   ComboboxSeparator,
 } from "./ui/combobox";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Ref,
+} from "react";
 import { Spinner } from "./ui/spinner";
 import { Button } from "./ui/button";
 import { toast } from "./ui/toast";
@@ -19,13 +26,38 @@ import type { LocationCreate } from "@/models/Location";
 import { fetchExternalLocations } from "@/api/locations";
 import { Item, ItemContent, ItemDescription, ItemTitle } from "./ui/item";
 
+// props that react hook form requires to communicate with this input
+// taken from:  https://react-hook-form.com/docs/usecontroller/controller
+interface Props {
+  onChange: (value?: LocationCreate) => void;
+  onBlur: () => void;
+  // current selected, if any
+  value?: LocationCreate;
+  disabled?: boolean;
+  name: string;
+  ref: Ref<HTMLInputElement>;
+  // error during validation
+  invalid: boolean;
+  // input id for label
+  id?: string;
+}
+
 // data needs to be grouped to work with combobox group
 interface DataGroup {
   value: "Cinetix" | "Google Maps";
   items: LocationCreate[];
 }
 
-export default function LocationCombobox() {
+export default function LocationCombobox({
+  onChange,
+  onBlur,
+  disabled,
+  name,
+  ref,
+  value,
+  invalid,
+  id,
+}: Props) {
   // trimmed query in inputhandler
   const [query, setQuery] = useState("");
   // database records from context, already memoized
@@ -34,16 +66,21 @@ export default function LocationCombobox() {
   const [extRequested, setExtRequested] = useState(false);
   // external records, null when ext not requested or when results not received yet
   const [external, setExternal] = useState<LocationCreate[] | null>(null);
-  // selected value is stored so no request is sent to google when selected item is entered in the input
-  const [selected, setSelected] = useState<LocationCreate | null>(null);
   // error during external records fetching
+  // this is NOT a validation error
+  // validation errors are handled by the parent form
   const [error, setError] = useState<string | null>(null);
-  // input ref for refocusing on button press
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const queryLower = query.toLowerCase();
+  // did the user change the value after making a selection
+  // only valid when value is defined
+  const valueDirty =
+    query !== "" && value !== undefined && query !== value.name;
   const loading =
-    extRequested && external === null && error === null && selected === null;
+    extRequested &&
+    external === null &&
+    error === null &&
+    (!value || valueDirty);
 
   // memoized filtered items, at most 5 items
   const databaseFiltered = useMemo(
@@ -69,7 +106,6 @@ export default function LocationCombobox() {
     setQuery(value);
     setExternal(null);
 
-    if (selected !== null) setSelected(null);
     if (error !== null) setError(null);
 
     // user cleared the input
@@ -80,7 +116,7 @@ export default function LocationCombobox() {
 
   // use an effect so the request does not pause our rendering
   useEffect(() => {
-    if (!extRequested || selected !== null || error !== null) return; // only fetch when no selected and the user requested
+    if (!extRequested || error !== null || (value && !valueDirty)) return; // only fetch on no error and when no value is selected or if the selected value has been changed.
 
     // fetch new res
     const controller = new AbortController();
@@ -101,7 +137,7 @@ export default function LocationCombobox() {
       controller.abort("fetched search term invalidated");
       clearTimeout(timer);
     };
-  }, [extRequested, query, selected, error]);
+  }, [extRequested, query, error, value, valueDirty]);
 
   // filtered data
   const data: DataGroup[] = [
@@ -125,19 +161,24 @@ export default function LocationCombobox() {
       isItemEqualToValue={(i, v) => i.external_id === v.external_id}
       onValueChange={(v) => {
         setExtRequested(false);
-        setSelected(v);
+        // erase value in form, instead of making it null
+        // is returned to this comp via value in the props
+        onChange(v ?? undefined); // rhf
       }}
       // if not grouped, the user has not requested data from google yet
       items={externalFiltered === null ? databaseFiltered : data}
       filter={null} // filtering is manually handled
       onInputValueChange={handleInputChange}
       autoHighlight
+      disabled={disabled} // from rhf
     >
       <ComboboxInput
-        placeholder="Select a Location"
-        aria-invalid={extRequested && error !== null}
-        ref={inputRef}
-        required
+        placeholder="Search a location"
+        aria-invalid={invalid || (extRequested && error !== null)}
+        ref={ref}
+        onBlur={onBlur} // from rhf
+        disabled={disabled} // from rhf
+        name={name} // from rhf
       />
 
       <ComboboxContent className="p-1">
@@ -151,7 +192,7 @@ export default function LocationCombobox() {
                 : "No results found."}
             </ComboboxEmpty>
 
-            <ComboboxList className="scrollbar-none">
+            <ComboboxList>
               {externalFiltered === null ? (
                 <ComboboxCollection>
                   {(location: LocationCreate) => (
@@ -207,7 +248,6 @@ export default function LocationCombobox() {
                   className="w-full whitespace-normal h-fit p-1"
                   onMouseDown={(e) => {
                     e.preventDefault(); // stop blur so that keyboard shortcuts with focus on input
-                    inputRef.current?.focus();
                     setExtRequested(true);
                   }}
                 >
@@ -217,6 +257,7 @@ export default function LocationCombobox() {
             )}
 
             {extRequested && error !== null && (
+              // this error is just for fetching, not validation
               <div className="w-full flex-col">
                 <ComboboxSeparator />
                 <div className="w-full text-center py-1 text-xs text-destructive">
@@ -226,7 +267,6 @@ export default function LocationCombobox() {
                   className="w-full whitespace-normal h-fit p-1"
                   onMouseDown={(e) => {
                     e.preventDefault(); // stop blur so that keyboard shortcuts with focus on input
-                    inputRef.current?.focus();
                     setError(null);
                   }}
                 >

@@ -9,6 +9,7 @@ import Movie from "./pages/movies/Movie";
 import MovieCombobox from "./components/MovieCombobox";
 import LocationCombobox from "./components/LocationCombobox";
 import PosterHall from "./components/PosterHall";
+import BookingForm from "./components/BookingForm";
 
 const router = createBrowserRouter([
   // redirect root to bookings
@@ -161,11 +162,14 @@ const router = createBrowserRouter([
   },
 
   {
-    path: "/posters",
+    path: "/form",
 
     element: (
       <LookupsProvider>
-        <PosterHall />
+        <div className="relative w-full h-full flex justify-center items-center">
+          <PosterHall />
+          <BookingForm />
+        </div>
       </LookupsProvider>
     ),
   },

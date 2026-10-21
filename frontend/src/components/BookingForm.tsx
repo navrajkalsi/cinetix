@@ -12,14 +12,9 @@ import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "./ui/button";
-import {
-  Field,
-  FieldContent,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from "./ui/field";
 import FormatSelect from "./FormatSelect";
+import DateTimePicker from "./DateTimePicker";
+import PriceInput from "./PriceInput";
 
 // complete booking schema with full movie, location and format types
 const schema = z.object({
@@ -38,10 +33,10 @@ const schema = z.object({
 
   format: z.object({ id: z.number(), name: z.string() }),
 
-  dateTime: z.date(),
+  datetime: z.date(),
 
-  // price: z.number().nullable(),
-  //
+  price: z.number().nullable(),
+
   // seats: z.array(z.string()),
 });
 
@@ -76,23 +71,7 @@ export default function BookingForm() {
             name="movie"
             control={control}
             render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldContent>
-                  <FieldLabel htmlFor="movie-combobox">Movie</FieldLabel>
-                  <FieldError errors={[fieldState.error]} />
-                </FieldContent>
-
-                <MovieCombobox
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  value={field.value}
-                  disabled={field.disabled}
-                  name={field.name}
-                  ref={field.ref}
-                  invalid={fieldState.invalid}
-                  id="movie-combobox"
-                />
-              </Field>
+              <MovieCombobox {...field} fieldState={fieldState} />
             )}
           />
 
@@ -100,23 +79,7 @@ export default function BookingForm() {
             name="location"
             control={control}
             render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldContent>
-                  <FieldLabel htmlFor="location-combobox">Location</FieldLabel>
-                  <FieldError errors={[fieldState.error]} />
-                </FieldContent>
-
-                <LocationCombobox
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  value={field.value}
-                  disabled={field.disabled}
-                  name={field.name}
-                  ref={field.ref}
-                  invalid={fieldState.invalid}
-                  id="location-combobox"
-                />
-              </Field>
+              <LocationCombobox {...field} fieldState={fieldState} />
             )}
           />
 
@@ -124,23 +87,23 @@ export default function BookingForm() {
             name="format"
             control={control}
             render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldContent>
-                  <FieldLabel htmlFor="format-select">Format</FieldLabel>
-                  <FieldError errors={[fieldState.error]} />
-                </FieldContent>
+              <FormatSelect {...field} fieldState={fieldState} />
+            )}
+          />
 
-                <FormatSelect
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  value={field.value}
-                  disabled={field.disabled}
-                  name={field.name}
-                  ref={field.ref}
-                  invalid={fieldState.invalid}
-                  id="format-combobox"
-                />
-              </Field>
+          <Controller
+            name="datetime"
+            control={control}
+            render={({ field, fieldState }) => (
+              <DateTimePicker {...field} fieldState={fieldState} />
+            )}
+          />
+
+          <Controller
+            name="price"
+            control={control}
+            render={({ field, fieldState }) => (
+              <PriceInput {...field} fieldState={fieldState} />
             )}
           />
         </form>

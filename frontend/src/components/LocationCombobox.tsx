@@ -11,20 +11,15 @@ import {
   ComboboxList,
   ComboboxSeparator,
 } from "./ui/combobox";
-import {
-  Fragment,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type Ref,
-} from "react";
+import { Fragment, useEffect, useMemo, useState, type Ref } from "react";
 import { Spinner } from "./ui/spinner";
 import { Button } from "./ui/button";
 import { toast } from "./ui/toast";
 import type { LocationCreate } from "@/models/Location";
 import { fetchExternalLocations } from "@/api/locations";
 import { Item, ItemContent, ItemDescription, ItemTitle } from "./ui/item";
+import { Field, FieldContent, FieldError, FieldLabel } from "./ui/field";
+import type { ControllerFieldState } from "react-hook-form";
 
 // props that react hook form requires to communicate with this input
 // taken from:  https://react-hook-form.com/docs/usecontroller/controller
@@ -36,10 +31,7 @@ interface Props {
   disabled?: boolean;
   name: string;
   ref: Ref<HTMLInputElement>;
-  // error during validation
-  invalid: boolean;
-  // input id for label
-  id?: string;
+  fieldState: ControllerFieldState;
 }
 
 // data needs to be grouped to work with combobox group
@@ -51,12 +43,11 @@ interface DataGroup {
 export default function LocationCombobox({
   onChange,
   onBlur,
+  value,
   disabled,
   name,
   ref,
-  value,
-  invalid,
-  id,
+  fieldState,
 }: Props) {
   // trimmed query in inputhandler
   const [query, setQuery] = useState("");
@@ -155,129 +146,137 @@ export default function LocationCombobox({
   // just show db results
   // and ask to load tmdb results
   return (
-    <Combobox
-      itemToStringLabel={(l: LocationCreate) => l.name}
-      itemToStringValue={(l: LocationCreate) => l.external_id.toString()}
-      isItemEqualToValue={(i, v) => i.external_id === v.external_id}
-      onValueChange={(v) => {
-        setExtRequested(false);
-        // erase value in form, instead of making it null
-        // is returned to this comp via value in the props
-        onChange(v ?? undefined); // rhf
-      }}
-      // if not grouped, the user has not requested data from google yet
-      items={externalFiltered === null ? databaseFiltered : data}
-      filter={null} // filtering is manually handled
-      onInputValueChange={handleInputChange}
-      autoHighlight
-      disabled={disabled} // from rhf
-    >
-      <ComboboxInput
-        placeholder="Search a location"
-        aria-invalid={invalid || (extRequested && error !== null)}
-        ref={ref}
-        onBlur={onBlur} // from rhf
+    <Field data-invalid={fieldState.invalid}>
+      <FieldContent>
+        <FieldLabel htmlFor="location-combobox">Location</FieldLabel>
+        <FieldError errors={[fieldState.error]} />
+      </FieldContent>
+
+      <Combobox
+        id="location-combobox"
+        itemToStringLabel={(l: LocationCreate) => l.name}
+        itemToStringValue={(l: LocationCreate) => l.external_id.toString()}
+        isItemEqualToValue={(i, v) => i.external_id === v.external_id}
+        onValueChange={(v) => {
+          setExtRequested(false);
+          // erase value in form, instead of making it null
+          // is returned to this comp via value in the props
+          onChange(v ?? undefined); // rhf
+        }}
+        // if not grouped, the user has not requested data from google yet
+        items={externalFiltered === null ? databaseFiltered : data}
+        filter={null} // filtering is manually handled
+        onInputValueChange={handleInputChange}
+        autoHighlight
         disabled={disabled} // from rhf
-        name={name} // from rhf
-      />
+      >
+        <ComboboxInput
+          placeholder="Search a location"
+          aria-invalid={fieldState.invalid || (extRequested && error !== null)}
+          ref={ref}
+          onBlur={onBlur} // from rhf
+          disabled={disabled} // from rhf
+          name={name} // from rhf
+        />
 
-      <ComboboxContent className="p-1">
-        {loading ? (
-          <Spinner className="size-4 w-full flex" />
-        ) : (
-          <>
-            <ComboboxEmpty>
-              {externalFiltered === null
-                ? "No results found in Cinetix."
-                : "No results found."}
-            </ComboboxEmpty>
+        <ComboboxContent className="p-1">
+          {loading ? (
+            <Spinner className="size-4 w-full flex" />
+          ) : (
+            <>
+              <ComboboxEmpty>
+                {externalFiltered === null
+                  ? "No results found in Cinetix."
+                  : "No results found."}
+              </ComboboxEmpty>
 
-            <ComboboxList>
-              {externalFiltered === null ? (
-                <ComboboxCollection>
-                  {(location: LocationCreate) => (
-                    <ComboboxItem key={location.external_id} value={location}>
-                      <Item size="sm" className="p-0">
-                        <ItemContent>
-                          <ItemTitle>{location.name}</ItemTitle>
-                          <ItemDescription className="text-xs">
-                            {location.address}
-                          </ItemDescription>
-                        </ItemContent>
-                      </Item>
-                    </ComboboxItem>
-                  )}
-                </ComboboxCollection>
-              ) : (
-                (group: DataGroup, index) => (
-                  <Fragment key={index}>
-                    <ComboboxGroup key={index} items={group.items}>
-                      <ComboboxLabel>{group.value}</ComboboxLabel>
-                      <ComboboxCollection>
-                        {(location: LocationCreate) => (
-                          <ComboboxItem
-                            key={location.external_id}
-                            value={location}
-                          >
-                            <Item size="sm" className="p-0">
-                              <ItemContent>
-                                <ItemTitle>{location.name}</ItemTitle>
-                                <ItemDescription className="text-xs">
-                                  {location.address}
-                                </ItemDescription>
-                              </ItemContent>
-                            </Item>
-                          </ComboboxItem>
-                        )}
-                      </ComboboxCollection>
-                    </ComboboxGroup>
-
-                    {databaseFiltered.length > 0 && index === 0 && (
-                      <ComboboxSeparator />
+              <ComboboxList>
+                {externalFiltered === null ? (
+                  <ComboboxCollection>
+                    {(location: LocationCreate) => (
+                      <ComboboxItem key={location.external_id} value={location}>
+                        <Item size="sm" className="p-0">
+                          <ItemContent>
+                            <ItemTitle>{location.name}</ItemTitle>
+                            <ItemDescription className="text-xs">
+                              {location.address}
+                            </ItemDescription>
+                          </ItemContent>
+                        </Item>
+                      </ComboboxItem>
                     )}
-                  </Fragment>
-                )
-              )}
-            </ComboboxList>
+                  </ComboboxCollection>
+                ) : (
+                  (group: DataGroup, index) => (
+                    <Fragment key={index}>
+                      <ComboboxGroup key={index} items={group.items}>
+                        <ComboboxLabel>{group.value}</ComboboxLabel>
+                        <ComboboxCollection>
+                          {(location: LocationCreate) => (
+                            <ComboboxItem
+                              key={location.external_id}
+                              value={location}
+                            >
+                              <Item size="sm" className="p-0">
+                                <ItemContent>
+                                  <ItemTitle>{location.name}</ItemTitle>
+                                  <ItemDescription className="text-xs">
+                                    {location.address}
+                                  </ItemDescription>
+                                </ItemContent>
+                              </Item>
+                            </ComboboxItem>
+                          )}
+                        </ComboboxCollection>
+                      </ComboboxGroup>
 
-            {query.length > 0 && !extRequested && (
-              // only show the external fetch button when query is no empty
-              <div className="w-full flex-col">
-                <ComboboxSeparator />
-                <Button
-                  className="w-full whitespace-normal h-fit p-1"
-                  onMouseDown={(e) => {
-                    e.preventDefault(); // stop blur so that keyboard shortcuts with focus on input
-                    setExtRequested(true);
-                  }}
-                >
-                  Load more results from Google Maps.
-                </Button>
-              </div>
-            )}
+                      {databaseFiltered.length > 0 && index === 0 && (
+                        <ComboboxSeparator />
+                      )}
+                    </Fragment>
+                  )
+                )}
+              </ComboboxList>
 
-            {extRequested && error !== null && (
-              // this error is just for fetching, not validation
-              <div className="w-full flex-col">
-                <ComboboxSeparator />
-                <div className="w-full text-center py-1 text-xs text-destructive">
-                  Failed to fetch Google Maps results.
+              {query.length > 0 && !extRequested && (
+                // only show the external fetch button when query is no empty
+                <div className="w-full flex-col">
+                  <ComboboxSeparator />
+                  <Button
+                    className="w-full whitespace-normal h-fit p-1"
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // stop blur so that keyboard shortcuts with focus on input
+                      setExtRequested(true);
+                    }}
+                  >
+                    Load more results from Google Maps.
+                  </Button>
                 </div>
-                <Button
-                  className="w-full whitespace-normal h-fit p-1"
-                  onMouseDown={(e) => {
-                    e.preventDefault(); // stop blur so that keyboard shortcuts with focus on input
-                    setError(null);
-                  }}
-                >
-                  Try again.
-                </Button>
-              </div>
-            )}
-          </>
-        )}
-      </ComboboxContent>
-    </Combobox>
+              )}
+
+              {extRequested && error !== null && (
+                // this error is just for fetching, not validation
+                <div className="w-full flex-col">
+                  <ComboboxSeparator />
+                  <div className="w-full text-center py-1 text-xs text-destructive">
+                    Failed to fetch Google Maps results.
+                  </div>
+                  <Button
+                    className="w-full whitespace-normal h-fit p-1"
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // stop blur so that keyboard shortcuts with focus on input
+                      setError(null);
+                    }}
+                  >
+                    Try again.
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </ComboboxContent>
+      </Combobox>
+    </Field>
   );
 }
 

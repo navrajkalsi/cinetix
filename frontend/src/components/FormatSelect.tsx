@@ -9,6 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Field, FieldContent, FieldError, FieldLabel } from "./ui/field";
+import type { ControllerFieldState } from "react-hook-form";
 
 // props that react hook form requires to communicate with this input
 // taken from:  https://react-hook-form.com/docs/usecontroller/controller
@@ -22,54 +24,57 @@ interface Props {
   disabled?: boolean;
   name: string;
   ref: Ref<HTMLInputElement>;
-  // error during validation
-  invalid: boolean;
-  // input id for label
-  id?: string;
+  fieldState: ControllerFieldState;
 }
 
 export default function FormatSelect({
   onChange,
   onBlur,
+  value,
   disabled,
   name,
   ref,
-  value,
-  invalid,
-  id,
+  fieldState,
 }: Props) {
   const [, , formats] = useLookupArrays();
 
   formats.sort((a, b) => (a.name < b.name ? -1 : 1));
 
   return (
-    <Select
-      id={id}
-      itemToStringLabel={(f: Format) => f.name}
-      itemToStringValue={(f: Format) => f.id.toString()}
-      isItemEqualToValue={(i, v) => i.id === v.id}
-      name={name}
-      onValueChange={(v) => onChange(v ?? undefined)} // rhf
-      disabled={disabled} // from rhf
-      inputRef={ref}
-      highlightItemOnHover
-    >
-      <SelectTrigger
-        onBlur={onBlur} // rhf
-        value={value?.name}
-        aria-invalid={invalid}
+    <Field data-invalid={fieldState.invalid}>
+      <FieldContent>
+        <FieldLabel htmlFor="format-select">Format</FieldLabel>
+        <FieldError errors={[fieldState.error]} />
+      </FieldContent>
+
+      <Select
+        id="format-select"
+        itemToStringLabel={(f: Format) => f.name}
+        itemToStringValue={(f: Format) => f.id.toString()}
+        isItemEqualToValue={(i, v) => i.id === v.id}
+        name={name}
+        onValueChange={(v) => onChange(v ?? undefined)} // rhf
+        disabled={disabled} // from rhf
+        inputRef={ref}
+        highlightItemOnHover
       >
-        <SelectValue placeholder="Select a format" />
-      </SelectTrigger>
-      <SelectContent alignItemWithTrigger={true}>
-        <SelectGroup>
-          {formats.map((format) => (
-            <SelectItem key={format.id} value={format}>
-              {format.name}
-            </SelectItem>
-          ))}
-        </SelectGroup>
-      </SelectContent>
-    </Select>
+        <SelectTrigger
+          onBlur={onBlur} // rhf
+          value={value?.name}
+          aria-invalid={fieldState.invalid}
+        >
+          <SelectValue placeholder="Select a format" />
+        </SelectTrigger>
+        <SelectContent alignItemWithTrigger={true}>
+          <SelectGroup>
+            {formats.map((format) => (
+              <SelectItem key={format.id} value={format}>
+                {format.name}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </Field>
   );
 }

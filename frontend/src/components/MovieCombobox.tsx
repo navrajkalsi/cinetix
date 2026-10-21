@@ -18,6 +18,8 @@ import { Button } from "./ui/button";
 import { fetchExternalMovies } from "@/api/movies";
 import { toast } from "./ui/toast";
 import { Item, ItemContent, ItemDescription, ItemTitle } from "./ui/item";
+import { Field, FieldContent, FieldError, FieldLabel } from "./ui/field";
+import type { ControllerFieldState } from "react-hook-form";
 
 // props that react hook form requires to communicate with this input
 // taken from:  https://react-hook-form.com/docs/usecontroller/controller
@@ -29,10 +31,7 @@ interface Props {
   disabled?: boolean;
   name: string;
   ref: Ref<HTMLInputElement>;
-  // error during validation
-  invalid: boolean;
-  // input id for label
-  id?: string;
+  fieldState: ControllerFieldState;
 }
 
 // data needs to be grouped to work with combobox group
@@ -44,12 +43,11 @@ interface DataGroup {
 export default function MovieCombobox({
   onChange,
   onBlur,
+  value,
   disabled,
   name,
   ref,
-  value,
-  invalid,
-  id,
+  fieldState,
 }: Props) {
   // trimmed query in inputhandler
   const [query, setQuery] = useState("");
@@ -148,137 +146,144 @@ export default function MovieCombobox({
   // just show db results
   // and ask to load tmdb results
   return (
-    <Combobox
-      id={id}
-      itemToStringLabel={(m: MovieCreate) => m.name}
-      itemToStringValue={(m: MovieCreate) => m.external_id.toString()}
-      isItemEqualToValue={(i, v) => i.external_id === v.external_id}
-      onValueChange={(v) => {
-        setExtRequested(false);
-        // erase value in form, instead of making it null
-        // is returned to this comp via value in the props
-        onChange(v ?? undefined); // rhf
-      }}
-      // if not grouped, the user has not requested data from tmdb yet
-      items={externalFiltered === null ? databaseFiltered : data}
-      filter={null} // filtering is manually handled
-      onInputValueChange={handleInputChange}
-      autoHighlight
-      disabled={disabled} // from rhf
-    >
-      <ComboboxInput
-        placeholder="Search a movie"
-        aria-invalid={invalid || (extRequested && error !== null)}
-        ref={ref}
-        onBlur={onBlur} // from rhf
+    <Field data-invalid={fieldState.invalid}>
+      <FieldContent>
+        <FieldLabel htmlFor="movie-combobox">Movie</FieldLabel>
+        <FieldError errors={[fieldState.error]} />
+      </FieldContent>
+
+      <Combobox
+        id="movie-combobox"
+        itemToStringLabel={(m: MovieCreate) => m.name}
+        itemToStringValue={(m: MovieCreate) => m.external_id.toString()}
+        isItemEqualToValue={(i, v) => i.external_id === v.external_id}
+        onValueChange={(v) => {
+          setExtRequested(false);
+          // erase value in form, instead of making it null
+          // is returned to this comp via value in the props
+          onChange(v ?? undefined); // rhf
+        }}
+        // if not grouped, the user has not requested data from tmdb yet
+        items={externalFiltered === null ? databaseFiltered : data}
+        filter={null} // filtering is manually handled
+        onInputValueChange={handleInputChange}
+        autoHighlight
         disabled={disabled} // from rhf
-        name={name} // from rhf
-      />
+      >
+        <ComboboxInput
+          placeholder="Search a movie"
+          aria-invalid={fieldState.invalid || (extRequested && error !== null)}
+          ref={ref}
+          onBlur={onBlur} // from rhf
+          disabled={disabled} // from rhf
+          name={name} // from rhf
+        />
 
-      <ComboboxContent className="p-1">
-        {loading ? (
-          <Spinner className="size-4 w-full flex" />
-        ) : (
-          <>
-            <ComboboxEmpty>
-              {externalFiltered === null
-                ? "No results found in Cinetix."
-                : "No results found."}
-            </ComboboxEmpty>
+        <ComboboxContent className="p-1">
+          {loading ? (
+            <Spinner className="size-4 w-full flex" />
+          ) : (
+            <>
+              <ComboboxEmpty>
+                {externalFiltered === null
+                  ? "No results found in Cinetix."
+                  : "No results found."}
+              </ComboboxEmpty>
 
-            <ComboboxList>
-              {externalFiltered === null ? (
-                <ComboboxCollection>
-                  {(movie: MovieCreate) => (
-                    <ComboboxItem key={movie.external_id} value={movie}>
-                      <Item size="sm" className="p-0">
-                        <ItemContent>
-                          <ItemTitle>{movie.name}</ItemTitle>
-                        </ItemContent>
-                        {movie.release_date !== null && (
-                          // show release year if available
+              <ComboboxList>
+                {externalFiltered === null ? (
+                  <ComboboxCollection>
+                    {(movie: MovieCreate) => (
+                      <ComboboxItem key={movie.external_id} value={movie}>
+                        <Item size="sm" className="p-0">
                           <ItemContent>
-                            <ItemDescription className="text-xs flex-none text-center">
-                              {movie.release_date.split("-", 1)[0]}
-                            </ItemDescription>
+                            <ItemTitle>{movie.name}</ItemTitle>
                           </ItemContent>
-                        )}
-                      </Item>
-                    </ComboboxItem>
-                  )}
-                </ComboboxCollection>
-              ) : (
-                (group: DataGroup, index) => (
-                  <Fragment key={index}>
-                    <ComboboxGroup key={index} items={group.items}>
-                      <ComboboxLabel>{group.value}</ComboboxLabel>
-                      <ComboboxCollection>
-                        {(movie: MovieCreate) => (
-                          <ComboboxItem key={movie.external_id} value={movie}>
-                            <Item size="sm" className="p-0">
-                              <ItemContent>
-                                <ItemTitle>{movie.name}</ItemTitle>
-                              </ItemContent>
-                              {movie.release_date !== null && (
-                                // show release year if available
-                                <ItemContent>
-                                  <ItemDescription className="text-xs flex-none text-center">
-                                    {movie.release_date.split("-", 1)[0]}
-                                  </ItemDescription>
-                                </ItemContent>
-                              )}
-                            </Item>
-                          </ComboboxItem>
-                        )}
-                      </ComboboxCollection>
-                    </ComboboxGroup>
-
-                    {databaseFiltered.length > 0 && index === 0 && (
-                      <ComboboxSeparator />
+                          {movie.release_date !== null && (
+                            // show release year if available
+                            <ItemContent>
+                              <ItemDescription className="text-xs flex-none text-center">
+                                {movie.release_date.split("-", 1)[0]}
+                              </ItemDescription>
+                            </ItemContent>
+                          )}
+                        </Item>
+                      </ComboboxItem>
                     )}
-                  </Fragment>
-                )
-              )}
-            </ComboboxList>
+                  </ComboboxCollection>
+                ) : (
+                  (group: DataGroup, index) => (
+                    <Fragment key={index}>
+                      <ComboboxGroup key={index} items={group.items}>
+                        <ComboboxLabel>{group.value}</ComboboxLabel>
+                        <ComboboxCollection>
+                          {(movie: MovieCreate) => (
+                            <ComboboxItem key={movie.external_id} value={movie}>
+                              <Item size="sm" className="p-0">
+                                <ItemContent>
+                                  <ItemTitle>{movie.name}</ItemTitle>
+                                </ItemContent>
+                                {movie.release_date !== null && (
+                                  // show release year if available
+                                  <ItemContent>
+                                    <ItemDescription className="text-xs flex-none text-center">
+                                      {movie.release_date.split("-", 1)[0]}
+                                    </ItemDescription>
+                                  </ItemContent>
+                                )}
+                              </Item>
+                            </ComboboxItem>
+                          )}
+                        </ComboboxCollection>
+                      </ComboboxGroup>
 
-            {query.length > 0 && !extRequested && (
-              // only show the external fetch button when query is no empty
-              <div className="w-full flex-col">
-                <ComboboxSeparator />
-                <Button
-                  className="w-full whitespace-normal h-fit p-1"
-                  onMouseDown={(e) => {
-                    e.preventDefault(); // stop blur so that keyboard shortcuts with focus on input
-                    setExtRequested(true);
-                  }}
-                >
-                  Load more results from TMDB.
-                </Button>
-              </div>
-            )}
+                      {databaseFiltered.length > 0 && index === 0 && (
+                        <ComboboxSeparator />
+                      )}
+                    </Fragment>
+                  )
+                )}
+              </ComboboxList>
 
-            {extRequested && error !== null && (
-              // this error is just for fetching, not validation
-              <div className="w-full flex-col">
-                <ComboboxSeparator />
-                <div className="w-full text-center py-1 text-xs text-destructive">
-                  Failed to fetch TMDB results.
+              {query.length > 0 && !extRequested && (
+                // only show the external fetch button when query is no empty
+                <div className="w-full flex-col">
+                  <ComboboxSeparator />
+                  <Button
+                    className="w-full whitespace-normal h-fit p-1"
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // stop blur so that keyboard shortcuts with focus on input
+                      setExtRequested(true);
+                    }}
+                  >
+                    Load more results from TMDB.
+                  </Button>
                 </div>
-                <Button
-                  className="w-full whitespace-normal h-fit p-1"
-                  onMouseDown={(e) => {
-                    e.preventDefault(); // stop blur so that keyboard shortcuts will focus on input
-                    setError(null);
-                  }}
-                >
-                  Try again.
-                </Button>
-              </div>
-            )}
-          </>
-        )}
-      </ComboboxContent>
-    </Combobox>
+              )}
+
+              {extRequested && error !== null && (
+                // this error is just for fetching, not validation
+                <div className="w-full flex-col">
+                  <ComboboxSeparator />
+                  <div className="w-full text-center py-1 text-xs text-destructive">
+                    Failed to fetch TMDB results.
+                  </div>
+                  <Button
+                    className="w-full whitespace-normal h-fit p-1"
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // stop blur so that keyboard shortcuts will focus on input
+                      setError(null);
+                    }}
+                  >
+                    Try again.
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </ComboboxContent>
+      </Combobox>
+    </Field>
   );
 }
 

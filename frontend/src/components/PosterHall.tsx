@@ -3,6 +3,7 @@ import { Marquee } from "./ui/marquee";
 import { useEffect, useMemo, useState } from "react";
 import { PauseIcon, PlayIcon } from "lucide-react";
 import { Toggle } from "./ui/toggle";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const postersPerColumn = 5;
 
@@ -116,7 +117,7 @@ export default function PosterHall({
           vertical
           reverse={i % 2 === 0}
           key={i}
-          className={`[--duration:250s] w-full`}
+          className="[--duration:250s] w-full"
           paused={paused}
         >
           {column.map((path, j) => (
@@ -126,16 +127,25 @@ export default function PosterHall({
       ))}
       <div className="from-background pointer-events-none absolute inset-x-0 top-0 h-1/4 bg-linear-to-b"></div>
       <div className="from-background pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-linear-to-t"></div>
-      <Toggle
-        className="absolute bottom-2.5 right-2.5"
-        aria-label="Toggle Background Motion"
-        onClick={() => setPaused(!paused)}
-        size="lg"
-        variant="outline"
-        title="Toggle Background Motion"
-      >
-        {paused ? <PlayIcon /> : <PauseIcon />}
-      </Toggle>
+
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Toggle
+              className="absolute bottom-2.5 right-2.5"
+              aria-label="Toggle Background Motion"
+              onClick={() => setPaused(!paused)}
+              size="lg"
+              variant="outline"
+            >
+              {paused ? <PlayIcon /> : <PauseIcon />}
+            </Toggle>
+          }
+        />
+        <TooltipContent side="left">
+          <span>Toggle background motion.</span>
+        </TooltipContent>
+      </Tooltip>
     </div>
   );
 }

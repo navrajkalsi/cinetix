@@ -1,7 +1,12 @@
 import { type Ref } from "react";
 import { Field, FieldContent, FieldError, FieldLabel } from "./ui/field";
 import type { ControllerFieldState } from "react-hook-form";
-import { Input } from "./ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "./ui/input-group";
 
 // props that react hook form requires to communicate with this input
 // taken from:  https://react-hook-form.com/docs/usecontroller/controller
@@ -25,23 +30,29 @@ export default function PriceInput({
   return (
     <Field data-invalid={fieldState.invalid}>
       <FieldContent>
-        <FieldLabel htmlFor="price-input">Format</FieldLabel>
+        <FieldLabel htmlFor="price-input">Price</FieldLabel>
         <FieldError errors={[fieldState.error]} />
       </FieldContent>
 
-      <Input
-        id="price-input"
-        type="number"
-        placeholder="Enter price"
-        step="0.01"
-        min={0.01}
-        onChange={(e) => onChange(e.target.valueAsNumber)}
-        onBlur={onBlur}
-        disabled={disabled}
-        name={name}
-        ref={ref}
-        aria-invalid={fieldState.invalid}
-      />
+      <InputGroup>
+        <InputGroupInput
+          id="price-input"
+          type="number"
+          className="bg-muted"
+          placeholder="Enter price"
+          step="0.01"
+          min={0.01}
+          onChange={(e) => onChange(e.target.valueAsNumber)}
+          onBlur={onBlur}
+          disabled={disabled}
+          name={name}
+          ref={ref}
+          aria-invalid={fieldState.invalid}
+        />
+        <InputGroupAddon align="inline-start">
+          <InputGroupText>$</InputGroupText>
+        </InputGroupAddon>
+      </InputGroup>
     </Field>
   );
 }

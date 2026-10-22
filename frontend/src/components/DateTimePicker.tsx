@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
 import type { ControllerFieldState } from "react-hook-form";
+import { cn } from "cn";
 
 // props that react hook form requires to communicate with this input
 // taken from:  https://react-hook-form.com/docs/usecontroller/controller
@@ -47,26 +48,25 @@ export default function DateTimePicker({
 
       newDatetime = newDate;
     } else if (newTime) {
-      // hour pattern depends on locale setting
-      const timePattern = /^\d{2}:\d{2}( [A|P]M)?$/;
+      const timePattern = /^\d{2}:\d{2}?$/; // always 24 hours
 
       if (!timePattern.test(newTime))
         throw new Error("invalid time received from input");
 
-      const meridiemPresent = newTime.length > 5; // am/pm present
       const hours = parseInt(newTime.slice(0, 2));
       const mins = parseInt(newTime.slice(3, 5));
 
       // preserve date
       if (!datetime) throw new Error("time is disabled until date is set");
-      // convert to 24 hours if meridiem indicators are present, else assume 24 hours format
-      datetime.setHours(
-        meridiemPresent && newTime[6] === "P" ? hours + 12 : hours,
-      );
-      datetime.setMinutes(mins);
 
-      newDatetime = datetime;
-    } else throw new Error("atleast one of date and time is required");
+      newDatetime = new Date(datetime);
+      // convert to 24 hours if meridiem indicators are present, else assume 24 hours format
+      newDatetime.setHours(hours);
+      newDatetime.setMinutes(mins);
+    } else {
+      if (newTime === "") return;
+      throw new Error("atleast one of date and time is required");
+    }
 
     setDatetime(newDatetime);
     onChange(newDatetime);
@@ -84,7 +84,10 @@ export default function DateTimePicker({
               <Button
                 variant="secondary"
                 id="date-picker"
-                className="w-32 justify-between font-normal text-muted-foreground"
+                className={cn(
+                  "w-32 justify-between font-normal",
+                  datetime ? "" : "text-muted-foreground",
+                )}
                 onBlur={onBlur}
                 disabled={disabled}
                 ref={ref}

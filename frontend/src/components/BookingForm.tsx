@@ -15,6 +15,7 @@ import { Button } from "./ui/button";
 import FormatSelect from "./FormatSelect";
 import DateTimePicker from "./DateTimePicker";
 import PriceInput from "./PriceInput";
+import SeatsInput from "./SeatsInput";
 
 // complete booking schema with full movie, location and format types
 const schema = z.object({
@@ -35,9 +36,9 @@ const schema = z.object({
 
   datetime: z.date(),
 
-  price: z.number().nullable(),
+  price: z.number().optional(),
 
-  // seats: z.array(z.string()),
+  seats: z.set(z.string()).max(20).optional(),
 });
 
 // ts type constructed by zod after validation
@@ -104,6 +105,14 @@ export default function BookingForm() {
             control={control}
             render={({ field, fieldState }) => (
               <PriceInput {...field} fieldState={fieldState} />
+            )}
+          />
+
+          <Controller
+            name="seats"
+            control={control}
+            render={({ field, fieldState }) => (
+              <SeatsInput {...field} fieldState={fieldState} />
             )}
           />
         </form>

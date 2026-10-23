@@ -36,7 +36,7 @@ const schema = z.object({
 
   datetime: z.date(),
 
-  price: z.number().optional(),
+  price: z.number().min(0.01).max(500).optional(),
 
   seats: z.set(z.string()).max(20).optional(),
 });
@@ -45,7 +45,7 @@ const schema = z.object({
 type infered = z.infer<typeof schema>;
 
 export default function BookingForm() {
-  const { register, handleSubmit, formState, control } = useForm<infered>({
+  const form = useForm<infered>({
     resolver: zodResolver(schema),
   });
 
@@ -65,12 +65,12 @@ export default function BookingForm() {
       <CardContent>
         <form
           id="booking-form"
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-5 h-fit"
         >
           <Controller
             name="movie"
-            control={control}
+            control={form.control}
             render={({ field, fieldState }) => (
               <MovieCombobox {...field} fieldState={fieldState} />
             )}
@@ -78,7 +78,7 @@ export default function BookingForm() {
 
           <Controller
             name="location"
-            control={control}
+            control={form.control}
             render={({ field, fieldState }) => (
               <LocationCombobox {...field} fieldState={fieldState} />
             )}
@@ -86,7 +86,7 @@ export default function BookingForm() {
 
           <Controller
             name="format"
-            control={control}
+            control={form.control}
             render={({ field, fieldState }) => (
               <FormatSelect {...field} fieldState={fieldState} />
             )}
@@ -94,7 +94,7 @@ export default function BookingForm() {
 
           <Controller
             name="datetime"
-            control={control}
+            control={form.control}
             render={({ field, fieldState }) => (
               <DateTimePicker {...field} fieldState={fieldState} />
             )}
@@ -102,7 +102,7 @@ export default function BookingForm() {
 
           <Controller
             name="price"
-            control={control}
+            control={form.control}
             render={({ field, fieldState }) => (
               <PriceInput {...field} fieldState={fieldState} />
             )}
@@ -110,7 +110,7 @@ export default function BookingForm() {
 
           <Controller
             name="seats"
-            control={control}
+            control={form.control}
             render={({ field, fieldState }) => (
               <SeatsInput {...field} fieldState={fieldState} />
             )}
@@ -121,6 +121,9 @@ export default function BookingForm() {
       <CardFooter className="flex justify-center items-center">
         <Button type="submit" form="booking-form">
           Submit
+        </Button>
+        <Button type="button" variant="outline" onClick={() => form.reset()}>
+          Reset
         </Button>
       </CardFooter>
     </Card>

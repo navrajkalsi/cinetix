@@ -13,6 +13,7 @@ import {
 interface Props {
   onChange: (value?: number) => void;
   onBlur: () => void;
+  value?: number;
   disabled?: boolean;
   name: string;
   ref: Ref<HTMLInputElement>;
@@ -22,6 +23,7 @@ interface Props {
 export default function PriceInput({
   onChange,
   onBlur,
+  value,
   disabled,
   name,
   ref,
@@ -46,6 +48,7 @@ export default function PriceInput({
           onBlur={onBlur}
           disabled={disabled}
           name={name}
+          value={value ? value.toString() : ""}
           ref={ref}
           aria-invalid={fieldState.invalid}
         />

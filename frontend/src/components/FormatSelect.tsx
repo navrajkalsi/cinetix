@@ -1,6 +1,6 @@
 import useLookupArrays from "@/hooks/useLookupArrays";
 import type { Format } from "@/models/Format";
-import { type Ref } from "react";
+import { useCallback, type Ref } from "react";
 import {
   Select,
   SelectContent,
@@ -38,12 +38,19 @@ export default function FormatSelect({
 }: Props) {
   const [, , formats] = useLookupArrays();
 
-  formats.sort((a, b) => (a.name < b.name ? -1 : 1));
+  const sort = useCallback(
+    () => formats.sort((a, b) => (a.name < b.name ? -1 : 1)),
+    [formats],
+  );
+
+  sort();
 
   return (
     <Field data-invalid={fieldState.invalid}>
       <FieldContent>
-        <FieldLabel htmlFor="format-select">Format</FieldLabel>
+        <FieldLabel htmlFor="format-select">
+          Format<span className="text-destructive">*</span>
+        </FieldLabel>
         <FieldError errors={[fieldState.error]} />
       </FieldContent>
 
@@ -65,7 +72,7 @@ export default function FormatSelect({
         >
           <SelectValue placeholder="Select a format" />
         </SelectTrigger>
-        <SelectContent alignItemWithTrigger={true}>
+        <SelectContent alignItemWithTrigger={false}>
           <SelectGroup>
             {formats.map((format) => (
               <SelectItem key={format.id} value={format}>

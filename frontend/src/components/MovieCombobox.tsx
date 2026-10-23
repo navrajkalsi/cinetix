@@ -148,7 +148,9 @@ export default function MovieCombobox({
   return (
     <Field data-invalid={fieldState.invalid}>
       <FieldContent>
-        <FieldLabel htmlFor="movie-combobox">Movie</FieldLabel>
+        <FieldLabel htmlFor="movie-combobox">
+          Movie<span className="text-destructive">*</span>
+        </FieldLabel>
         <FieldError errors={[fieldState.error]} />
       </FieldContent>
 

@@ -148,7 +148,9 @@ export default function LocationCombobox({
   return (
     <Field data-invalid={fieldState.invalid}>
       <FieldContent>
-        <FieldLabel htmlFor="location-combobox">Location</FieldLabel>
+        <FieldLabel htmlFor="location-combobox">
+          Location<span className="text-destructive">*</span>
+        </FieldLabel>
         <FieldError errors={[fieldState.error]} />
       </FieldContent>
 

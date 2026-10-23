@@ -75,7 +75,9 @@ export default function DateTimePicker({
   return (
     <FieldGroup className="mx-auto max-w-xs flex-row">
       <Field>
-        <FieldLabel htmlFor="date-picker">Date</FieldLabel>
+        <FieldLabel htmlFor="date-picker">
+          Date<span className="text-destructive">*</span>
+        </FieldLabel>
         <FieldError errors={[fieldState.error]} />
 
         <Popover open={open} onOpenChange={setOpen}>

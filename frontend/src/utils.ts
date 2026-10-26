@@ -1,3 +1,4 @@
+import { toast } from "./components/ui/toast";
 import { err, ok } from "./types";
 
 export async function resolve<S, const R extends string>(
@@ -9,4 +10,8 @@ export async function resolve<S, const R extends string>(
   } catch (e) {
     return err({ reason: reason, details: e });
   }
+}
+
+export function showErrorToast(error: string) {
+  toast.add({ description: error, type: "error", priority: "high" });
 }

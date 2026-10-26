@@ -1,13 +1,12 @@
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
 import Bookings from "./pages/bookings/Bookings";
-import getBookings from "./api/bookings";
+import { getBooking, getBookings } from "./api/bookings";
 import Location from "./pages/locations/Location";
 import Format from "./pages/formats/Format";
 import BookingNew from "./pages/bookings/BookingNew";
 import { LookupsProvider } from "./context/LookupProvider";
 import Movie from "./pages/movies/Movie";
-import PosterHall from "./components/PosterHall";
-import BookingForm from "./components/BookingForm";
+import Booking from "./pages/bookings/Booking";
 
 const router = createBrowserRouter([
   // redirect root to bookings
@@ -23,6 +22,35 @@ const router = createBrowserRouter([
         element: (
           <LookupsProvider>
             <BookingNew />
+          </LookupsProvider>
+        ),
+      },
+
+      {
+        path: ":id",
+
+        loader: async ({ params }) => {
+          const { id } = params;
+
+          // no id provided
+          if (!id) {
+            throw new Response("No booking id provided", { status: 404 });
+          }
+
+          if (!/^\d+$/.test(id)) {
+            throw new Response("Provided booking id is not a number", {
+              status: 404,
+            });
+          }
+
+          const bookingId = Number(id);
+          const booking = await getBooking(bookingId);
+          return { booking };
+        },
+
+        element: (
+          <LookupsProvider>
+            <Booking />
           </LookupsProvider>
         ),
       },
@@ -142,19 +170,6 @@ const router = createBrowserRouter([
     element: (
       <LookupsProvider>
         <Format />
-      </LookupsProvider>
-    ),
-  },
-
-  {
-    path: "/form",
-
-    element: (
-      <LookupsProvider>
-        <div className="relative w-full h-full flex justify-center items-center">
-          <PosterHall />
-          <BookingForm />
-        </div>
       </LookupsProvider>
     ),
   },

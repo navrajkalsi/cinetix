@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from decimal import Decimal
 from typing import Literal
 
@@ -20,9 +20,10 @@ class BookingBase(SQLModel):
         min_length=1,
         description="Booking ID from the movie theater chain.",
     )
+    date: datetime.date = Field(description="Date of the showing.")
     # No timezone info is stored
-    date_time: datetime = Field(
-        description="Date, and optional time with no timezone info, of the showing."
+    time: datetime.time = Field(
+        description="Time, with no timezone info, of the showing."
     )
     seats: list[str] = Field(
         default_factory=list,

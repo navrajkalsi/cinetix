@@ -49,7 +49,8 @@ def transaction_to_booking_create(
 
     return BookingCreate(
         external_id=t.id,
-        date_time=t.datetime,
+        date=t.datetime.date(),
+        time=t.datetime.time(),
         seats=t.seats,
         price=t.price,
         movie_id=m.id,

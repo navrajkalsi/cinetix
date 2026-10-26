@@ -2,7 +2,7 @@ import { err, type AppError, type Result } from "@/types";
 import { type Location, type LocationCreate } from "../models/Location";
 import { resolve } from "@/utils";
 
-export default async function getMovie(
+export default async function getLocation(
   id: number,
   signal?: AbortSignal,
 ): Promise<Location> {

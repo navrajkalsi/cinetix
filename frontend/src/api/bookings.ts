@@ -1,6 +1,19 @@
 import { type Booking, type BookingCreate } from "../models/Booking";
 
-export default async function getBookings({
+export async function getBooking(
+  id: number,
+  signal?: AbortSignal,
+): Promise<Location> {
+  const response = await fetch(`/api/bookings/${id}`, { signal });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch booking: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function getBookings({
   year,
   movieId,
   locationId,

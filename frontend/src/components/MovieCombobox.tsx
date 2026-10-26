@@ -16,10 +16,10 @@ import { Fragment, useEffect, useMemo, useState, type Ref } from "react";
 import { Spinner } from "./ui/spinner";
 import { Button } from "./ui/button";
 import { fetchExternalMovies } from "@/api/movies";
-import { toast } from "./ui/toast";
 import { Item, ItemContent, ItemDescription, ItemTitle } from "./ui/item";
 import { Field, FieldError, FieldLabel } from "./ui/field";
 import type { ControllerFieldState } from "react-hook-form";
+import { showErrorToast } from "@/utils";
 
 // props that react hook form requires to communicate with this input
 // taken from:  https://react-hook-form.com/docs/usecontroller/controller
@@ -288,8 +288,4 @@ export default function MovieCombobox({
       {fieldState.error && <FieldError errors={[fieldState.error]} />}
     </Field>
   );
-}
-
-function showErrorToast(error: string) {
-  toast.add({ description: error, type: "error", priority: "high" });
 }

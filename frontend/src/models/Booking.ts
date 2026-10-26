@@ -5,7 +5,8 @@ import { type Movie } from "./Movie";
 // Model with common fields for all booking models.
 interface BookingBase {
   external_id: string | null;
-  date_time: Date;
+  date: string;
+  time: string | null;
   seats: string[];
   price: number | null;
   movie_id: number;

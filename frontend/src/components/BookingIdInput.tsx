@@ -31,9 +31,9 @@ export default function BookingIdInput({
       <Input
         id="booking-id-input"
         type="text"
-        className="bg-muted"
+        className="bg-muted uppercase"
         placeholder="W-----"
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value.toUpperCase())}
         onBlur={onBlur}
         disabled={disabled}
         name={name}

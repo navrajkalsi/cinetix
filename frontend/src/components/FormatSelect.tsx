@@ -1,6 +1,6 @@
 import useLookupArrays from "@/hooks/useLookupArrays";
 import type { Format } from "@/models/Format";
-import { useCallback, type Ref } from "react";
+import { type Ref } from "react";
 import {
   Select,
   SelectContent,
@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Field, FieldContent, FieldError, FieldLabel } from "./ui/field";
+import { Field, FieldError, FieldLabel } from "./ui/field";
 import type { ControllerFieldState } from "react-hook-form";
 
 // props that react hook form requires to communicate with this input
@@ -36,41 +36,31 @@ export default function FormatSelect({
   ref,
   fieldState,
 }: Props) {
-  const [, , formats] = useLookupArrays();
-
-  const sort = useCallback(
-    () => formats.sort((a, b) => (a.name < b.name ? -1 : 1)),
-    [formats],
-  );
-
-  sort();
+  const [, , formats] = useLookupArrays(true);
 
   return (
-    <Field data-invalid={fieldState.invalid}>
-      <FieldContent>
-        <FieldLabel htmlFor="format-select">
-          Format<span className="text-destructive">*</span>
-        </FieldLabel>
-        <FieldError errors={[fieldState.error]} />
-      </FieldContent>
+    <Field data-invalid={fieldState.invalid} className="col-span-full">
+      <FieldLabel htmlFor="format-select">
+        Format<span className="text-destructive">*</span>
+      </FieldLabel>
 
       <Select
         id="format-select"
         itemToStringLabel={(f: Format) => f.name}
         itemToStringValue={(f: Format) => f.id.toString()}
         isItemEqualToValue={(i, v) => i.id === v.id}
-        name={name}
         onValueChange={(v) => onChange(v ?? undefined)} // rhf
         disabled={disabled} // from rhf
         inputRef={ref}
         highlightItemOnHover
+        name={name}
+        value={value ?? null}
       >
         <SelectTrigger
           onBlur={onBlur} // rhf
-          value={value?.name}
           aria-invalid={fieldState.invalid}
         >
-          <SelectValue placeholder="Select a format" />
+          <SelectValue placeholder="IMAX" />
         </SelectTrigger>
         <SelectContent alignItemWithTrigger={false}>
           <SelectGroup>
@@ -82,6 +72,8 @@ export default function FormatSelect({
           </SelectGroup>
         </SelectContent>
       </Select>
+
+      {fieldState.error && <FieldError errors={[fieldState.error]} />}
     </Field>
   );
 }

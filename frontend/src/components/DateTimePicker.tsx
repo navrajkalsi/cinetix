@@ -14,6 +14,7 @@ import { cn } from "cn";
 interface Props {
   onChange: (value?: Date) => void;
   onBlur: () => void;
+  value?: Date;
   disabled?: boolean;
   name: string;
   ref: Ref<HTMLButtonElement>;
@@ -26,7 +27,9 @@ interface Props {
 export default function DateTimePicker({
   onChange,
   onBlur,
+  value,
   disabled,
+  name,
   ref,
   fieldState,
 }: Props) {

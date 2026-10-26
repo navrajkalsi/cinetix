@@ -1,7 +1,6 @@
 import type { Format } from "./Format";
 import type { Location } from "./Location";
-import { type MovieCreate, type Movie } from "./Movie";
-import z from "zod";
+import { type Movie } from "./Movie";
 
 // Model with common fields for all booking models.
 interface BookingBase {
@@ -29,8 +28,3 @@ export interface BookingComplete extends Booking {
   location: Location;
   format: Format;
 }
-
-// // Validation schema for add a new booking via form input.
-// export const BookingNew: z.ZodType<BookingCreate> = z.object({
-//   movie: z.custom<MovieCreate>((m) => m);
-// });

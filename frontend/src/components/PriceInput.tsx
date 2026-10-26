@@ -1,5 +1,5 @@
 import { type Ref } from "react";
-import { Field, FieldContent, FieldError, FieldLabel } from "./ui/field";
+import { Field, FieldError, FieldLabel } from "./ui/field";
 import type { ControllerFieldState } from "react-hook-form";
 import {
   InputGroup,
@@ -31,24 +31,27 @@ export default function PriceInput({
 }: Props) {
   return (
     <Field data-invalid={fieldState.invalid}>
-      <FieldContent>
-        <FieldLabel htmlFor="price-input">Price</FieldLabel>
-        <FieldError errors={[fieldState.error]} />
-      </FieldContent>
+      <FieldLabel htmlFor="price-input">Price</FieldLabel>
 
       <InputGroup>
         <InputGroupInput
           id="price-input"
           type="number"
           className="bg-muted"
-          placeholder="Enter price"
+          placeholder="--.--"
           step="0.01"
           min={0.01}
-          onChange={(e) => onChange(e.target.valueAsNumber)}
+          onChange={(e) =>
+            onChange(
+              Number.isNaN(e.target.valueAsNumber)
+                ? undefined
+                : e.target.valueAsNumber,
+            )
+          }
           onBlur={onBlur}
           disabled={disabled}
           name={name}
-          value={value ? value.toString() : ""}
+          value={value ?? ""}
           ref={ref}
           aria-invalid={fieldState.invalid}
         />
@@ -56,6 +59,8 @@ export default function PriceInput({
           <InputGroupText>$</InputGroupText>
         </InputGroupAddon>
       </InputGroup>
+
+      {fieldState.error && <FieldError errors={[fieldState.error]} />}
     </Field>
   );
 }

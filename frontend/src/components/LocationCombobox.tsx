@@ -18,7 +18,7 @@ import { toast } from "./ui/toast";
 import type { LocationCreate } from "@/models/Location";
 import { fetchExternalLocations } from "@/api/locations";
 import { Item, ItemContent, ItemDescription, ItemTitle } from "./ui/item";
-import { Field, FieldContent, FieldError, FieldLabel } from "./ui/field";
+import { Field, FieldError, FieldLabel } from "./ui/field";
 import type { ControllerFieldState } from "react-hook-form";
 
 // props that react hook form requires to communicate with this input
@@ -146,13 +146,10 @@ export default function LocationCombobox({
   // just show db results
   // and ask to load tmdb results
   return (
-    <Field data-invalid={fieldState.invalid}>
-      <FieldContent>
-        <FieldLabel htmlFor="location-combobox">
-          Location<span className="text-destructive">*</span>
-        </FieldLabel>
-        <FieldError errors={[fieldState.error]} />
-      </FieldContent>
+    <Field data-invalid={fieldState.invalid} className="col-span-full">
+      <FieldLabel htmlFor="location-combobox">
+        Location<span className="text-destructive">*</span>
+      </FieldLabel>
 
       <Combobox
         id="location-combobox"
@@ -171,14 +168,17 @@ export default function LocationCombobox({
         onInputValueChange={handleInputChange}
         autoHighlight
         disabled={disabled} // from rhf
+        value={value ?? null}
+        name={name} // from rhf
       >
         <ComboboxInput
-          placeholder="Search a location"
+          placeholder="Scotiabank Theatre Toronto"
           aria-invalid={fieldState.invalid || (extRequested && error !== null)}
           ref={ref}
           onBlur={onBlur} // from rhf
           disabled={disabled} // from rhf
           name={name} // from rhf
+          spellCheck={false}
         />
 
         <ComboboxContent className="p-1">
@@ -278,6 +278,8 @@ export default function LocationCombobox({
           )}
         </ComboboxContent>
       </Combobox>
+
+      {fieldState.error && <FieldError errors={[fieldState.error]} />}
     </Field>
   );
 }

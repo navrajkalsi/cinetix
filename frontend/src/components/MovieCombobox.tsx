@@ -18,7 +18,7 @@ import { Button } from "./ui/button";
 import { fetchExternalMovies } from "@/api/movies";
 import { toast } from "./ui/toast";
 import { Item, ItemContent, ItemDescription, ItemTitle } from "./ui/item";
-import { Field, FieldContent, FieldError, FieldLabel } from "./ui/field";
+import { Field, FieldError, FieldLabel } from "./ui/field";
 import type { ControllerFieldState } from "react-hook-form";
 
 // props that react hook form requires to communicate with this input
@@ -146,13 +146,10 @@ export default function MovieCombobox({
   // just show db results
   // and ask to load tmdb results
   return (
-    <Field data-invalid={fieldState.invalid}>
-      <FieldContent>
-        <FieldLabel htmlFor="movie-combobox">
-          Movie<span className="text-destructive">*</span>
-        </FieldLabel>
-        <FieldError errors={[fieldState.error]} />
-      </FieldContent>
+    <Field data-invalid={fieldState.invalid} className="col-span-full">
+      <FieldLabel htmlFor="movie-combobox">
+        Movie<span className="text-destructive">*</span>
+      </FieldLabel>
 
       <Combobox
         id="movie-combobox"
@@ -171,14 +168,16 @@ export default function MovieCombobox({
         onInputValueChange={handleInputChange}
         autoHighlight
         disabled={disabled} // from rhf
+        value={value ?? null}
       >
         <ComboboxInput
-          placeholder="Search a movie"
+          placeholder="The Odyssey"
           aria-invalid={fieldState.invalid || (extRequested && error !== null)}
           ref={ref}
           onBlur={onBlur} // from rhf
           disabled={disabled} // from rhf
           name={name} // from rhf
+          spellCheck={false}
         />
 
         <ComboboxContent className="p-1">
@@ -285,6 +284,8 @@ export default function MovieCombobox({
           )}
         </ComboboxContent>
       </Combobox>
+
+      {fieldState.error && <FieldError errors={[fieldState.error]} />}
     </Field>
   );
 }

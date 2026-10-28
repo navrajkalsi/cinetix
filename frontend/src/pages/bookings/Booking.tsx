@@ -9,7 +9,7 @@ export default function Booking() {
 
   return (
     <div className="w-full h-full flex justify-center items-center p-32">
-      <BookingCard booking={complete} contentVisible={false} />
+      <BookingCard booking={complete} />
     </div>
   );
 }

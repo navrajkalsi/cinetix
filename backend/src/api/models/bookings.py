@@ -22,12 +22,11 @@ class BookingBase(SQLModel):
     )
     date: datetime.date = Field(description="Date of the showing.")
     # No timezone info is stored
-    time: datetime.time = Field(
-        description="Time, with no timezone info, of the showing."
+    time: datetime.time | None = Field(
+        default=None, description="Time, with no timezone info, of the showing."
     )
     seats: list[str] = Field(
         default_factory=list,
-        min_length=1,
         sa_type=ARRAY(String),
         description="List of seats with each seat being a row and seat number.",
     )

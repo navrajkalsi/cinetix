@@ -28,22 +28,11 @@ import { postMovie } from "@/api/movies";
 import type { Movie } from "@/models/Movie";
 import type { Location } from "@/models/Location";
 import { postLocation } from "@/api/locations";
-import { postBooking } from "@/api/bookings";
 import BookingIdInput from "./BookingIdInput";
 import { useEffect, useState } from "react";
 import useLookupArrays from "@/hooks/useLookupArrays";
 import { showErrorToast } from "@/utils";
 import type { BookingComplete } from "@/models/Booking";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
-import BookingCard from "./BookingCard";
-import { CheckIcon, PenIcon } from "lucide-react";
 import { Spinner } from "./ui/spinner";
 
 // allows upto 3 upper or lowercase letters, followed by optional '-', and upto 3 digits per seat
@@ -119,16 +108,20 @@ const schema = z.object({
 });
 
 // ts type constructed by zod after validation
-type infered = z.infer<typeof schema>;
+type Infered = z.infer<typeof schema>;
 
-export default function BookingForm() {
+interface Props {
+  onConfirm: (complete: BookingComplete) => void;
+  disable: boolean;
+}
+
+export default function BookingForm({ onConfirm, disable }: Props) {
   const [focusLast, setFocusLast] = useState(false); // state to determine when to focus on last seat input
   const [movies, locations] = useLookupArrays();
-  // complete booking awaiting confirmation after submitting
-  const [complete, setComplete] = useState<BookingComplete | undefined>();
 
-  const form = useForm<infered>({
+  const form = useForm<Infered>({
     resolver: zodResolver(schema),
+    disabled: disable,
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -136,10 +129,10 @@ export default function BookingForm() {
     name: "seats",
   });
 
-  // disable on dialog open as well
-  const disableSubmit = form.formState.isSubmitting || complete !== undefined;
+  // issubmitting is checked as that covers posting movie and location
+  const disabled = form.formState.isSubmitting || disable;
 
-  async function onSubmit(data: infered) {
+  async function onSubmit(data: Infered) {
     // check lookup arrays for movie and location first
     let movie = movies.find(
       (movie) => movie.external_id === data.movie.external_id,
@@ -173,7 +166,7 @@ export default function BookingForm() {
       id: 0, // temp
       external_id: data.id ?? null,
       date: dateString,
-      time: data.time ?? null,
+      time: data.time ? data.time + ":00" : null,
       seats: data.seats ?? [],
       price: data.price ?? null,
       movie_id: movie.id,
@@ -185,7 +178,7 @@ export default function BookingForm() {
       source: "manual",
     };
 
-    setComplete(booking);
+    return onConfirm(booking);
   }
 
   // appends empty seat only if all the seats present pass validation
@@ -205,181 +198,135 @@ export default function BookingForm() {
   }, [focusLast, fields.length, form]);
 
   return (
-    <>
-      <Card className="mx-auto w-full max-w-xs max-h-3/4 overflow-y-auto shadow-black z-10">
-        <CardHeader>
-          <CardTitle>Create a new Booking</CardTitle>
-          <CardDescription>
-            with saved or new movies and locations.
-          </CardDescription>
-        </CardHeader>
+    <Card className="mx-auto w-full max-w-xs max-h-3/4 overflow-y-auto shadow-black z-10">
+      <CardHeader>
+        <CardTitle>Create a new Booking</CardTitle>
+        <CardDescription>
+          with saved or new movies and locations.
+        </CardDescription>
+      </CardHeader>
 
-        <CardContent>
-          <form
-            id="booking-form"
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="grid grid-cols-2 gap-5 h-fit"
-          >
-            <Controller
-              name="movie"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <MovieCombobox {...field} fieldState={fieldState} />
-              )}
-            />
-
-            <Controller
-              name="location"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <LocationCombobox {...field} fieldState={fieldState} />
-              )}
-            />
-
-            <Controller
-              name="format"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <FormatSelect {...field} fieldState={fieldState} />
-              )}
-            />
-
-            <Controller
-              name="date"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <DatePicker {...field} fieldState={fieldState} />
-              )}
-            />
-
-            <Controller
-              name="time"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <TimeInput {...field} fieldState={fieldState} />
-              )}
-            />
-
-            <Controller
-              name="price"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <PriceInput {...field} fieldState={fieldState} />
-              )}
-            />
-
-            <Controller
-              name="id"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <BookingIdInput {...field} fieldState={fieldState} />
-              )}
-            />
-
-            <FieldSet className="col-span-full">
-              <FieldLegend variant="label">Seats</FieldLegend>
-              <FieldDescription className="text-xs">
-                Add upto {maxSeats} seats.
-              </FieldDescription>
-
-              {fields.length > 0 && (
-                <FieldGroup className="grid gap-2.5 grid-cols-2">
-                  {fields.map((field, index) => (
-                    <Controller
-                      key={field.id} // must use field.id
-                      name={`seats.${index}`}
-                      control={form.control}
-                      render={({ field, fieldState }) => (
-                        <SeatInput
-                          {...field}
-                          onChange={async (v) => {
-                            field.onChange(v);
-                            await form.trigger("seats"); // validate array for duplicates
-                          }}
-                          fieldState={fieldState}
-                          index={index}
-                          remove={remove}
-                        />
-                      )}
-                    />
-                  ))}
-                </FieldGroup>
-              )}
-
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => handleSeatAdd()}
-                disabled={fields.length >= maxSeats}
-                aria-label="Add seat."
-              >
-                Add Seat
-              </Button>
-
-              {form.formState.errors.seats?.root && (
-                <FieldError errors={[form.formState.errors.seats.root]} />
-              )}
-            </FieldSet>
-          </form>
-        </CardContent>
-
-        <CardFooter className="flex justify-center items-center">
-          <Dialog
-            open={complete !== undefined}
-            onOpenChange={(open) => {
-              // prevent submitting loop
-              if (!open) setComplete(undefined);
-            }}
-          >
-            <DialogTrigger
-              render={
-                <Button
-                  type="submit"
-                  form="booking-form"
-                  disabled={disableSubmit}
-                >
-                  {disableSubmit && <Spinner data-icon="inline-start" />}
-                  {disableSubmit ? "Submitting" : "Submit"}
-                </Button>
-              }
-            />
-            {complete && (
-              <DialogContent
-                className="z-50 h-max max-h-full rounded-10xl w-max flex flex-col items-center"
-                showCloseButton={false}
-              >
-                <DialogHeader className="flex flex-col items-center gap-5">
-                  <DialogTitle className="text-xl text-center">
-                    Looking Good?
-                  </DialogTitle>
-
-                  <BookingCard
-                    booking={complete}
-                    contentVisible={true}
-                    hoverScale={false}
-                  />
-                </DialogHeader>
-
-                <DialogFooter className="flex flex-row items-center sm:justify-evenly justify-evenly w-full">
-                  <Button size="lg">
-                    Yes
-                    <CheckIcon data-icon="inline-end" aria-label="Submit." />
-                  </Button>
-                  <Button
-                    size="lg"
-                    aria-label="Cancel submission."
-                    onClick={() => setComplete(undefined)}
-                  >
-                    No
-                    <PenIcon data-icon="inline-end" />
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
+      <CardContent>
+        <form
+          id="booking-form"
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid grid-cols-2 gap-5 h-fit"
+        >
+          <Controller
+            name="movie"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <MovieCombobox {...field} fieldState={fieldState} />
             )}
-          </Dialog>
-        </CardFooter>
-      </Card>
-    </>
+          />
+
+          <Controller
+            name="location"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <LocationCombobox {...field} fieldState={fieldState} />
+            )}
+          />
+
+          <Controller
+            name="format"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <FormatSelect {...field} fieldState={fieldState} />
+            )}
+          />
+
+          <Controller
+            name="date"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <DatePicker {...field} fieldState={fieldState} />
+            )}
+          />
+
+          <Controller
+            name="time"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <TimeInput {...field} fieldState={fieldState} />
+            )}
+          />
+
+          <Controller
+            name="price"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <PriceInput {...field} fieldState={fieldState} />
+            )}
+          />
+
+          <Controller
+            name="id"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <BookingIdInput {...field} fieldState={fieldState} />
+            )}
+          />
+
+          <FieldSet className="col-span-full flex flex-col">
+            <FieldLegend variant="label">Seats</FieldLegend>
+            <FieldDescription className="text-xs">
+              Add upto {maxSeats} seats.
+            </FieldDescription>
+
+            {fields.length > 0 && (
+              <FieldGroup className="grid gap-2.5 grid-cols-2">
+                {fields.map((field, index) => (
+                  <Controller
+                    key={field.id} // must use field.id
+                    name={`seats.${index}`}
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <SeatInput
+                        {...field}
+                        onChange={async (v) => {
+                          field.onChange(v);
+                          await form.trigger("seats"); // validate array for duplicates
+                        }}
+                        fieldState={fieldState}
+                        index={index}
+                        remove={remove}
+                      />
+                    )}
+                  />
+                ))}
+              </FieldGroup>
+            )}
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleSeatAdd()}
+              disabled={disabled || fields.length >= maxSeats}
+              aria-label="Add seat."
+              className="self-center"
+            >
+              Add Seat
+            </Button>
+
+            {form.formState.errors.seats?.root && (
+              <FieldError errors={[form.formState.errors.seats.root]} />
+            )}
+          </FieldSet>
+        </form>
+      </CardContent>
+
+      <CardFooter>
+        <Button
+          type="submit"
+          form="booking-form"
+          disabled={disabled}
+          className="w-full"
+        >
+          {disabled && <Spinner data-icon="inline-start" />}
+          {disabled ? "Submitting" : "Submit"}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }

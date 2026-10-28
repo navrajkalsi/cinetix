@@ -2,9 +2,16 @@ import type { BookingComplete } from "@/models/Booking";
 import { Link } from "react-router";
 import { Card, CardContent } from "./ui/card";
 import { Item, ItemDescription, ItemTitle } from "./ui/item";
-import { Link2Icon } from "lucide-react";
+import {
+  CloudCogIcon,
+  Link2Icon,
+  UserPenIcon,
+  UserPlusIcon,
+} from "lucide-react";
 import { format, parse, parseISO } from "date-fns";
 import { cn } from "cn";
+import { Badge } from "./ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 interface Props {
   booking: BookingComplete;
@@ -19,15 +26,15 @@ interface Props {
 
 function getItem(title: string, description: string, link?: string) {
   return (
-    <Item className="flex flex-row justify-between font-heading">
-      <ItemDescription className="font-semibold text-base">
+    <Item className="flex flex-row justify-between font-heading items-center gap-2.5">
+      <ItemDescription className="font-semibold text-base w-fit shrink-0">
         {description}
       </ItemDescription>
-      <ItemTitle className="text-base">
+      <ItemTitle className="text-base flex-1 text-right min-w-0 justify-end">
         {link ? (
           <Link
             to={link}
-            className="link flex flex-row items-center gap-2 text-base/relaxed"
+            className="link inline-flex items-center justify-end flex-wrap gap-2 text-base/relaxed"
           >
             {title} <Link2Icon className="size-4" />
           </Link>
@@ -57,7 +64,7 @@ export default function BookingCard({
       {contentVisible !== false && (
         <CardContent
           className={cn(
-            "bg-background/55 w-full rounded-10xl backdrop-blur-sm py-5 z-10 duration-300",
+            "bg-background/55 w-full rounded-10xl backdrop-blur-sm py-5 z-10 duration-300 flex flex-col",
             contentVisible !== true && "translate-y-full",
             contentVisible === undefined && "group-hover:translate-y-0",
           )}
@@ -83,6 +90,40 @@ export default function BookingCard({
           {booking.external_id && getItem(booking.external_id, "Booking ID")}
           {booking.seats.length > 0 &&
             getItem(booking.seats.join(", "), "Seats")}
+
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Badge variant="outline" className="self-center">
+                  {booking.source === "auto" && (
+                    <>
+                      <CloudCogIcon data-icon="inline-start" /> Auto generated
+                    </>
+                  )}
+                  {booking.source === "manual" && (
+                    <>
+                      <UserPlusIcon data-icon="inline-start" /> User created
+                    </>
+                  )}
+                  {booking.source === "auto_edit" && (
+                    <>
+                      <UserPenIcon data-icon="inline-start" /> Auto generated,
+                      with user edits
+                    </>
+                  )}
+                </Badge>
+              }
+            />
+
+            <TooltipContent side="bottom" className="text-center">
+              {booking.source === "auto" &&
+                "This booking was generated automatically from email."}
+              {booking.source === "manual" &&
+                "This booking was created manually by the user."}
+              {booking.source === "auto_edit" &&
+                "Originally this booking was generated automatically, but the user has made some edits."}
+            </TooltipContent>
+          </Tooltip>
         </CardContent>
       )}
     </Card>

@@ -33,9 +33,8 @@ export async function getBookings({
     { signal },
   );
 
-  if (!response.ok) {
+  if (!response.ok)
     throw new Error(`Failed to fetch bookings: ${response.statusText}`);
-  }
 
   return response.json();
 }
@@ -50,6 +49,9 @@ export async function postBooking(model: BookingCreate): Promise<Booking> {
     headers: headers,
     body: JSON.stringify(model),
   });
+
+  if (!response.ok)
+    throw new Error(`Failed to add booking: ${response.statusText}`);
 
   return response.json();
 }

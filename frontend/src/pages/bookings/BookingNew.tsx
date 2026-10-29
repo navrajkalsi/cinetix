@@ -41,7 +41,7 @@ export default function BookingNew() {
     // work on this
     try {
       const booking = (await postBooking(create)) as Booking;
-      navigate(`/bookings/${booking.id}`);
+      navigate(`/bookings/${booking.id}`, { state: booking });
     } catch {
       setState({ status: "filling" });
       return showErrorToast(

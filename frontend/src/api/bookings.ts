@@ -3,7 +3,7 @@ import { type Booking, type BookingCreate } from "../models/Booking";
 export async function getBooking(
   id: number,
   signal?: AbortSignal,
-): Promise<Location> {
+): Promise<Booking> {
   const response = await fetch(`/api/bookings/${id}`, { signal });
 
   if (!response.ok) {

@@ -49,9 +49,11 @@ const router = createBrowserRouter([
         },
 
         element: (
-          <LookupsProvider>
-            <Booking />
-          </LookupsProvider>
+          <div className="w-full h-full">
+            <LookupsProvider>
+              <Booking />
+            </LookupsProvider>
+          </div>
         ),
       },
 

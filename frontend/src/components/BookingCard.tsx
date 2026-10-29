@@ -12,6 +12,7 @@ import { format, parse, parseISO } from "date-fns";
 import { cn } from "cn";
 import { Badge } from "./ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { parseDate, parseTime } from "@/utils";
 
 interface Props {
   booking: BookingComplete;
@@ -22,6 +23,7 @@ interface Props {
   contentVisible?: boolean;
   // scale up on hover
   hoverScale?: boolean;
+  className?: string;
 }
 
 function getItem(title: string, description: string, link?: string) {
@@ -50,6 +52,7 @@ export default function BookingCard({
   booking,
   contentVisible,
   hoverScale = true,
+  className,
 }: Props) {
   const bg = `https://image.tmdb.org/t/p/w780${booking.movie.poster_path}`;
 
@@ -58,6 +61,7 @@ export default function BookingCard({
       className={cn(
         "group h-full min-w-96 aspect-2/3 bg-cover bg-center max-w-full rounded-10xl justify-end p-0 duration-500",
         hoverScale && "hover:scale-105",
+        className,
       )}
       style={{ backgroundImage: `url(${bg})` }}
     >
@@ -80,12 +84,8 @@ export default function BookingCard({
             "Format",
             `/formats/${booking.format_id}`,
           )}
-          {getItem(format(parseISO(booking.date), "E MMM d, y"), "Date")}
-          {booking.time &&
-            getItem(
-              format(parse(booking.time, "HH:mm:ss", new Date()), "h:mm a"),
-              "Time",
-            )}
+          {getItem(parseDate(booking.date), "Date")}
+          {booking.time && getItem(parseTime(booking.time), "Time")}
           {booking.price && getItem(`$${booking.price}`, "Price")}
           {booking.external_id && getItem(booking.external_id, "Booking ID")}
           {booking.seats.length > 0 &&

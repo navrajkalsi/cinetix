@@ -1,12 +1,11 @@
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
 import Bookings from "./pages/bookings/Bookings";
 import { getBooking, getBookings } from "./api/bookings";
-import Location from "./pages/locations/Location";
-import Format from "./pages/formats/Format";
 import BookingNew from "./pages/bookings/BookingNew";
 import { LookupsProvider } from "./context/LookupProvider";
-import Movie from "./pages/movies/Movie";
 import Booking from "./pages/bookings/Booking";
+import type { DetailsLoaderData } from "./layouts/Details";
+import Details from "./layouts/Details";
 
 const router = createBrowserRouter([
   // redirect root to bookings
@@ -106,12 +105,16 @@ const router = createBrowserRouter([
       const movieId = Number(id);
       const bookings = await getBookings({ movieId: movieId });
 
-      return { movieId, bookings };
+      const data: DetailsLoaderData = {
+        bookings,
+        entityInfo: { type: "movie", id: movieId },
+      };
+      return data;
     },
 
     element: (
       <LookupsProvider>
-        <Movie />
+        <Details />
       </LookupsProvider>
     ),
   },
@@ -136,12 +139,16 @@ const router = createBrowserRouter([
       const locationId = Number(id);
       const bookings = await getBookings({ locationId: locationId });
 
-      return { locationId, bookings };
+      const data: DetailsLoaderData = {
+        bookings,
+        entityInfo: { type: "location", id: locationId },
+      };
+      return data;
     },
 
     element: (
       <LookupsProvider>
-        <Location />
+        <Details />
       </LookupsProvider>
     ),
   },
@@ -166,12 +173,16 @@ const router = createBrowserRouter([
       const formatId = Number(id);
       const bookings = await getBookings({ formatId: formatId });
 
-      return { formatId, bookings };
+      const data: DetailsLoaderData = {
+        bookings,
+        entityInfo: { type: "format", id: formatId },
+      };
+      return data;
     },
 
     element: (
       <LookupsProvider>
-        <Format />
+        <Details />
       </LookupsProvider>
     ),
   },

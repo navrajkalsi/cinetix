@@ -8,16 +8,9 @@ import type { Location } from "@/models/Location";
 import { Link, useLoaderData } from "react-router";
 import useLookupsContext from "@/hooks/useLookupsContext";
 import type { Lookups } from "@/context/LookupContext";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { ExternalLinkIcon, Link2Icon, LinkIcon } from "lucide-react";
+import { DotIcon, ExternalLinkIcon } from "lucide-react";
+import Backdrop from "@/components/Backdrop";
+import { format, parseISO } from "date-fns";
 
 const mapsApiKey = "AIzaSyBXmTWlDVPBKtxFm2pejH0CII8jGJZ6vvU";
 
@@ -41,9 +34,10 @@ export default function Details() {
   const entity = getEntity(entityInfo, lookups);
 
   return (
-    <div className="w-full h-full flex flex-row justify-center items-center p-4 gap-4 sm:p-12 sm:gap-12">
-      {getDetails(entity)}
+    <div className="size-full flex p-12 gap-12">
+      {getDetails(entity, bookings.length)}
       {getPreview(entity)}
+      <Backdrop />
     </div>
   );
 }
@@ -76,62 +70,105 @@ function getEntity(entityInfo: EntityInfo, lookups: Lookups) {
   return entity;
 }
 
-function getDetails(entity: Entity) {
+function getDetails(entity: Entity, bookings: number) {
+  const mutiple = bookings > 1;
+
   return (
-    <Card className="grow h-full [--card-spacing:--spacing(12)] rounded-10xl overflow-x-auto">
-      <CardHeader>
-        <CardTitle className="text-5xl">
-          {entity[0] === "movie" && (
+    <div className="size-full bg-transparent flex flex-col gap-8 font-heading">
+      <div className="bg-[rgba(255,255,255,0.025)] backdrop-blur-sm rounded-10xl p-8 w-fit flex flex-col gap-2">
+        {entity[0] === "movie" && (
+          <>
             <Link
-              className="link inline-flex items-center justify-end gap-2 text-4xl"
+              className="text-5xl link inline-flex items-center gap-3"
               to={new URL(
                 `https://www.themoviedb.org/movie/${entity[1].external_id}`,
               ).toString()}
             >
-              {entity[1].name} <ExternalLinkIcon className="h-1em w-1em" />
+              {entity[1].name} <ExternalLinkIcon className="h-auto w-1em" />
             </Link>
-          )}
 
-          {entity[0] === "location" && (
+            <div className="text-muted-foreground flex gap-1">
+              {entity[1].release_date && (
+                <>
+                  <div>{format(parseISO(entity[1].release_date), "MMM y")}</div>
+                  <DotIcon />
+                </>
+              )}
+
+              <div>
+                Seen {bookings} time{mutiple && "s"}
+              </div>
+            </div>
+          </>
+        )}
+
+        {entity[0] === "location" && (
+          <>
             <Link
-              className="link inline-flex items-center justify-end gap-2 text-4xl"
+              className="text-5xl link inline-flex items-center gap-3"
               to={new URL(
                 `https://www.google.com/maps/search/?api=1&query=${entity[1].name}&query_place_id=${entity[1].external_id}`,
               ).toString()}
             >
-              {entity[1].name} <ExternalLinkIcon className="size-5" />
+              {entity[1].name} <ExternalLinkIcon className="h-auto w-1em" />
             </Link>
-          )}
 
-          {entity[0] === "format" && entity[1].name}
-        </CardTitle>
-      </CardHeader>
+            <div className="text-muted-foreground flex gap-1">
+              <div>{entity[1].address}</div>
+              <DotIcon />
+              <div>
+                Visited {bookings} time{mutiple && "s"}
+              </div>
+            </div>
+          </>
+        )}
 
-      <Separator className="h-0.75" />
-      <CardContent className="w-full grid grid-cols-2 gap-5"></CardContent>
-    </Card>
+        {entity[0] === "format" && (
+          <>
+            <Link
+              className="text-5xl link inline-flex items-center gap-3"
+              to="https://www.imax.com"
+            >
+              {entity[1].name} <ExternalLinkIcon className="h-auto w-1em" />
+            </Link>
+
+            <div className="text-muted-foreground">
+              Experienced {bookings} time{mutiple && "s"}
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="bg-[rgba(255,255,255,0.05)] backdrop-blur-sm rounded-10xl p-8 grow"></div>
+    </div>
   );
 }
 
 function getPreview(entity: Entity) {
+  // the first div will shrink in width to maintain ratio, but will lose the ratio when h is much more than width
+  // in that case the w will be capped at 40%
+  // but then the inner div will take over and scale its height to maintain the aspect ratio
   return (
-    <div className="max-h-full h-fit w-fit rounded-10xl basis-2/5 grow-0 shrink">
-      {entity[0] === "movie" && (
-        <img
-          className="aspect-2/3 h-full w-full object-contain bg-red-100"
-          src={`https://image.tmdb.org/t/p/w780${entity[1].poster_path}`}
-        />
-      )}
+    <div className="aspect-2/3 max-w-2/5 h-full w-auto flex items-center">
+      <div className="aspect-2/3 w-full h-auto rounded-10xl overflow-auto">
+        {entity[0] === "movie" && (
+          <img
+            loading="lazy"
+            className="size-full pointer-events-none"
+            src={`https://image.tmdb.org/t/p/w780${entity[1].poster_path}`}
+          />
+        )}
 
-      {entity[0] === "location" && (
-        <iframe
-          className="w-full h-full"
-          loading="lazy"
-          src={`https://www.google.com/maps/embed/v1/place?q=place_id:${entity[1].external_id}&key=${mapsApiKey}`}
-        />
-      )}
+        {entity[0] === "location" && (
+          <iframe
+            loading="lazy"
+            className="size-full"
+            src={`https://www.google.com/maps/embed/v1/place?q=place_id:${entity[1].external_id}&key=${mapsApiKey}`}
+          />
+        )}
 
-      {entity[0] === "format" && <div>format</div>}
+        {entity[0] === "format" && <div>format</div>}
+      </div>
     </div>
   );
 }

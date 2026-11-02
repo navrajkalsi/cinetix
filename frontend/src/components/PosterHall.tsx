@@ -4,32 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import { PauseIcon, PlayIcon } from "lucide-react";
 import { Toggle } from "./ui/toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { shuffle } from "@/utils";
 
 const postersPerColumn = 5;
-
-function shuffle<T>(arr: T[]): T[] {
-  const indices = Array.from(Array(arr.length).keys());
-
-  // active view in the indices array to pick the next index from
-  let viewLen = arr.length;
-  const ret: T[] = [];
-
-  while (viewLen > 0) {
-    // index of the number to target in indices
-    // that number will then be the index to remove from arr
-    const indicesIndex = Math.floor(Math.random() * viewLen);
-
-    // index to remove from arr
-    const arrIndex = indices[indicesIndex];
-
-    ret.push(arr[arrIndex]);
-
-    indices[indicesIndex] = indices[--viewLen];
-    indices[viewLen] = arrIndex;
-  }
-
-  return ret;
-}
 
 // returns 2/3 aspect ratio card
 // fetches 342px wide version of posters

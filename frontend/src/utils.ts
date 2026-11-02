@@ -24,3 +24,27 @@ export function parseDate(date: string) {
 export function parseTime(time: string) {
   return format(parse(time, "HH:mm:ss", new Date()), "h:mm a");
 }
+
+export function shuffle<T>(arr: T[]): T[] {
+  const indices = Array.from(Array(arr.length).keys());
+
+  // active view in the indices array to pick the next index from
+  let viewLen = arr.length;
+  const ret: T[] = [];
+
+  while (viewLen > 0) {
+    // index of the number to target in indices
+    // that number will then be the index to remove from arr
+    const indicesIndex = Math.floor(Math.random() * viewLen);
+
+    // index to remove from arr
+    const arrIndex = indices[indicesIndex];
+
+    ret.push(arr[arrIndex]);
+
+    indices[indicesIndex] = indices[--viewLen];
+    indices[viewLen] = arrIndex;
+  }
+
+  return ret;
+}

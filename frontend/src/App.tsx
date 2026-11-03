@@ -1,12 +1,10 @@
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
-import Bookings from "./pages/bookings/Bookings";
 import { getBooking, getBookings } from "./api/bookings";
 import BookingNew from "./pages/bookings/BookingNew";
 import { LookupsProvider } from "./context/LookupProvider";
 import Booking from "./pages/bookings/Booking";
 import type { DetailsLoaderData } from "./layouts/Details";
 import Details from "./layouts/Details";
-import Backdrop from "./components/Backdrop";
 
 const router = createBrowserRouter([
   // redirect root to bookings
@@ -79,7 +77,7 @@ const router = createBrowserRouter([
 
         element: (
           <LookupsProvider>
-            <Bookings />
+            <></>
           </LookupsProvider>
         ),
       },
@@ -187,8 +185,6 @@ const router = createBrowserRouter([
       </LookupsProvider>
     ),
   },
-
-  { path: "/demo", Component: Backdrop },
 ]);
 
 export default function App() {

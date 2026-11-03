@@ -158,7 +158,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground size-full;
   }
 
   button:not(:disabled),
@@ -167,7 +167,7 @@
   }
 
   html {
-    @apply font-sans;
+    @apply font-sans size-full;
   }
 }
 

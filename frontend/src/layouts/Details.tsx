@@ -11,11 +11,14 @@ import type { Lookups } from "@/context/LookupContext";
 import { DotIcon, ExternalLinkIcon } from "lucide-react";
 import Backdrop from "@/components/Backdrop";
 import { format, parseISO } from "date-fns";
+import BookingItem from "@/components/BookingItem";
 
 const mapsApiKey = "AIzaSyBXmTWlDVPBKtxFm2pejH0CII8jGJZ6vvU";
 
+export type EntityType = "movie" | "location" | "format";
+
 interface EntityInfo {
-  type: "movie" | "location" | "format";
+  type: EntityType;
   id: number;
 }
 
@@ -35,9 +38,8 @@ export default function Details() {
 
   return (
     <div className="size-full flex p-12 gap-12">
-      {getDetails(entity, bookings.length)}
+      {getDetails(entity, bookings)}
       {getPreview(entity)}
-      <Backdrop />
     </div>
   );
 }
@@ -70,12 +72,12 @@ function getEntity(entityInfo: EntityInfo, lookups: Lookups) {
   return entity;
 }
 
-function getDetails(entity: Entity, bookings: number) {
-  const mutiple = bookings > 1;
+function getDetails(entity: Entity, bookings: Booking[]) {
+  const mutiple = bookings.length > 1;
 
   return (
     <div className="size-full bg-transparent flex flex-col gap-8 font-heading">
-      <div className="bg-[rgba(255,255,255,0.025)] backdrop-blur-sm rounded-10xl p-8 w-fit flex flex-col gap-2">
+      <div className="bg-foreground/5 backdrop-blur-sm rounded-10xl p-8 w-fit flex flex-col gap-2">
         {entity[0] === "movie" && (
           <>
             <Link
@@ -96,7 +98,7 @@ function getDetails(entity: Entity, bookings: number) {
               )}
 
               <div>
-                Seen {bookings} time{mutiple && "s"}
+                Seen {bookings.length} time{mutiple && "s"}
               </div>
             </div>
           </>
@@ -117,7 +119,7 @@ function getDetails(entity: Entity, bookings: number) {
               <div>{entity[1].address}</div>
               <DotIcon />
               <div>
-                Visited {bookings} time{mutiple && "s"}
+                Visited {bookings.length} time{mutiple && "s"}
               </div>
             </div>
           </>
@@ -133,13 +135,22 @@ function getDetails(entity: Entity, bookings: number) {
             </Link>
 
             <div className="text-muted-foreground">
-              Experienced {bookings} time{mutiple && "s"}
+              Experienced {bookings.length} time{mutiple && "s"}
             </div>
           </>
         )}
       </div>
 
-      <div className="bg-[rgba(255,255,255,0.05)] backdrop-blur-sm rounded-10xl p-8 grow"></div>
+      {
+        // make sure the scrollbar starts in the inner container
+      }
+      <div className="bg-foreground/5 backdrop-blur-sm rounded-10xl py-8 px-4 size-full overflow-hidden">
+        <div className="bg-transparent size-full overflow-y-auto px-4 gap-8 flex flex-col">
+          {bookings.map((booking, i) => (
+            <BookingItem booking={booking} key={i} hideField={entity[0]} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

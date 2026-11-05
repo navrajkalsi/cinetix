@@ -1,13 +1,5 @@
 import useBookingComplete from "@/hooks/useBookingCompelete";
 import type { Booking } from "@/models/Booking";
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from "./ui/item";
-import type { Key } from "react";
 import type { EntityType } from "@/layouts/Details";
 import { Link } from "react-router";
 import {
@@ -20,8 +12,10 @@ import {
   MapPinIcon,
   ReceiptIcon,
   VideoIcon,
+  type LucideIcon,
 } from "lucide-react";
 import { parseDate, parseTime } from "@/utils";
+import { Fragment } from "react/jsx-runtime";
 
 interface Props {
   booking: Booking;
@@ -34,102 +28,99 @@ export default function BookingItem({ booking, hideField }: Props) {
   const location = complete.location;
   const format = complete.format;
 
+  // blank labels to render at end to maintain consistent height of the item
+  let blanks = 0;
+
+  const incrementBlanks = () => {
+    blanks++;
+    return <></>;
+  };
+
   return (
-    <div className="bg-background/80 rounded-5xl flex gap-5 p-5 h-min">
+    <div className="bg-background/80 rounded-5xl flex gap-4 p-4 h-fit m-1">
       {hideField !== "movie" && (
-        <div className="aspect-2/3 h-full w-auto max-h-full flex items-center">
-          <img
-            src={`https://image.tmdb.org/t/p/w154${movie.poster_path}`}
-            className="aspect-2/3 w-full h-auto object-cover block rounded-xl"
-          />
-        </div>
+        <div
+          className="aspect-2/3 rounded-xl max-h-full h-full w-auto bg-center bg-cover"
+          style={{
+            backgroundImage: `url(https://image.tmdb.org/t/p/w154${movie.poster_path})`,
+          }}
+          aria-hidden
+        />
       )}
 
-      <div className="flex flex-col gap-5 p-2.5 w-full h-fit">
-        <div className="text-xl flex items-center">
-          {hideField === "movie" && (
-            <>
-              <Link
-                to={`/locations/${location.id}`}
-                className="link inline-flex items-center gap-2"
-              >
-                <MapPinIcon /> {location.name}
-              </Link>
-              <DotIcon />
-              <Link
-                to={`/formats/${format.id}`}
-                className="link inline-flex items-center gap-2"
-              >
-                <FilmIcon /> {format.name}
-              </Link>
-            </>
-          )}
+      <div className="flex flex-col gap-5 p-2.5 w-full min-w-0 h-fit max-w-full">
+        <div className="text-xl flex items-center min-w-0 w-full overflow-hidden">
+          {hideField === "movie" &&
+            linkIcon(location.name, `/locations/${location.id}`, MapPinIcon)}
+          {hideField === "location" &&
+            linkIcon(movie.name, `/movies/${movie.id}`, VideoIcon)}
+          {hideField === "format" &&
+            linkIcon(movie.name, `/movies/${movie.id}`, VideoIcon)}
 
-          {hideField === "location" && (
-            <>
-              <Link
-                to={`/movies/${movie.id}`}
-                className="link inline-flex items-center gap-2"
-              >
-                <VideoIcon /> {movie.name}
-              </Link>
-              <DotIcon />
-              <Link
-                to={`/formats/${format.id}`}
-                className="link inline-flex items-center gap-2"
-              >
-                <FilmIcon /> {format.name}
-              </Link>
-            </>
-          )}
+          <DotIcon />
 
-          {hideField === "format" && (
-            <>
-              <Link
-                to={`/movies/${movie.id}`}
-                className="link inline-flex items-center gap-2"
-              >
-                <VideoIcon /> {movie.name}
-              </Link>
-              <DotIcon />
-              <Link
-                to={`/locations/${location.id}`}
-                className="link inline-flex items-center gap-2"
-              >
-                <MapPinIcon /> {location.name}
-              </Link>
-            </>
-          )}
+          {hideField === "movie" &&
+            linkIcon(format.name, `/formats/${format.id}`, FilmIcon)}
+          {hideField === "location" &&
+            linkIcon(format.name, `/formats/${format.id}`, FilmIcon)}
+          {hideField === "format" &&
+            linkIcon(location.name, `/locations/${location.id}`, MapPinIcon)}
         </div>
 
         <div className="grid grid-cols-2 gap-3 text-muted-foreground">
-          <div className="inline-flex items-center gap-2">
-            <CalendarDaysIcon className="size-4" />
-            {parseDate(booking.date)}
-          </div>
-          {booking.time && (
-            <div className="inline-flex items-center gap-2">
-              <Clock2Icon className="size-4" />
-              {parseTime(booking.time)}
-            </div>
-          )}
-          {booking.seats.length > 0 && (
-            <div className="inline-flex items-center gap-2">
-              <ArmchairIcon className="size-4" /> {booking.seats.join(", ")}
-            </div>
-          )}
-          {booking.price && (
-            <div className="inline-flex items-center gap-2">
-              <ReceiptIcon className="size-4" /> ${booking.price}
-            </div>
-          )}
-          {booking.external_id && (
-            <div className="inline-flex items-center gap-2">
-              <IdCardIcon className="size-4" /> {booking.external_id}
-            </div>
-          )}
+          {labelIcon(parseDate(booking.date), CalendarDaysIcon)}
+
+          {booking.time
+            ? labelIcon(parseTime(booking.time), Clock2Icon)
+            : incrementBlanks()}
+
+          {booking.seats.length > 0
+            ? labelIcon(booking.seats.join(", "), ArmchairIcon)
+            : incrementBlanks()}
+
+          {booking.price
+            ? labelIcon("$" + booking.price, ReceiptIcon)
+            : incrementBlanks()}
+
+          {booking.external_id
+            ? labelIcon(booking.external_id, IdCardIcon)
+            : incrementBlanks()}
+
+          {Array.from({ length: blanks }).map((_, i) => (
+            <Fragment key={i}>{labelIcon()}</Fragment>
+          ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function linkIcon(label: string, link: string, icon: LucideIcon) {
+  const Icon = icon;
+
+  return (
+    <Link
+      to={link}
+      className="link inline-flex items-center gap-2 min-w-0 flex-1 whitespace-nowrap overflow-hidden"
+    >
+      <Icon className="shrink-0" />
+      <span className="truncate min-w-0">{label}</span>
+    </Link>
+  );
+}
+
+function labelIcon(label?: string, icon?: LucideIcon) {
+  if (!label || !icon)
+    return (
+      <div className="invisible" aria-hidden>
+        empty
+      </div>
+    );
+
+  const Icon = icon;
+  return (
+    <div className="inline-flex items-center gap-2">
+      <Icon className="size-4 shrink-0" /> {label}
     </div>
   );
 }

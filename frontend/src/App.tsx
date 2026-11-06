@@ -1,187 +1,87 @@
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+  type RouteObject,
+} from "react-router";
 import { getBooking, getBookings } from "./api/bookings";
 import BookingNew from "./pages/bookings/BookingNew";
 import { LookupsProvider } from "./context/LookupProvider";
-import Booking from "./pages/bookings/Booking";
-import type { DetailsLoaderData } from "./layouts/Details";
+import BookingPage from "./pages/bookings/Booking";
+import type { DetailsLoaderData, EntityType } from "./layouts/Details";
 import Details from "./layouts/Details";
+import FiltersLayout from "./layouts/FilterLayout";
+import { Fragment } from "react/jsx-runtime";
+import type { Booking } from "./models/Booking";
 
 const router = createBrowserRouter([
-  // redirect root to bookings
-  { index: true, element: <Navigate replace to="/bookings" /> },
-
   {
-    // get OPTIONAL year from query params
-    path: "/bookings",
+    // provide the child routes filters and lookups
+    path: "/",
+    element: (
+      <LookupsProvider>
+        <FiltersLayout />
+      </LookupsProvider>
+    ),
     children: [
-      {
-        path: "new",
-
-        element: (
-          <LookupsProvider>
-            <BookingNew />
-          </LookupsProvider>
-        ),
-      },
+      // redirect root to bookings
+      { index: true, element: <Navigate replace to="/bookings" /> },
 
       {
-        path: ":id",
+        path: "bookings",
+        children: [
+          {
+            index: true,
+            loader: async ({ request }) => {
+              const url = new URL(request.url);
+              const year = url.searchParams.get("year");
 
-        loader: async ({ params }) => {
-          const { id } = params;
+              // verify if year is a number, if not null
+              if (year && !/^\d{4}$/.test(year)) {
+                throw new Response("Invalid year", { status: 404 });
+              }
 
-          // no id provided
-          if (!id) {
-            throw new Response("No booking id provided", { status: 404 });
-          }
+              const yearNum = year ? Number(year) : new Date().getFullYear();
+              const bookings = await getBookings({
+                year: yearNum,
+                includeFuture: year ? false : true,
+              });
 
-          if (!/^\d+$/.test(id)) {
-            throw new Response("Provided booking id is not a number", {
-              status: 404,
-            });
-          }
+              return { yearNum, bookings };
+            },
+            Component: Fragment,
+          },
 
-          const bookingId = Number(id);
-          const booking = await getBooking(bookingId);
-          return { booking };
-        },
-
-        element: (
-          <div className="w-full h-full">
-            <LookupsProvider>
-              <Booking />
-            </LookupsProvider>
-          </div>
-        ),
+          {
+            path: ":id",
+            loader: async ({ params }) => {
+              const id = parseId("booking", params.id);
+              const booking = await getBooking(id);
+              return { booking };
+            },
+            Component: BookingPage,
+          },
+        ],
       },
 
-      {
-        index: true,
-        loader: async ({ request }) => {
-          const url = new URL(request.url);
-          const year = url.searchParams.get("year");
+      detailsRoute("movies/:id", "movie", (id) => getBookings({ movieId: id })),
 
-          // verify if year is a number, if not null
-          if (year && !/^\d{4}$/.test(year)) {
-            throw new Response("Invalid year", { status: 404 });
-          }
+      detailsRoute("locations/:id", "location", (id) =>
+        getBookings({ locationId: id }),
+      ),
 
-          const yearNum = year ? Number(year) : new Date().getFullYear();
-          const bookings = await getBookings({
-            year: yearNum,
-            includeFuture: year ? false : true,
-          });
-
-          return { yearNum, bookings };
-        },
-
-        element: (
-          <LookupsProvider>
-            <></>
-          </LookupsProvider>
-        ),
-      },
+      detailsRoute("formats/:id", "format", (id) =>
+        getBookings({ formatId: id }),
+      ),
     ],
   },
 
   {
-    // get movie id from path segment (route param)
-    path: "/movies/:id",
-    loader: async ({ params }) => {
-      const { id } = params;
-
-      // no name provided
-      if (!id) {
-        throw new Response("No movie id provided", { status: 404 });
-      }
-
-      if (!/^\d+$/.test(id)) {
-        throw new Response("Provided movie id is not a number", {
-          status: 404,
-        });
-      }
-
-      const movieId = Number(id);
-      const bookings = await getBookings({ movieId: movieId });
-
-      const data: DetailsLoaderData = {
-        bookings,
-        entityInfo: { type: "movie", id: movieId },
-      };
-      return data;
-    },
-
+    // does not require filters, provide only lookups
+    path: "/bookings/new",
     element: (
       <LookupsProvider>
-        <Details />
-      </LookupsProvider>
-    ),
-  },
-
-  {
-    // get location id from path segment (route param)
-    path: "/locations/:id",
-    loader: async ({ params }) => {
-      const { id } = params;
-
-      // no name provided
-      if (!id) {
-        throw new Response("No movie id provided", { status: 404 });
-      }
-
-      if (!/^\d+$/.test(id)) {
-        throw new Response("Provided location id is not a number", {
-          status: 404,
-        });
-      }
-
-      const locationId = Number(id);
-      const bookings = await getBookings({ locationId: locationId });
-
-      const data: DetailsLoaderData = {
-        bookings,
-        entityInfo: { type: "location", id: locationId },
-      };
-      return data;
-    },
-
-    element: (
-      <LookupsProvider>
-        <Details />
-      </LookupsProvider>
-    ),
-  },
-
-  {
-    // get format id from path segment (route param)
-    path: "/formats/:id",
-    loader: async ({ params }) => {
-      const { id } = params;
-
-      // no name provided
-      if (!id) {
-        throw new Response("No movie id provided", { status: 404 });
-      }
-
-      if (!/^\d+$/.test(id)) {
-        throw new Response("Provided format id is not a number", {
-          status: 404,
-        });
-      }
-
-      const formatId = Number(id);
-      const bookings = await getBookings({ formatId: formatId });
-
-      const data: DetailsLoaderData = {
-        bookings,
-        entityInfo: { type: "format", id: formatId },
-      };
-      return data;
-    },
-
-    element: (
-      <LookupsProvider>
-        <Details />
+        <BookingNew />
       </LookupsProvider>
     ),
   },
@@ -189,4 +89,34 @@ const router = createBrowserRouter([
 
 export default function App() {
   return <RouterProvider router={router} />;
+}
+
+function parseId(name: string, id?: string): number {
+  if (!id) throw new Response(`No ${name} id found`, { status: 404 });
+  if (!/^\d+$/.test(id))
+    throw new Response(`Invalid ${name} id`, { status: 404 });
+
+  return Number(id);
+}
+
+function detailsRoute(
+  path: string,
+  type: EntityType,
+  fetchBookings: (id: number) => Promise<Booking[]>,
+): RouteObject {
+  const route: RouteObject = {
+    path,
+    loader: async ({ params }) => {
+      const id = parseId(type, params.id);
+
+      const data: DetailsLoaderData = {
+        bookings: await fetchBookings(id),
+        entityInfo: { type, id },
+      };
+      return data;
+    },
+    Component: Details,
+  };
+
+  return route;
 }

@@ -6,7 +6,6 @@ import {
   ArmchairIcon,
   CalendarDaysIcon,
   Clock2Icon,
-  DotIcon,
   FilmIcon,
   IdCardIcon,
   MapPinIcon,
@@ -49,15 +48,13 @@ export default function BookingItem({ booking, hideField }: Props) {
       )}
 
       <div className="flex flex-col gap-5 p-2.5 w-full min-w-0 h-fit max-w-full">
-        <div className="text-xl flex items-center min-w-0 w-full overflow-hidden">
+        <div className="text-xl flex items-center min-w-0 w-full overflow-hidden gap-2.5">
           {hideField === "movie" &&
             linkIcon(location.name, `/locations/${location.id}`, MapPinIcon)}
           {hideField === "location" &&
             linkIcon(movie.name, `/movies/${movie.id}`, VideoIcon)}
           {hideField === "format" &&
             linkIcon(movie.name, `/movies/${movie.id}`, VideoIcon)}
-
-          <DotIcon />
 
           {hideField === "movie" &&
             linkIcon(format.name, `/formats/${format.id}`, FilmIcon)}

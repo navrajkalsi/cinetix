@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Outlet, useOutletContext } from "react-router";
 
 // Filters that child elements can read to modify the information they are showing
-interface Filters {
+export interface Filters {
   movie?: Movie;
   location?: Location;
   format?: Format;
@@ -20,8 +20,7 @@ export default function FiltersLayout() {
   return (
     <div className="size-full max-w-full max-h-full flex">
       <SidebarProvider defaultOpen={false}>
-        <FiltersSidebar />
-        <SidebarTrigger className="fixed" />
+        <FiltersSidebar activeFilters={filters} setActiveFilters={setFilters} />
         <Outlet context={filters} />
       </SidebarProvider>
     </div>

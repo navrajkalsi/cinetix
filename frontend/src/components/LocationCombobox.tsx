@@ -40,7 +40,7 @@ interface DataGroup {
   items: LocationCreate[];
 }
 
-export default function LocationCombobox({
+export default function ExternalLocationCombobox({
   onChange,
   onBlur,
   value,

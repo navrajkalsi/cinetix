@@ -40,7 +40,7 @@ interface DataGroup {
   items: MovieCreate[];
 }
 
-export default function MovieCombobox({
+export default function ExternalMovieCombobox({
   onChange,
   onBlur,
   value,
@@ -199,15 +199,13 @@ export default function MovieCombobox({
                         <Item size="sm" className="p-0">
                           <ItemContent>
                             <ItemTitle>{movie.name}</ItemTitle>
-                          </ItemContent>
-                          {movie.release_date !== null && (
-                            // show release year if available
-                            <ItemContent>
+                            {movie.release_date !== null && (
+                              // show release year if available
                               <ItemDescription className="text-xs flex-none text-center">
                                 {movie.release_date.split("-", 1)[0]}
                               </ItemDescription>
-                            </ItemContent>
-                          )}
+                            )}
+                          </ItemContent>
                         </Item>
                       </ComboboxItem>
                     )}

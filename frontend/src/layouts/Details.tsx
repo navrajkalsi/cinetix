@@ -19,26 +19,22 @@ export type MovieData = Extract<LoaderData, { path: "movie" }>;
 export type LocationData = Extract<LoaderData, { path: "location" }>;
 export type FormatData = Extract<LoaderData, { path: "format" }>;
 
-export type EntityType = "movie" | "location" | "format";
+type DetailsLoaderData = MovieData | LocationData | FormatData;
+type Paths = DetailsLoaderData["path"];
 
-interface EntityInfo {
-  type: EntityType;
-  id: number;
-}
+type EntityMap = {
+  movie: Movie;
+  location: Location;
+  format: Format;
+};
 
-type Entity = ["movie", Movie] | ["location", Location] | ["format", Format];
-
-export interface DetailsLoaderData {
-  // bookings to show in the list
-  bookings: Booking[];
-  entityInfo: EntityInfo;
-}
+export type Entity = { [P in Paths]: { type: P; data: EntityMap[P] } }[Paths];
 
 export default function Details() {
-  const { bookings, entityInfo }: DetailsLoaderData = useLoaderData();
+  const { path, id, bookings, filters }: DetailsLoaderData = useLoaderData();
   const { lookups } = useLookupsContext();
 
-  const entity = getEntity(entityInfo, lookups);
+  const entity = getEntity(path, id, lookups);
 
   return (
     <div className="size-full flex p-12 gap-12">
@@ -48,23 +44,28 @@ export default function Details() {
   );
 }
 
-function getEntity(entityInfo: EntityInfo, lookups: Lookups) {
+// return path is the same as input path
+function getEntity<P extends Paths>(
+  path: P,
+  id: number,
+  lookups: Lookups,
+): Extract<Entity, { path: P }> {
   let entity: Entity | undefined = undefined;
 
-  switch (entityInfo.type) {
+  switch (path) {
     case "movie":
-      const movie = lookups.movies.get(entityInfo.id);
-      if (movie) entity = ["movie", movie];
+      const movie = lookups.movies.get(id);
+      if (movie) entity = { type: path, data: movie };
       break;
 
     case "location":
-      const location = lookups.locations.get(entityInfo.id);
-      if (location) entity = ["location", location];
+      const location = lookups.locations.get(id);
+      if (location) entity = { type: path, data: location };
       break;
 
     case "format":
-      const format = lookups.formats.get(entityInfo.id);
-      if (format) entity = ["format", format];
+      const format = lookups.formats.get(id);
+      if (format) entity = { type: path, data: format };
       break;
 
     default:
@@ -73,7 +74,7 @@ function getEntity(entityInfo: EntityInfo, lookups: Lookups) {
 
   if (!entity) throw new Response("id must exist");
 
-  return entity;
+  return entity as Extract<Entity, { path: P }>;
 }
 
 function getDetails(entity: Entity, bookings: Booking[]) {
@@ -82,21 +83,23 @@ function getDetails(entity: Entity, bookings: Booking[]) {
   return (
     <div className="size-full bg-transparent flex flex-col gap-8 font-heading">
       <div className="bg-foreground/5 backdrop-blur-sm rounded-10xl p-8 w-fit flex flex-col gap-2">
-        {entity[0] === "movie" && (
+        {entity.type === "movie" && (
           <>
             <Link
               className="text-5xl link inline-flex items-center gap-3"
               to={new URL(
-                `https://www.themoviedb.org/movie/${entity[1].external_id}`,
+                `https://www.themoviedb.org/movie/${entity.data.external_id}`,
               ).toString()}
             >
-              {entity[1].name} <ExternalLinkIcon className="h-auto w-1em" />
+              {entity.data.name} <ExternalLinkIcon className="h-auto w-1em" />
             </Link>
 
             <div className="text-muted-foreground flex gap-1">
-              {entity[1].release_date && (
+              {entity.data.release_date && (
                 <>
-                  <div>{format(parseISO(entity[1].release_date), "MMM y")}</div>
+                  <div>
+                    {format(parseISO(entity.data.release_date), "MMM y")}
+                  </div>
                   <DotIcon />
                 </>
               )}
@@ -108,19 +111,19 @@ function getDetails(entity: Entity, bookings: Booking[]) {
           </>
         )}
 
-        {entity[0] === "location" && (
+        {entity.type === "location" && (
           <>
             <Link
               className="text-5xl link inline-flex items-center gap-3"
               to={new URL(
-                `https://www.google.com/maps/search/?api=1&query=${entity[1].name}&query_place_id=${entity[1].external_id}`,
+                `https://www.google.com/maps/search/?api=1&query=${entity.data.name}&query_place_id=${entity.data.external_id}`,
               ).toString()}
             >
-              {entity[1].name} <ExternalLinkIcon className="h-auto w-1em" />
+              {entity.data.name} <ExternalLinkIcon className="h-auto w-1em" />
             </Link>
 
             <div className="text-muted-foreground flex gap-1">
-              <div>{entity[1].address}</div>
+              <div>{entity.data.address}</div>
               <DotIcon />
               <div>
                 Visited {bookings.length} time{mutiple && "s"}
@@ -129,13 +132,13 @@ function getDetails(entity: Entity, bookings: Booking[]) {
           </>
         )}
 
-        {entity[0] === "format" && (
+        {entity.type === "format" && (
           <>
             <Link
               className="text-5xl link inline-flex items-center gap-3"
               to="https://www.imax.com"
             >
-              {entity[1].name} <ExternalLinkIcon className="h-auto w-1em" />
+              {entity.data.name} <ExternalLinkIcon className="h-auto w-1em" />
             </Link>
 
             <div className="text-muted-foreground">
@@ -151,7 +154,7 @@ function getDetails(entity: Entity, bookings: Booking[]) {
       <div className="bg-foreground/5 backdrop-blur-sm rounded-10xl py-8 px-4 size-full overflow-hidden">
         <div className="bg-transparent size-full overflow-y-auto px-4 gap-8 flex flex-col">
           {bookings.map((booking, i) => (
-            <BookingItem booking={booking} key={i} hideField={entity[0]} />
+            <BookingItem booking={booking} key={i} hideField={entity.type} />
           ))}
         </div>
       </div>
@@ -166,23 +169,23 @@ function getPreview(entity: Entity) {
   return (
     <div className="aspect-2/3 max-w-2/5 h-full w-auto flex items-center">
       <div className="aspect-2/3 w-full h-auto rounded-10xl overflow-auto">
-        {entity[0] === "movie" && (
+        {entity.type === "movie" && (
           <img
             loading="lazy"
             className="size-full pointer-events-none"
-            src={`https://image.tmdb.org/t/p/w780${entity[1].poster_path}`}
+            src={`https://image.tmdb.org/t/p/w780${entity.data.poster_path}`}
           />
         )}
 
-        {entity[0] === "location" && (
+        {entity.type === "location" && (
           <iframe
             loading="lazy"
             className="size-full"
-            src={`https://www.google.com/maps/embed/v1/place?q=place_id:${entity[1].external_id}&key=${mapsApiKey}`}
+            src={`https://www.google.com/maps/embed/v1/place?q=place_id:${entity.data.external_id}&key=${mapsApiKey}`}
           />
         )}
 
-        {entity[0] === "format" && <div>format</div>}
+        {entity.type === "format" && <div>format</div>}
       </div>
     </div>
   );

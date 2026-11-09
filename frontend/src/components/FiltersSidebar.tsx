@@ -26,9 +26,8 @@ import type { Location } from "@/models/Location";
 import FiltersCombobox from "./FiltersCombobox";
 import type { Format } from "@/models/Format";
 import FiltersSelect from "./FiltersSelect";
-import { Input } from "./ui/input";
-import { useMatches } from "react-router";
-import type { Filter } from "@/filters";
+import FiltersYearInput from "./FiltersYearInput";
+import { useLoaderFilters, type LoaderData } from "@/loaders";
 
 const pages = [
   {
@@ -57,8 +56,7 @@ export default function FiltersSidebar() {
   const [movies, locations, formats] = useLookupArrays();
   const { toggleSidebar } = useSidebar();
 
-  const match = useMatches().at(-1);
-  const filters = match ? (match.handle as Filter[]) : [];
+  const filters = useLoaderFilters();
 
   return (
     <Sidebar variant="floating" collapsible="icon">
@@ -76,7 +74,7 @@ export default function FiltersSidebar() {
       <SidebarContent>
         {pagesGroup}
         <SidebarSeparator className="bg-muted-foreground h-0.5 rounded-full" />
-        {filtersGroup(movies, locations, formats)}
+        {filtersGroup(movies, locations, formats, filters)}
       </SidebarContent>
 
       <SidebarFooter>
@@ -118,22 +116,47 @@ function filtersGroup(
   movies: Movie[],
   locations: Location[],
   formats: Format[],
+  filters: LoaderData["filters"],
 ) {
+  if (!filters) return <></>;
+
+  const movie =
+    "movieId" in filters
+      ? (movies.find((m) => m.id === filters.movieId) ?? null)
+      : null;
+  const location =
+    "locationId" in filters
+      ? (locations.find((l) => l.id === filters.locationId) ?? null)
+      : null;
+  const format =
+    "formatId" in filters
+      ? (formats.find((f) => f.id === filters.formatId) ?? null)
+      : null;
+
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Filters</SidebarGroupLabel>
       <SidebarMenu>
         <SidebarMenuItem key="movie" className="flex flex-col gap-2.5">
-          <FiltersCombobox entity={["movie", movies]} />
-          <FiltersCombobox entity={["location", locations]} />
-          <FiltersSelect formats={formats} />
-          <Input
-            type="number"
-            placeholder="Year"
-            step="1"
-            min="2000"
-            max="2030"
-          />
+          {"year" in filters && <FiltersYearInput />}
+
+          {"movieId" in filters && (
+            <FiltersCombobox
+              entity={["movie", movies]}
+              value={movie}
+              onValueChange={console.log}
+            />
+          )}
+
+          {"locationId" in filters && (
+            <FiltersCombobox
+              entity={["location", locations]}
+              value={location}
+              onValueChange={console.log}
+            />
+          )}
+
+          {"formatId" in filters && <FiltersSelect formats={formats} />}
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>

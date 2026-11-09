@@ -18,9 +18,15 @@ type EntityType = Movie | Location;
 
 interface Props {
   entity: Entity;
+  value: EntityType | null;
+  onValueChange: (v: EntityType | null) => void;
 }
 
-export default function FiltersCombobox({ entity }: Props) {
+export default function FiltersCombobox({
+  entity,
+  value,
+  onValueChange,
+}: Props) {
   // trimmed query in inputhandler
   const [query, setQuery] = useState("");
   const queryLower = query.toLowerCase();
@@ -45,6 +51,8 @@ export default function FiltersCombobox({ entity }: Props) {
       items={filtered}
       filter={null} // filtering is manually handled
       onInputValueChange={setQuery}
+      onValueChange={(v) => onValueChange(v)}
+      value={value}
       autoHighlight
     >
       <ComboboxInput

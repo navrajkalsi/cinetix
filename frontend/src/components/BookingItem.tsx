@@ -1,6 +1,5 @@
 import useBookingComplete from "@/hooks/useBookingCompelete";
 import type { Booking } from "@/models/Booking";
-import type { EntityType } from "@/layouts/Details";
 import { Link } from "react-router";
 import {
   ArmchairIcon,
@@ -15,10 +14,11 @@ import {
 } from "lucide-react";
 import { parseDate, parseTime } from "@/utils";
 import { Fragment } from "react/jsx-runtime";
+import type { Entity } from "@/layouts/Details";
 
 interface Props {
   booking: Booking;
-  hideField: EntityType;
+  hideField: Entity["type"];
 }
 
 export default function BookingItem({ booking, hideField }: Props) {

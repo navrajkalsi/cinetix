@@ -12,14 +12,6 @@ import {
   locationLoader,
   movieLoader,
 } from "./loaders";
-import {
-  BookingsFilters,
-  BookingFilters,
-  BookingNewFilters,
-  FormatFilters,
-  LocationFilters,
-  MovieFilters,
-} from "./filters";
 
 export type Page = "bookings" | "movie" | "location" | "format";
 
@@ -43,41 +35,35 @@ const router = createBrowserRouter([
             index: true,
             loader: bookingsLoader,
             Component: Bookings,
-            handle: BookingsFilters,
           },
           {
             path: "new",
             Component: BookingNew,
-            handle: BookingNewFilters,
           },
           {
             path: ":id",
             loader: bookingLoader,
             Component: BookingPage,
-            handle: BookingFilters,
           },
         ],
       },
 
       {
-        path: "movie/:id",
+        path: "movies/:id",
         loader: movieLoader,
         Component: Details,
-        handle: MovieFilters,
       },
 
       {
-        path: "location/:id",
+        path: "locations/:id",
         loader: locationLoader,
         Component: Details,
-        handle: LocationFilters,
       },
 
       {
-        path: "format/:id",
+        path: "formats/:id",
         loader: formatLoader,
         Component: Details,
-        handle: FormatFilters,
       },
     ],
   },

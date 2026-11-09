@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs } from "react-router";
+import { useMatches, type LoaderFunctionArgs } from "react-router";
 import {
   BookingsFilters,
   FormatFilters,
@@ -17,24 +17,28 @@ export type LoaderData =
   | {
     path: "bookings";
     bookings: Booking[];
-    filters: Omit<Filters, "movie" | "location" | "format">;
+    filters: Omit<Filters, "movieId" | "locationId" | "formatId">;
   }
   | {
     path: "booking";
     booking: Booking;
+    filters: null;
   }
   | {
     path: "movie";
+    id: number;
     bookings: Booking[];
     filters: Omit<Filters, "movieId" | "year">; // no need to add year filter to movies
   }
   | {
     path: "location";
+    id: number;
     bookings: Booking[];
     filters: Omit<Filters, "locationId">; // user might want to see per year bookings
   }
   | {
     path: "format";
+    id: number;
     bookings: Booking[];
     filters: Omit<Filters, "formatId">; // user might want to see per year bookings
   };
@@ -62,7 +66,7 @@ export async function bookingsLoader({ request }: LoaderFunctionArgs) {
 // single booking page loader
 export async function bookingLoader({ params }: LoaderFunctionArgs) {
   const booking = await getBooking(parseId(params.id));
-  const data: BookingData = { path: "booking", booking };
+  const data: BookingData = { path: "booking", booking, filters: null };
   return data;
 }
 
@@ -72,13 +76,10 @@ export async function movieLoader({ request, params }: LoaderFunctionArgs) {
     new URL(request.url).searchParams,
     MovieFilters,
   );
-  // fetch based on filters
-  const bookings = await getBookings({
-    movieId: parseId(params.id),
-    ...filters,
-  });
+  const id = parseId(params.id);
+  const bookings = await getBookings({ movieId: id, ...filters }); // fetch based on filters
 
-  const data: MovieData = { path: "movie", bookings, filters };
+  const data: MovieData = { path: "movie", id, bookings, filters };
   return data;
 }
 
@@ -88,13 +89,15 @@ export async function locationLoader({ request, params }: LoaderFunctionArgs) {
     new URL(request.url).searchParams,
     LocationFilters,
   );
-  // fetch based on filters
-  const bookings = await getBookings({
-    locationId: parseId(params.id),
-    ...filters,
-  });
+  const id = parseId(params.id);
+  const bookings = await getBookings({ locationId: id, ...filters }); // fetch based on filters
 
-  const data: LocationData = { path: "location", bookings, filters };
+  const data: LocationData = {
+    path: "location",
+    id,
+    bookings,
+    filters,
+  };
   return data;
 }
 
@@ -104,13 +107,10 @@ export async function formatLoader({ request, params }: LoaderFunctionArgs) {
     new URL(request.url).searchParams,
     FormatFilters,
   );
-  // fetch based on filters
-  const bookings = await getBookings({
-    formatId: parseId(params.id),
-    ...filters,
-  });
+  const id = parseId(params.id);
+  const bookings = await getBookings({ formatId: id, ...filters }); // fetch based on filters
 
-  const data: FormatData = { path: "format", bookings, filters };
+  const data: FormatData = { path: "format", id, bookings, filters };
   return data;
 }
 
@@ -120,4 +120,12 @@ function parseId(id?: string): number {
     throw new Response("Invalid entity id", { status: 404 });
 
   return Number(id);
+}
+
+export function useLoaderFilters(): LoaderData["filters"] {
+  const match = useMatches().at(-1);
+  if (!match) return null;
+
+  const data = match.loaderData as LoaderData;
+  return data.filters;
 }

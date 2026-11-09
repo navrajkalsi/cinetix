@@ -9,11 +9,15 @@ import { Link, useLoaderData } from "react-router";
 import useLookupsContext from "@/hooks/useLookupsContext";
 import type { Lookups } from "@/context/LookupContext";
 import { DotIcon, ExternalLinkIcon } from "lucide-react";
-import Backdrop from "@/components/Backdrop";
 import { format, parseISO } from "date-fns";
 import BookingItem from "@/components/BookingItem";
+import type { LoaderData } from "@/loaders";
 
 const mapsApiKey = "AIzaSyBXmTWlDVPBKtxFm2pejH0CII8jGJZ6vvU";
+
+export type MovieData = Extract<LoaderData, { path: "movie" }>;
+export type LocationData = Extract<LoaderData, { path: "location" }>;
+export type FormatData = Extract<LoaderData, { path: "format" }>;
 
 export type EntityType = "movie" | "location" | "format";
 

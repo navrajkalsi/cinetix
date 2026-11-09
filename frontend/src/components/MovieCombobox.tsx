@@ -195,9 +195,13 @@ export default function ExternalMovieCombobox({
                 {externalFiltered === null ? (
                   <ComboboxCollection>
                     {(movie: MovieCreate) => (
-                      <ComboboxItem key={movie.external_id} value={movie}>
+                      <ComboboxItem
+                        key={movie.external_id}
+                        value={movie}
+                        className="p-2"
+                      >
                         <Item size="sm" className="p-0">
-                          <ItemContent>
+                          <ItemContent className="flex flex-row items-center justify-between">
                             <ItemTitle>{movie.name}</ItemTitle>
                             {movie.release_date !== null && (
                               // show release year if available

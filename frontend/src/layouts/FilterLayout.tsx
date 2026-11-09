@@ -1,5 +1,5 @@
 import FiltersSidebar from "@/components/FiltersSidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import type { Format } from "@/models/Format";
 import type { Location } from "@/models/Location";
 import type { Movie } from "@/models/Movie";

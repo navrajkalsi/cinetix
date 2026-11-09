@@ -1,6 +1,6 @@
 import useLookupArrays from "@/hooks/useLookupArrays";
 import type { Format } from "@/models/Format";
-import { type Ref } from "react";
+import { useState, type Ref } from "react";
 import {
   Select,
   SelectContent,
@@ -11,6 +11,7 @@ import {
 } from "./ui/select";
 import { Field, FieldError, FieldLabel } from "./ui/field";
 import type { ControllerFieldState } from "react-hook-form";
+import { cn } from "cn";
 
 // props that react hook form requires to communicate with this input
 // taken from:  https://react-hook-form.com/docs/usecontroller/controller
@@ -36,7 +37,8 @@ export default function FormatSelect({
   ref,
   fieldState,
 }: Props) {
-  const [, , formats] = useLookupArrays(true);
+  const formats = useLookupArrays(true)[2];
+  const [open, setOpen] = useState(false);
 
   return (
     <Field data-invalid={fieldState.invalid} className="col-span-full">
@@ -55,10 +57,12 @@ export default function FormatSelect({
         highlightItemOnHover
         name={name}
         value={value ?? null}
+        onOpenChange={setOpen}
       >
         <SelectTrigger
           onBlur={onBlur} // rhf
           aria-invalid={fieldState.invalid}
+          className={cn(open && "border-ring ring-2 ring-primary/20")}
         >
           <SelectValue placeholder="IMAX" />
         </SelectTrigger>

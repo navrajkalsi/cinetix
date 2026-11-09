@@ -11,19 +11,19 @@ import {
 } from "./ui/combobox";
 import { useMemo, useState } from "react";
 import { Item, ItemContent, ItemDescription, ItemTitle } from "./ui/item";
+import { cn } from "cn";
 
-export type Entity = ["movie", Movie[]] | ["location", Location[]];
+type Entity = ["movie", Movie[]] | ["location", Location[]];
 type EntityType = Movie | Location;
 
 interface Props {
   entity: Entity;
 }
 
-export default function LookupCombobox({ entity }: Props) {
+export default function FiltersCombobox({ entity }: Props) {
   // trimmed query in inputhandler
   const [query, setQuery] = useState("");
   const queryLower = query.toLowerCase();
-  const entityType = entity[0];
 
   // memoized filtered items, at most 5 items
   const filtered = useMemo(
@@ -36,7 +36,7 @@ export default function LookupCombobox({ entity }: Props) {
 
   return (
     <Combobox
-      id="combobox"
+      id={entity[0] + "-combobox"}
       itemToStringLabel={(entity: EntityType) => entity.name}
       itemToStringValue={(entity: EntityType) => entity.external_id.toString()}
       isItemEqualToValue={(i: EntityType, v: EntityType) =>
@@ -47,27 +47,34 @@ export default function LookupCombobox({ entity }: Props) {
       onInputValueChange={setQuery}
       autoHighlight
     >
-      <ComboboxInput placeholder={titleCase(entity[0])} spellCheck={false} />
+      <ComboboxInput
+        placeholder={entity[0].replace(
+          entity[0].charAt(0),
+          entity[0].charAt(0).toUpperCase(),
+        )}
+        spellCheck={false}
+      />
       <ComboboxContent className="p-1">
         <ComboboxEmpty>No matches found.</ComboboxEmpty>
         <ComboboxList>
           <ComboboxCollection>
-            {(entity: EntityType) => (
-              <ComboboxItem key={entity.external_id} value={entity}>
+            {(item: EntityType) => (
+              <ComboboxItem key={item.external_id} value={item} className="p-2">
                 <Item size="sm" className="p-0">
-                  <ItemContent>
-                    <ItemTitle>{entity.name}</ItemTitle>
-                    {entityType === "location" && (
-                      <ItemDescription className="text-xs">
-                        {entity.address}
-                      </ItemDescription>
+                  <ItemContent
+                    className={cn(
+                      entity[0] === "movie" &&
+                      "flex flex-row items-center justify-between",
                     )}
-                    {entityType === "movie" && entity.release_date !== null && (
-                      // show release year if available
-                      <ItemDescription className="text-xs">
-                        {entity.release_date.split("-", 1)[0]}
-                      </ItemDescription>
-                    )}
+                  >
+                    <ItemTitle>{item.name}</ItemTitle>
+                    <ItemDescription className="text-xs">
+                      {entity[0] === "location" && item.address}
+                      {entity[0] === "movie" &&
+                        item.release_date !== null &&
+                        // show release year if available
+                        item.release_date.split("-", 1)[0]}
+                    </ItemDescription>
                   </ItemContent>
                 </Item>
               </ComboboxItem>
@@ -77,9 +84,4 @@ export default function LookupCombobox({ entity }: Props) {
       </ComboboxContent>
     </Combobox>
   );
-}
-
-function titleCase(s: string) {
-  const first = s.charAt(0);
-  return s.replace(first, first.toUpperCase());
 }

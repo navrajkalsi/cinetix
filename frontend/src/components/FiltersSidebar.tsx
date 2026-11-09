@@ -1,4 +1,3 @@
-import { type Filters } from "@/layouts/FilterLayout";
 import {
   Sidebar,
   SidebarContent,
@@ -10,7 +9,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarTrigger,
+  SidebarSeparator,
+  useSidebar,
 } from "./ui/sidebar";
 import {
   CircleUserIcon,
@@ -18,9 +18,17 @@ import {
   FileVideoCameraIcon,
   FilmIcon,
   MapPinIcon,
+  SidebarIcon,
 } from "lucide-react";
-import LookupCombobox, { type Entity } from "./LookupCombobox";
 import useLookupArrays from "@/hooks/useLookupArrays";
+import type { Movie } from "@/models/Movie";
+import type { Location } from "@/models/Location";
+import FiltersCombobox from "./FiltersCombobox";
+import type { Format } from "@/models/Format";
+import FiltersSelect from "./FiltersSelect";
+import { Input } from "./ui/input";
+import { useMatches } from "react-router";
+import type { Filter } from "@/filters";
 
 const pages = [
   {
@@ -45,36 +53,41 @@ const pages = [
   },
 ];
 
-const filters = [
-  { title: "Movie", input: LookupCombobox },
-  // { title: "Location", input: Combobox },
-  // { title: "Format", input: Select },
-];
-
-interface Props {
-  activeFilters: Filters;
-  setActiveFilters: (filters: Filters) => void;
-}
-
-export default function FiltersSidebar({
-  activeFilters,
-  setActiveFilters,
-}: Props) {
+export default function FiltersSidebar() {
   const [movies, locations, formats] = useLookupArrays();
+  const { toggleSidebar } = useSidebar();
+
+  const match = useMatches().at(-1);
+  const filters = match ? (match.handle as Filter[]) : [];
 
   return (
     <Sidebar variant="floating" collapsible="icon">
       <SidebarHeader>
-        <SidebarTrigger variant="outline" className="mx-auto" />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={toggleSidebar} tooltip="Toggle Sidebar">
+              <SidebarIcon />
+              <span>Collapse Sidebar</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent>
         {pagesGroup}
-        {filtersGroup(["movie", movies])}
+        <SidebarSeparator className="bg-muted-foreground h-0.5 rounded-full" />
+        {filtersGroup(movies, locations, formats)}
       </SidebarContent>
 
       <SidebarFooter>
-        <CircleUserIcon className="mx-auto" />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton>
+              <CircleUserIcon />
+              <span>Profile</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
 
       <SidebarRail />
@@ -88,7 +101,7 @@ const pagesGroup = (
     <SidebarMenu>
       {pages.map((page) => (
         <SidebarMenuItem key={page.title}>
-          <SidebarMenuButton>
+          <SidebarMenuButton tooltip={page.title}>
             <page.icon />
             <span>{page.title}</span>
           </SidebarMenuButton>
@@ -101,16 +114,27 @@ const pagesGroup = (
 // is hidden when the sidebar is collapsed
 // TODO make visible when at least one filter is active
 // and add a superscript with the total number of filters applied
-function filtersGroup(entity: Entity) {
+function filtersGroup(
+  movies: Movie[],
+  locations: Location[],
+  formats: Format[],
+) {
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Filters</SidebarGroupLabel>
       <SidebarMenu>
-        {filters.map((filter) => (
-          <SidebarMenuItem key={filter.title}>
-            <filter.input entity={entity} />
-          </SidebarMenuItem>
-        ))}
+        <SidebarMenuItem key="movie" className="flex flex-col gap-2.5">
+          <FiltersCombobox entity={["movie", movies]} />
+          <FiltersCombobox entity={["location", locations]} />
+          <FiltersSelect formats={formats} />
+          <Input
+            type="number"
+            placeholder="Year"
+            step="1"
+            min="2000"
+            max="2030"
+          />
+        </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
   );

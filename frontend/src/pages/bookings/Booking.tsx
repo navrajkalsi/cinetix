@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
 import useBookingComplete from "@/hooks/useBookingCompelete";
-import type { Booking } from "@/models/Booking";
+import type { LoaderData } from "@/loaders";
 import { parseDate, parseTime } from "@/utils";
 import {
   ArmchairIcon,
@@ -30,6 +30,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Link, useLoaderData } from "react-router";
+
+export type BookingData = Extract<LoaderData, { path: "booking" }>;
 
 function getCardItem(title: string, description: string, Icon: LucideIcon) {
   return (
@@ -63,7 +65,7 @@ function getHeaderLink(data: string, link: string) {
 }
 
 export default function Booking() {
-  const { booking }: { booking: Booking } = useLoaderData();
+  const { booking }: BookingData = useLoaderData();
   const complete = useBookingComplete(booking);
 
   const movie = complete.movie;

@@ -29,7 +29,7 @@ export async function getBookings({
   signal?: AbortSignal;
 }): Promise<Booking[]> {
   const response = await fetch(
-    `/api/bookings/?${year ? `year=${year}&` : ""}${movieId ? `movie_id=${movieId}&` : ""}${locationId ? `location_id=${locationId}&` : ""}${formatId ? `format_id=${formatId}&` : ""}${includeFuture ? `future=${includeFuture}` : ""}`,
+    `/api/bookings/?${year ? `year=${year}&` : ""}${movieId ? `movie_id=${movieId}&` : ""}${locationId ? `location_id=${locationId}&` : ""}${formatId ? `format_id=${formatId}&` : ""}${includeFuture ? `include_future=${includeFuture}` : ""}`,
     { signal },
   );
 

@@ -28,6 +28,8 @@ import type { Format } from "@/models/Format";
 import FiltersSelect from "./FiltersSelect";
 import FiltersYearInput from "./FiltersYearInput";
 import { useLoaderFilters, type LoaderData } from "@/loaders";
+import type { Filters, Filter } from "@/filters";
+import { useNavigate, type NavigateFunction } from "react-router";
 
 const pages = [
   {
@@ -55,6 +57,7 @@ const pages = [
 export default function FiltersSidebar() {
   const [movies, locations, formats] = useLookupArrays();
   const { toggleSidebar } = useSidebar();
+  const navigate = useNavigate();
 
   const filters = useLoaderFilters();
 
@@ -74,7 +77,7 @@ export default function FiltersSidebar() {
       <SidebarContent>
         {pagesGroup}
         <SidebarSeparator className="bg-muted-foreground h-0.5 rounded-full" />
-        {filtersGroup(movies, locations, formats, filters)}
+        {filtersGroup(movies, locations, formats, filters, navigate)}
       </SidebarContent>
 
       <SidebarFooter>
@@ -117,6 +120,7 @@ function filtersGroup(
   locations: Location[],
   formats: Format[],
   filters: LoaderData["filters"],
+  navigate: NavigateFunction,
 ) {
   if (!filters) return <></>;
 
@@ -138,13 +142,18 @@ function filtersGroup(
       <SidebarGroupLabel>Filters</SidebarGroupLabel>
       <SidebarMenu>
         <SidebarMenuItem key="movie" className="flex flex-col gap-2.5">
-          {"year" in filters && <FiltersYearInput />}
+          {"year" in filters && (
+            <FiltersYearInput
+              value={filters.year}
+              onValueChange={(e) => applyFiler({ year: e }, navigate)}
+            />
+          )}
 
           {"movieId" in filters && (
             <FiltersCombobox
               entity={["movie", movies]}
               value={movie}
-              onValueChange={console.log}
+              onValueChange={(e) => applyFiler({ movieId: e?.id }, navigate)}
             />
           )}
 
@@ -152,7 +161,7 @@ function filtersGroup(
             <FiltersCombobox
               entity={["location", locations]}
               value={location}
-              onValueChange={console.log}
+              onValueChange={(e) => applyFiler({ locationId: e?.id }, navigate)}
             />
           )}
 
@@ -161,4 +170,24 @@ function filtersGroup(
       </SidebarMenu>
     </SidebarGroup>
   );
+}
+
+// navigates to the new query(search) string, preserving original params and overwriting supplied filters
+function applyFiler(filters: Partial<Filters>, navigate: NavigateFunction) {
+  const params = new URLSearchParams(location.search);
+
+  const setOrDelete = (key: Filter, n?: number) =>
+    n ? params.set(key, n.toString()) : params.delete(key);
+
+  if ("year" in filters) setOrDelete("year", filters.year);
+  if ("movieId" in filters) setOrDelete("movieId", filters.movieId);
+  if ("locationId" in filters) setOrDelete("locationId", filters.locationId);
+  if ("formatId" in filters) setOrDelete("formatId", filters.formatId);
+
+  navigate(
+    {
+      search: params.toString(),
+    },
+    { replace: true },
+  ); // do not add history record
 }

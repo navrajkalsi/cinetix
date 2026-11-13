@@ -171,6 +171,25 @@
   }
 }
 
+@layer utilities {
+
+  /* hiding number inputs stepper */
+  .no-stepper {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  .no-stepper::-webkit-inner-spin-button,
+  .no-stepper::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
 @utility link {
   @apply underline-offset-2 decoration-2 hover:underline hover:cursor-pointer;
+}
+
+@utility shadow-booking-card {
+  box-shadow: 0 0 15px 15px rgba(100, 100, 100, 0.5);
 }

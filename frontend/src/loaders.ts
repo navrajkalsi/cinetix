@@ -17,7 +17,10 @@ export type LoaderData =
   | {
     path: "bookings";
     bookings: Booking[];
-    filters: Omit<Filters, "movieId" | "locationId" | "formatId">;
+    filters: Omit<Filters, "movieId">;
+    // do the bookings also contain bookings for following years
+    // this will be only true for current year
+    future: boolean;
   }
   | {
     path: "booking";
@@ -54,12 +57,20 @@ export async function bookingsLoader({ request }: LoaderFunctionArgs) {
 
   // if no year is requested, show future bookings with current year
   // no future bookings are shown if the year is requested specifically
+  const future = filters.year ? false : true;
+
   const bookings = await getBookings({
+    ...filters,
+    includeFuture: future,
     year: filters.year ?? today.getFullYear(),
-    includeFuture: filters.year ? false : true,
   });
 
-  const data: BookingsData = { path: "bookings", bookings, filters };
+  const data: BookingsData = {
+    path: "bookings",
+    bookings,
+    filters,
+    future,
+  };
   return data;
 }
 
@@ -124,7 +135,7 @@ function parseId(id?: string): number {
 
 export function useLoaderFilters(): LoaderData["filters"] {
   const match = useMatches().at(-1);
-  if (!match) return null;
+  if (!match || !match.loaderData) return null; // some pages may not have loader data
 
   const data = match.loaderData as LoaderData;
   return data.filters;

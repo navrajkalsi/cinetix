@@ -31,7 +31,7 @@ export function parseFilters(
 }
 
 // filters for all pages
-export const BookingsFilters = ["year"] as const,
+export const BookingsFilters = ["year", "locationId", "formatId"] as const,
   BookingFilters = [] as const,
   BookingNewFilters = [] as const,
   MovieFilters = ["locationId", "formatId"] as const,

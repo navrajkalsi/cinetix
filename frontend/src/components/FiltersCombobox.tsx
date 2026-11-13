@@ -61,6 +61,7 @@ export default function FiltersCombobox({
           entity[0].charAt(0).toUpperCase(),
         )}
         spellCheck={false}
+        showClear
       />
       <ComboboxContent className="p-1">
         <ComboboxEmpty>No matches found.</ComboboxEmpty>

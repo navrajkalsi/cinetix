@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { useLoaderData } from "react-router";
 import { parseISO } from "date-fns";
 import BookingCard from "@/components/BookingCard";
@@ -6,54 +5,63 @@ import useBookingComplete from "@/hooks/useBookingCompelete";
 import type { LoaderData } from "@/loaders";
 
 export type BookingsData = Extract<LoaderData, { path: "bookings" }>;
+const today = new Date();
 
 export default function Bookings() {
   // bookings fetched during routing
-  const { bookings, filters }: BookingsData = useLoaderData();
+  const { bookings, filters, future }: BookingsData = useLoaderData();
 
-  const upcomingBookings = bookings
-    .filter((booking) => parseISO(booking.date) > new Date())
-    .map(useBookingComplete),
-    pastBookings = bookings
-      .filter((booking) => parseISO(booking.date) <= new Date())
-      .map(useBookingComplete);
+  if (!bookings.length) return empty(filters);
 
-  const startLeft = useRef<number>(0); // for offsettting the sidebar width
-  const scrollOffset = useRef<number>(0);
+  const upcomingBookings = future
+    ? bookings
+      .filter((booking) => parseISO(booking.date) > new Date())
+      .map(useBookingComplete)
+    : [],
+    recentBookings = future
+      ? bookings
+        .filter((booking) => parseISO(booking.date) <= new Date())
+        .map(useBookingComplete)
+      : bookings.map(useBookingComplete);
 
-  function handleWheel(e: React.WheelEvent<HTMLElement>) {
-    const main = e.currentTarget;
-
-    if (!startLeft.current)
-      startLeft.current = main.getBoundingClientRect().left;
-
-    const currentOffset = scrollOffset.current,
-      // clamped to bounds
-      newOffset = Math.max(
-        Math.min(currentOffset - e.deltaY - e.deltaX, 0),
-        window.innerWidth > main.scrollWidth
-          ? 0
-          : window.innerWidth - main.scrollWidth - startLeft.current,
-      );
-
-    main.style.setProperty("translate", `${newOffset}px 0`);
-    scrollOffset.current = newOffset;
-  }
+  const handleWheel = (e: React.WheelEvent<HTMLElement>) =>
+    (e.currentTarget.scrollLeft += e.deltaY);
 
   return (
-    <div className="size-full overflow-hidden">
-      <div
-        onWheel={handleWheel}
-        className="w-fit h-full flex py-25 px-12.5 gap-12.5 duration-300"
-      >
-        {upcomingBookings.map((booking) => (
-          <BookingCard booking={booking} key={booking.id} />
-        ))}
+    <div className="size-full flex flex-col overflow-auto justify-center">
+      <div className="font-heading mx-12 mt-12 text-2xl">
+        {upcomingBookings.length
+          ? "Upcoming and recent bookings for year "
+          : "Bookings for year "}
+        <span className="font-bold">{filters.year ?? today.getFullYear()}</span>
+        :
+      </div>
 
-        {pastBookings.map((booking) => (
-          <BookingCard booking={booking} key={booking.id} />
-        ))}
+      <div
+        className="size-full overflow-x-scroll overflow-y-hidden flex"
+        onWheel={handleWheel}
+      >
+        {upcomingBookings.length > 0 && (
+          <div className="w-fit h-full flex pb-24 p-12 gap-15">
+            {upcomingBookings.map((booking) => (
+              <BookingCard booking={booking} key={booking.id} ringGlow />
+            ))}
+          </div>
+        )}
+
+        <div className="w-fit h-full flex pb-24 p-12 gap-15">
+          {recentBookings.map((booking) => (
+            <BookingCard booking={booking} key={booking.id} />
+          ))}
+        </div>
       </div>
     </div>
   );
 }
+
+const empty = (filters: BookingsData["filters"]) => (
+  <div className="size-full flex justify-center items-center text-5xl font-heading">
+    No bookings found for year&nbsp;
+    <span className="font-bold">{filters.year ?? today.getFullYear()}</span>.
+  </div>
+);

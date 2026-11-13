@@ -8,7 +8,6 @@ import {
   UserPenIcon,
   UserPlusIcon,
 } from "lucide-react";
-import { format, parse, parseISO } from "date-fns";
 import { cn } from "cn";
 import { Badge } from "./ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
@@ -23,6 +22,8 @@ interface Props {
   contentVisible?: boolean;
   // scale up on hover
   hoverScale?: boolean;
+  // add box shadow
+  ringGlow?: boolean;
   className?: string;
 }
 
@@ -52,6 +53,7 @@ export default function BookingCard({
   booking,
   contentVisible,
   hoverScale = true,
+  ringGlow = false,
   className,
 }: Props) {
   const bg = `https://image.tmdb.org/t/p/w780${booking.movie.poster_path}`;
@@ -59,8 +61,9 @@ export default function BookingCard({
   return (
     <Card
       className={cn(
-        "group h-full min-w-96 aspect-2/3 bg-cover bg-center max-w-full rounded-10xl justify-end p-0 duration-500",
+        "group h-full aspect-2/3 bg-cover bg-center max-w-full rounded-10xl justify-end p-0 duration-500",
         hoverScale && "hover:scale-105",
+        ringGlow && "shadow-booking-card border-muted-foreground/50 border-5",
         className,
       )}
       style={{ backgroundImage: `url(${bg})` }}

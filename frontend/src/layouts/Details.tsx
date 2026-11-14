@@ -12,6 +12,7 @@ import { DotIcon, ExternalLinkIcon } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import BookingItem from "@/components/BookingItem";
 import type { LoaderData } from "@/loaders";
+import EmtpyBookings from "@/components/EmptyBookings";
 
 const mapsApiKey = "AIzaSyBXmTWlDVPBKtxFm2pejH0CII8jGJZ6vvU";
 
@@ -38,7 +39,7 @@ export default function Details() {
 
   return (
     <div className="size-full flex p-12 gap-12">
-      {getDetails(entity, bookings)}
+      {getDetails(entity, bookings, filters)}
       {getPreview(entity)}
     </div>
   );
@@ -77,7 +78,15 @@ function getEntity<P extends Paths>(
   return entity as Extract<Entity, { path: P }>;
 }
 
-function getDetails(entity: Entity, bookings: Booking[]) {
+function getDetails(
+  entity: Entity,
+  bookings: Booking[],
+  filters: Extract<
+    LoaderData,
+    { path: "movie" | "location" | "format" }
+  >["filters"],
+) {
+  const empty = bookings.length === 0;
   const mutiple = bookings.length > 1;
 
   return (
@@ -100,13 +109,15 @@ function getDetails(entity: Entity, bookings: Booking[]) {
                   <div>
                     {format(parseISO(entity.data.release_date), "MMM y")}
                   </div>
-                  <DotIcon />
+                  {!empty && <DotIcon />}
                 </>
               )}
 
-              <div>
-                Seen {bookings.length} time{mutiple && "s"}
-              </div>
+              {!empty && (
+                <div>
+                  Seen {bookings.length} time{mutiple && "s"}
+                </div>
+              )}
             </div>
           </>
         )}
@@ -124,10 +135,14 @@ function getDetails(entity: Entity, bookings: Booking[]) {
 
             <div className="text-muted-foreground flex gap-1">
               <div>{entity.data.address}</div>
-              <DotIcon />
-              <div>
-                Visited {bookings.length} time{mutiple && "s"}
-              </div>
+              {!empty && (
+                <>
+                  <DotIcon />
+                  <div>
+                    Visited {bookings.length} time{mutiple && "s"}
+                  </div>
+                </>
+              )}
             </div>
           </>
         )}
@@ -141,9 +156,11 @@ function getDetails(entity: Entity, bookings: Booking[]) {
               {entity.data.name} <ExternalLinkIcon className="h-auto w-1em" />
             </Link>
 
-            <div className="text-muted-foreground">
-              Experienced {bookings.length} time{mutiple && "s"}
-            </div>
+            {!empty && (
+              <div className="text-muted-foreground">
+                Experienced {bookings.length} time{mutiple && "s"}
+              </div>
+            )}
           </>
         )}
       </div>
@@ -153,9 +170,13 @@ function getDetails(entity: Entity, bookings: Booking[]) {
       }
       <div className="bg-foreground/5 backdrop-blur-sm rounded-10xl py-8 px-4 size-full overflow-hidden">
         <div className="bg-transparent size-full overflow-y-auto px-4 gap-8 flex flex-col">
-          {bookings.map((booking, i) => (
-            <BookingItem booking={booking} key={i} hideField={entity.type} />
-          ))}
+          {bookings.length > 0 ? (
+            bookings.map((booking, i) => (
+              <BookingItem booking={booking} key={i} hideField={entity.type} />
+            ))
+          ) : (
+            <EmtpyBookings filters={filters} />
+          )}
         </div>
       </div>
     </div>

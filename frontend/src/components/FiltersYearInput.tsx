@@ -1,6 +1,6 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { Button } from "./ui/button";
-import { CircleCheckIcon } from "lucide-react";
+import { CheckIcon, XIcon } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 
 interface Props {
@@ -8,8 +8,12 @@ interface Props {
   onValueChange: (v: number | undefined) => void;
 }
 
+const minYear = 2000;
+const maxYear = new Date().getFullYear() + 1;
+
 export default function FiltersYearInput({ value, onValueChange }: Props) {
   const [inputValue, setInputValue] = useState(value);
+  const input = useRef<HTMLInputElement | null>(null);
   const dirty = inputValue !== value;
 
   const updateValue = (e: ChangeEvent<HTMLInputElement>) =>
@@ -20,6 +24,15 @@ export default function FiltersYearInput({ value, onValueChange }: Props) {
         : e.target.valueAsNumber,
     );
 
+  const handleClick = (newValue: number | undefined) => {
+    const inputTarget = input.current;
+
+    if (!inputTarget) return; // skip
+    if (newValue && !inputTarget.reportValidity()) return; // invalid
+
+    onValueChange(newValue);
+  };
+
   useEffect(() => setInputValue(value), [value]);
 
   return (
@@ -28,21 +41,34 @@ export default function FiltersYearInput({ value, onValueChange }: Props) {
         type="number"
         placeholder="Year"
         value={inputValue ?? ""}
+        min={minYear}
+        max={maxYear}
         onChange={updateValue}
         className="no-stepper"
+        ref={input}
       />
 
-      {dirty && (
-        <InputGroupAddon align="inline-end">
+      <InputGroupAddon align="inline-end">
+        {dirty && (
           <Button
-            variant="secondary"
-            size="icon"
-            onClick={() => onValueChange(inputValue)}
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => handleClick(inputValue)}
           >
-            <CircleCheckIcon />
+            <CheckIcon />
           </Button>
-        </InputGroupAddon>
-      )}
+        )}
+
+        {!dirty && value && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => handleClick(undefined)}
+          >
+            <XIcon />
+          </Button>
+        )}
+      </InputGroupAddon>
     </InputGroup>
   );
 }

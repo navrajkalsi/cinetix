@@ -3,6 +3,9 @@ import { parseISO } from "date-fns";
 import BookingCard from "@/components/BookingCard";
 import useBookingComplete from "@/hooks/useBookingCompelete";
 import type { LoaderData } from "@/loaders";
+import { FilterText } from "@/components/FilterText";
+import EmtpyBookings from "@/components/EmptyBookings";
+import { useEffect, useRef } from "react";
 
 export type BookingsData = Extract<LoaderData, { path: "bookings" }>;
 const today = new Date();
@@ -10,8 +13,14 @@ const today = new Date();
 export default function Bookings() {
   // bookings fetched during routing
   const { bookings, filters, future }: BookingsData = useLoaderData();
+  const list = useRef<HTMLDivElement | null>(null);
 
-  if (!bookings.length) return empty(filters);
+  useEffect(() => {
+    if (list.current) list.current.scrollLeft = 0;
+  }, [bookings, filters]);
+
+  if (!bookings.length)
+    return <EmtpyBookings filters={filters} future={future} />;
 
   const upcomingBookings = future
     ? bookings
@@ -30,16 +39,20 @@ export default function Bookings() {
   return (
     <div className="size-full flex flex-col overflow-auto justify-center">
       <div className="font-heading mx-12 mt-12 text-2xl">
-        {upcomingBookings.length
+        {future
           ? "Upcoming and recent bookings for year "
           : "Bookings for year "}
         <span className="font-bold">{filters.year ?? today.getFullYear()}</span>
-        :
+        &nbsp;
+        <FilterText filter="locationId" data={filters.locationId} />
+        &nbsp;
+        <FilterText filter="formatId" data={filters.formatId} />
       </div>
 
       <div
         className="size-full overflow-x-scroll overflow-y-hidden flex"
         onWheel={handleWheel}
+        ref={list}
       >
         {upcomingBookings.length > 0 && (
           <div className="w-fit h-full flex pb-24 p-12 gap-15">
@@ -58,10 +71,3 @@ export default function Bookings() {
     </div>
   );
 }
-
-const empty = (filters: BookingsData["filters"]) => (
-  <div className="size-full flex justify-center items-center text-5xl font-heading">
-    No bookings found for year&nbsp;
-    <span className="font-bold">{filters.year ?? today.getFullYear()}</span>.
-  </div>
-);

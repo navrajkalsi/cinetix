@@ -153,7 +153,7 @@ function filtersGroup(
             <FiltersCombobox
               entity={["movie", movies]}
               value={movie}
-              onValueChange={(e) => applyFiler({ movieId: e?.id }, navigate)}
+              onValueChange={(m) => applyFiler({ movieId: m?.id }, navigate)}
             />
           )}
 
@@ -161,11 +161,17 @@ function filtersGroup(
             <FiltersCombobox
               entity={["location", locations]}
               value={location}
-              onValueChange={(e) => applyFiler({ locationId: e?.id }, navigate)}
+              onValueChange={(l) => applyFiler({ locationId: l?.id }, navigate)}
             />
           )}
 
-          {"formatId" in filters && <FiltersSelect formats={formats} />}
+          {"formatId" in filters && (
+            <FiltersSelect
+              formats={formats}
+              value={format}
+              onValueChange={(f) => applyFiler({ formatId: f?.id }, navigate)}
+            />
+          )}
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>

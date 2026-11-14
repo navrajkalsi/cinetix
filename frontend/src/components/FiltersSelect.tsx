@@ -12,9 +12,15 @@ import { cn } from "cn";
 
 interface Props {
   formats: Format[];
+  value: Format | null;
+  onValueChange: (v: Format | null) => void;
 }
 
-export default function FiltersSelect({ formats }: Props) {
+export default function FiltersSelect({
+  formats,
+  value,
+  onValueChange,
+}: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -23,6 +29,8 @@ export default function FiltersSelect({ formats }: Props) {
       itemToStringLabel={(f: Format) => f.name}
       itemToStringValue={(f: Format) => f.id.toString()}
       isItemEqualToValue={(i, v) => i.id === v.id}
+      onValueChange={onValueChange}
+      value={value}
       highlightItemOnHover
       open={open}
       onOpenChange={setOpen}
@@ -34,6 +42,9 @@ export default function FiltersSelect({ formats }: Props) {
       </SelectTrigger>
       <SelectContent alignItemWithTrigger={false}>
         <SelectGroup>
+          <SelectItem value={null} className="text-muted-foreground">
+            Format
+          </SelectItem>
           {formats.map((format) => (
             <SelectItem key={format.id} value={format}>
               {format.name}

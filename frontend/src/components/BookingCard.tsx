@@ -61,9 +61,10 @@ export default function BookingCard({
   return (
     <Card
       className={cn(
-        "group h-full aspect-2/3 bg-cover bg-center max-w-full rounded-10xl justify-end p-0 duration-500",
+        "group shadow-booking-card h-full aspect-2/3 bg-cover bg-center max-w-full rounded-10xl justify-end p-0 duration-500",
         hoverScale && "hover:scale-105",
-        ringGlow && "shadow-booking-card border-muted-foreground/50 border-5",
+        ringGlow &&
+        "border-muted-foreground/50 border-0 outline-5 outline-foreground/50 outline-offset-5",
         className,
       )}
       style={{ backgroundImage: `url(${bg})` }}
@@ -118,7 +119,7 @@ export default function BookingCard({
               }
             />
 
-            <TooltipContent side="bottom" className="text-center">
+            <TooltipContent side="top" className="text-center">
               {booking.source === "auto" &&
                 "This booking was generated automatically from email."}
               {booking.source === "manual" &&

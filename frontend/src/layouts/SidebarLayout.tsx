@@ -1,3 +1,4 @@
+import Backdrop from "@/components/Backdrop";
 import FiltersSidebar from "@/components/FiltersSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Outlet, useMatch } from "react-router";
@@ -15,6 +16,7 @@ export default function FiltersLayout() {
       >
         <FiltersSidebar />
         <Outlet />
+        <Backdrop />
       </SidebarProvider>
     </div>
   );

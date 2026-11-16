@@ -11,7 +11,11 @@ import { getBooking, getBookings } from "./api/bookings";
 import type { Booking } from "./models/Booking";
 import type { BookingsData } from "./pages/bookings/Bookings";
 import type { BookingData } from "./pages/bookings/Booking";
-import type { FormatData, LocationData, MovieData } from "./layouts/Details";
+import type {
+  FormatData,
+  LocationData,
+  MovieData,
+} from "./layouts/DetailsLayout";
 
 export type LoaderData =
   | {

@@ -20,7 +20,8 @@
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  /* --accent: oklch(0.97 0 0); */
+  --accent: rgb(250, 25, 25);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
@@ -40,6 +41,8 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  cursor: default;
 }
 
 .dark {
@@ -55,7 +58,8 @@
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
+  /* --accent: oklch(0.269 0 0); */
+  --accent: rgb(250, 25, 25);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
@@ -191,5 +195,51 @@
 }
 
 @utility shadow-booking-card {
-  box-shadow: 0 0 15px 15px rgba(100, 100, 100, 0.5);
+  box-shadow: 0 0 25px 25px black;
+}
+
+@utility highlight {
+  @apply after:content-[""] after:absolute after:h-1 after:bg-accent after:left-0 after:-bottom-1 after:w-0 after:rounded-full;
+  /* transition: width 0.5s; */
+}
+
+@theme {
+  --animate-grow: grow 1s ease-in-out;
+
+  @keyframes grow {
+
+    0%,
+    50% {
+      width: 0;
+    }
+
+    100% {
+      width: 100%;
+    }
+  }
+}
+
+@property --c1 {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: hsl(0 80% 55%);
+}
+
+@property --c2 {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: hsl(40 80% 55%);
+}
+
+.random-gradient {
+  background: linear-gradient(135deg, var(--c1), var(--c2));
+  transition:
+    --c1 2.5s ease,
+    --c2 2.5s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .random-gradient {
+    transition: none;
+  }
 }

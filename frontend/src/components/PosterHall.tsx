@@ -25,7 +25,6 @@ function PosterCard({ posterPath }: { posterPath: string | null }) {
         !error && (
           <img
             aria-hidden
-            alt=""
             className="w-full h-full object-cover"
             src={`https://image.tmdb.org/t/p/w342${posterPath}`}
             loading="lazy"

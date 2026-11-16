@@ -13,6 +13,7 @@ import { format, parseISO } from "date-fns";
 import BookingItem from "@/components/BookingItem";
 import type { LoaderData } from "@/loaders";
 import EmtpyBookings from "@/components/EmptyBookings";
+import { FilterText } from "@/components/FilterText";
 
 const mapsApiKey = "AIzaSyBXmTWlDVPBKtxFm2pejH0CII8jGJZ6vvU";
 
@@ -88,6 +89,11 @@ function getDetails(
 ) {
   const empty = bookings.length === 0;
   const mutiple = bookings.length > 1;
+  const activeFilters = [] as Entity["type"][]; // for repeating fields that will be save due to filters
+  if ("movieId" in filters && filters.movieId) activeFilters.push("movie");
+  if ("locationId" in filters && filters.locationId)
+    activeFilters.push("location");
+  if ("formatId" in filters && filters.formatId) activeFilters.push("format");
 
   return (
     <div className="size-full bg-transparent flex flex-col gap-8 font-heading">
@@ -106,17 +112,21 @@ function getDetails(
             <div className="text-muted-foreground flex gap-1">
               {entity.data.release_date && (
                 <>
-                  <div>
-                    {format(parseISO(entity.data.release_date), "MMM y")}
-                  </div>
+                  {format(parseISO(entity.data.release_date), "MMM y")}
                   {!empty && <DotIcon />}
                 </>
               )}
 
               {!empty && (
-                <div>
+                <>
                   Seen {bookings.length} time{mutiple && "s"}
-                </div>
+                  {"locationId" in filters && (
+                    <FilterText filter="locationId" data={filters.locationId} />
+                  )}
+                  {"formatId" in filters && (
+                    <FilterText filter="formatId" data={filters.formatId} />
+                  )}
+                </>
               )}
             </div>
           </>
@@ -165,14 +175,19 @@ function getDetails(
         )}
       </div>
 
-      {
-        // make sure the scrollbar starts in the inner container
-      }
       <div className="bg-foreground/5 backdrop-blur-sm rounded-10xl py-8 px-4 size-full overflow-hidden">
+        {
+          // make sure the scrollbar starts in the inner container
+        }
         <div className="bg-transparent size-full overflow-y-auto px-4 gap-8 flex flex-col">
           {bookings.length > 0 ? (
             bookings.map((booking, i) => (
-              <BookingItem booking={booking} key={i} hideField={entity.type} />
+              <BookingItem
+                booking={booking}
+                key={i}
+                primary={entity.type}
+                secondary={activeFilters}
+              />
             ))
           ) : (
             <EmtpyBookings filters={filters} />
@@ -189,7 +204,7 @@ function getPreview(entity: Entity) {
   // but then the inner div will take over and scale its height to maintain the aspect ratio
   return (
     <div className="aspect-2/3 max-w-2/5 h-full w-auto flex items-center">
-      <div className="aspect-2/3 w-full h-auto rounded-10xl overflow-auto">
+      <div className="shadow-booking-card aspect-2/3 w-full h-auto rounded-10xl overflow-auto">
         {entity.type === "movie" && (
           <img
             loading="lazy"

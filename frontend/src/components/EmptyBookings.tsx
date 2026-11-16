@@ -24,7 +24,7 @@ export default function EmtpyBookings({ filters, future = false }: Props) {
       : undefined;
 
   return (
-    <Empty className="border border-dashed">
+    <Empty className="border border-dashed size-fit m-auto flex-initial bg-background">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <TrashIcon />
@@ -33,20 +33,14 @@ export default function EmtpyBookings({ filters, future = false }: Props) {
         <EmptyTitle>Houseempty!</EmptyTitle>
 
         <EmptyDescription>
-          No {future && "upcoming or recent"} bookings found&nbsp;
-          {year && (
-            <>
-              for year <span className="font-bold">{year}</span>
-            </>
-          )}
+          No {future && "upcoming or recent"} bookings found
+          {year && <FilterText filter="year-booking" data={year} />}
           {"movieId" in filters && (
             <FilterText filter="movieId" data={filters.movieId} />
           )}
-          &nbsp;
           {"locationId" in filters && (
             <FilterText filter="locationId" data={filters.locationId} />
           )}
-          &nbsp;
           {"formatId" in filters && (
             <FilterText filter="formatId" data={filters.formatId} />
           )}

@@ -13,6 +13,7 @@ import {
   useSidebar,
 } from "./ui/sidebar";
 import {
+  ChartSplineIcon,
   CircleUserIcon,
   ClapperboardIcon,
   FileVideoCameraIcon,
@@ -29,7 +30,7 @@ import FiltersSelect from "./FiltersSelect";
 import FiltersYearInput from "./FiltersYearInput";
 import { useLoaderFilters, type LoaderData } from "@/loaders";
 import type { Filters, Filter } from "@/filters";
-import { useNavigate, type NavigateFunction } from "react-router";
+import { useMatch, useNavigate, type NavigateFunction } from "react-router";
 
 const pages = [
   {
@@ -58,6 +59,8 @@ export default function FiltersSidebar() {
   const [movies, locations, formats] = useLookupArrays();
   const { toggleSidebar } = useSidebar();
   const navigate = useNavigate();
+  // load stats only for the first bookings page
+  const bookings = useMatch("/bookings");
 
   const filters = useLoaderFilters();
 
@@ -82,6 +85,17 @@ export default function FiltersSidebar() {
 
       <SidebarFooter>
         <SidebarMenu>
+          {!!bookings && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip={`Stats for ${filters && "year" in filters && filters.year ? filters.year : "all years"}`}
+              >
+                <ChartSplineIcon />
+                <span>Stats</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+
           <SidebarMenuItem>
             <SidebarMenuButton>
               <CircleUserIcon />

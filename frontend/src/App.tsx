@@ -2,8 +2,8 @@ import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
 import BookingNew from "./pages/bookings/BookingNew";
 import { LookupsProvider } from "./context/LookupProvider";
 import BookingPage from "./pages/bookings/Booking";
-import Details from "./layouts/Details";
-import FiltersLayout from "./layouts/FilterLayout";
+import Details from "./layouts/DetailsLayout";
+import FiltersLayout from "./layouts/SidebarLayout";
 import Bookings from "./pages/bookings/Bookings";
 import {
   bookingLoader,
@@ -12,6 +12,7 @@ import {
   locationLoader,
   movieLoader,
 } from "./loaders";
+import Backdrop from "./components/Backdrop";
 
 export type Page = "bookings" | "movie" | "location" | "format";
 
@@ -27,6 +28,11 @@ const router = createBrowserRouter([
     children: [
       // redirect root to bookings
       { index: true, element: <Navigate replace to="/bookings" /> },
+
+      {
+        path: "backdrop",
+        Component: Backdrop,
+      },
 
       {
         path: "bookings",

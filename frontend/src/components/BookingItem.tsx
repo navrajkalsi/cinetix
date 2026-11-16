@@ -14,14 +14,17 @@ import {
 } from "lucide-react";
 import { parseDate, parseTime } from "@/utils";
 import { Fragment } from "react/jsx-runtime";
-import type { Entity } from "@/layouts/Details";
+import type { Entity } from "@/layouts/DetailsLayout";
 
 interface Props {
   booking: Booking;
-  hideField: Entity["type"];
+  // what page are the bookings being shown for
+  primary: Entity["type"];
+  // further fields to hide, in addition to primary
+  secondary: Entity["type"][];
 }
 
-export default function BookingItem({ booking, hideField }: Props) {
+export default function BookingItem({ booking, primary, secondary }: Props) {
   const complete = useBookingComplete(booking);
   const movie = complete.movie;
   const location = complete.location;
@@ -37,7 +40,7 @@ export default function BookingItem({ booking, hideField }: Props) {
 
   return (
     <div className="bg-background/80 rounded-5xl flex gap-4 p-4 h-fit m-1">
-      {hideField !== "movie" && (
+      {primary !== "movie" && (
         <div
           className="aspect-2/3 rounded-xl max-h-full h-full w-auto bg-center bg-cover"
           style={{
@@ -49,19 +52,15 @@ export default function BookingItem({ booking, hideField }: Props) {
 
       <div className="flex flex-col gap-5 p-2.5 w-full min-w-0 h-fit max-w-full">
         <div className="text-xl flex items-center min-w-0 w-full overflow-hidden gap-2.5">
-          {hideField === "movie" &&
-            linkIcon(location.name, `/locations/${location.id}`, MapPinIcon)}
-          {hideField === "location" &&
+          {primary !== "movie" &&
+            !secondary.includes("movie") &&
             linkIcon(movie.name, `/movies/${movie.id}`, VideoIcon)}
-          {hideField === "format" &&
-            linkIcon(movie.name, `/movies/${movie.id}`, VideoIcon)}
-
-          {hideField === "movie" &&
-            linkIcon(format.name, `/formats/${format.id}`, FilmIcon)}
-          {hideField === "location" &&
-            linkIcon(format.name, `/formats/${format.id}`, FilmIcon)}
-          {hideField === "format" &&
+          {primary !== "location" &&
+            !secondary.includes("location") &&
             linkIcon(location.name, `/locations/${location.id}`, MapPinIcon)}
+          {primary !== "format" &&
+            !secondary.includes("format") &&
+            linkIcon(format.name, `/formats/${format.id}`, FilmIcon)}
         </div>
 
         <div className="grid grid-cols-2 gap-3 text-muted-foreground">

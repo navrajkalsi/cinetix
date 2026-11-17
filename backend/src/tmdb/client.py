@@ -6,18 +6,38 @@ from toolz.itertoolz import unique
 
 from api.models.movies import MovieCreate
 from config import config
-from tmdb.models import Movie, SearchMovie
+from tmdb.models import DetailsMovie, SearchMovie, SearchMovies
 from utils import print_debug
 
 KEY = config.tmdb_api_key
 
-MOVIE_URL = "https://api.themoviedb.org/3/search/movie"
+MOVIE_SEARCH_URL = "https://api.themoviedb.org/3/search/movie"
+MOVIE_DETAILS_URL = "https://api.themoviedb.org/3/movie/"
 
 # only headers required for accessing all movie search endpoint
 HEADERS = {"accept": "application/json", "Authorization": f"Bearer {KEY}"}
 
 
-def search_movie(name: str) -> Movie | None:
+def details_movie(tmdb_id: int) -> DetailsMovie:
+    """Fetches a complete `DetailsMovie` model from TMDB for the provided `tmdb_id`."""
+
+    response = requests.get(
+        url=f"{MOVIE_DETAILS_URL}{tmdb_id}",
+        params={"language": "en-US"},
+        headers=HEADERS,
+    )
+
+    response.raise_for_status()  # raises exception for any status code less than 400
+
+    if response.status_code != 200:
+        raise requests.HTTPError(
+            f"failed to get a 200 OK response from TMDB, got: {response.status_code}"
+        )
+
+    return DetailsMovie.model_validate(response.json())
+
+
+def search_movie(name: str) -> SearchMovie | None:
     """Searches TMDB for any matching movie name.
 
     If multiple matches are found the first one is returned.
@@ -36,12 +56,12 @@ def search_movie(name: str) -> Movie | None:
         name: Name of the movie to search for.
 
     Returns:
-        Returns a validated `Movie` if a match is found. Otherwise returns `None`.
+        Returns a validated `SearchMovie` if a match is found. Otherwise returns `None`.
     """
 
     # request only the first page
     response = requests.get(
-        url=MOVIE_URL,
+        url=MOVIE_SEARCH_URL,
         params={"language": "en-US", "page": 1, "query": name},
         headers=HEADERS,
     )
@@ -53,7 +73,7 @@ def search_movie(name: str) -> Movie | None:
             f"failed to get a 200 OK response from TMDB, got: {response.status_code}"
         )
 
-    model = SearchMovie.model_validate(response.json())
+    model = SearchMovies.model_validate(response.json())
 
     if model.total_results == 0:
         print_debug(
@@ -94,7 +114,7 @@ def search_movie_matches(name: str) -> Sequence[MovieCreate]:
 
     # request only the first page
     response = requests.get(
-        url=MOVIE_URL,
+        url=MOVIE_SEARCH_URL,
         params={"language": "en-US", "page": 1, "query": name},
         headers=HEADERS,
     )
@@ -106,7 +126,7 @@ def search_movie_matches(name: str) -> Sequence[MovieCreate]:
             f"failed to get a 200 OK response from TMDB, got: {response.status_code}"
         )
 
-    model = SearchMovie.model_validate(response.json())
+    model = SearchMovies.model_validate(response.json())
 
     if model.total_results == 0:
         print_debug(f"could not find any matching movie names for: {name}")

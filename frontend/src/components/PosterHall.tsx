@@ -87,7 +87,7 @@ export default function PosterHall({
   }, [columnCount, movies]);
 
   return (
-    <div className="absolute flex h-full w-full top-0 left-0 flex-row items-center justify-center overflow-hidden">
+    <div className="absolute flex h-full w-full top-0 left-0 flex-row items-center justify-center overflow-hidden bg-background">
       {columns.map((column, i) => (
         <Marquee
           vertical

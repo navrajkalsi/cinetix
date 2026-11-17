@@ -9,6 +9,10 @@ interface MovieBase {
 // Model recived from database api
 export interface Movie extends MovieBase {
   id: number;
+  backdrop_path: string | null;
+  homepage: string | null;
+  runtime: number | null;
+  tagline: string | null;
 }
 
 // Model for creating a new movie in the database from user input

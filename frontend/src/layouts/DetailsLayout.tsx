@@ -51,7 +51,7 @@ function getEntity<P extends Paths>(
   path: P,
   id: number,
   lookups: Lookups,
-): Extract<Entity, { path: P }> {
+): Extract<Entity, { type: P }> {
   let entity: Entity | undefined = undefined;
 
   switch (path) {
@@ -82,10 +82,7 @@ function getEntity<P extends Paths>(
 function getDetails(
   entity: Entity,
   bookings: Booking[],
-  filters: Extract<
-    LoaderData,
-    { path: "movie" | "location" | "format" }
-  >["filters"],
+  filters: DetailsLoaderData["filters"],
 ) {
   const empty = bookings.length === 0;
   const mutiple = bookings.length > 1;
@@ -97,82 +94,15 @@ function getDetails(
 
   return (
     <div className="size-full bg-transparent flex flex-col gap-8 font-heading">
-      <div className="bg-foreground/5 backdrop-blur-sm rounded-10xl p-8 w-fit flex flex-col gap-2">
-        {entity.type === "movie" && (
-          <>
-            <Link
-              className="text-5xl link inline-flex items-center gap-3"
-              to={new URL(
-                `https://www.themoviedb.org/movie/${entity.data.external_id}`,
-              ).toString()}
-            >
-              {entity.data.name} <ExternalLinkIcon className="h-auto w-1em" />
-            </Link>
+      <div className="bg-foreground/5 backdrop-blur-sm rounded-10xl p-8 w-fit flex flex-col gap-4">
+        {entity.type === "movie" &&
+          getDetailsMovie(entity.data, bookings, filters)}
 
-            <div className="text-muted-foreground flex gap-1">
-              {entity.data.release_date && (
-                <>
-                  {format(parseISO(entity.data.release_date), "MMM y")}
-                  {!empty && <DotIcon />}
-                </>
-              )}
+        {entity.type === "location" &&
+          getLocationDetails(entity.data, bookings, filters)}
 
-              {!empty && (
-                <>
-                  Seen {bookings.length} time{mutiple && "s"}
-                  {"locationId" in filters && (
-                    <FilterText filter="locationId" data={filters.locationId} />
-                  )}
-                  {"formatId" in filters && (
-                    <FilterText filter="formatId" data={filters.formatId} />
-                  )}
-                </>
-              )}
-            </div>
-          </>
-        )}
-
-        {entity.type === "location" && (
-          <>
-            <Link
-              className="text-5xl link inline-flex items-center gap-3"
-              to={new URL(
-                `https://www.google.com/maps/search/?api=1&query=${entity.data.name}&query_place_id=${entity.data.external_id}`,
-              ).toString()}
-            >
-              {entity.data.name} <ExternalLinkIcon className="h-auto w-1em" />
-            </Link>
-
-            <div className="text-muted-foreground flex gap-1">
-              <div>{entity.data.address}</div>
-              {!empty && (
-                <>
-                  <DotIcon />
-                  <div>
-                    Visited {bookings.length} time{mutiple && "s"}
-                  </div>
-                </>
-              )}
-            </div>
-          </>
-        )}
-
-        {entity.type === "format" && (
-          <>
-            <Link
-              className="text-5xl link inline-flex items-center gap-3"
-              to="https://www.imax.com"
-            >
-              {entity.data.name} <ExternalLinkIcon className="h-auto w-1em" />
-            </Link>
-
-            {!empty && (
-              <div className="text-muted-foreground">
-                Experienced {bookings.length} time{mutiple && "s"}
-              </div>
-            )}
-          </>
-        )}
+        {entity.type === "format" &&
+          getFormatDetails(entity.data, bookings, filters)}
       </div>
 
       <div className="bg-foreground/5 backdrop-blur-sm rounded-10xl py-8 px-4 size-full overflow-hidden">
@@ -224,5 +154,137 @@ function getPreview(entity: Entity) {
         {entity.type === "format" && <div>format</div>}
       </div>
     </div>
+  );
+}
+
+function getDetailsMovie(
+  movie: Movie,
+  bookings: Booking[],
+  filters: DetailsLoaderData["filters"],
+) {
+  const empty = bookings.length === 0;
+  const multiple = bookings.length > 1;
+
+  return (
+    <>
+      <Link
+        className="text-5xl link inline-flex items-center gap-3"
+        to={
+          movie.homepage
+            ? movie.homepage
+            : new URL(
+              `https://www.themoviedb.org/movie/${movie.external_id}`,
+            ).toString()
+        }
+      >
+        {movie.name} <ExternalLinkIcon className="h-auto w-1em" />
+      </Link>
+
+      <div className="text-muted-foreground flex gap-1">
+        {movie.release_date && (
+          <>
+            {format(parseISO(movie.release_date), "MMM y")}
+            {(!empty || movie.runtime) && <DotIcon />}
+          </>
+        )}
+
+        {movie.runtime && (
+          <>
+            {movie.runtime / 60 > 1
+              ? `${Math.trunc(movie.runtime / 60)}h ${movie.runtime % 60}m`
+              : `${movie.runtime}m`}
+            {!empty && <DotIcon />}
+          </>
+        )}
+
+        {!empty && (
+          <>
+            Seen {bookings.length} time{multiple && "s"}
+            {"locationId" in filters && (
+              <FilterText filter="locationId" data={filters.locationId} />
+            )}
+            {"formatId" in filters && (
+              <FilterText filter="formatId" data={filters.formatId} />
+            )}
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+
+function getLocationDetails(
+  location: Location,
+  bookings: Booking[],
+  filters: DetailsLoaderData["filters"],
+) {
+  const empty = bookings.length === 0;
+  const multiple = bookings.length > 1;
+
+  return (
+    <>
+      <Link
+        className="text-5xl link inline-flex items-center gap-3"
+        to={new URL(
+          `https://www.google.com/maps/search/?api=1&query=${location.name}&query_place_id=${location.external_id}`,
+        ).toString()}
+      >
+        {location.name} <ExternalLinkIcon className="h-auto w-1em" />
+      </Link>
+
+      <div className="text-muted-foreground flex gap-1">
+        <div>{location.address}</div>
+        {!empty && (
+          <>
+            <DotIcon />
+            Visited {bookings.length} time{multiple && "s"}
+            {"year" in filters && (
+              <FilterText filter="year" data={filters.year} />
+            )}
+            {"movieId" in filters && (
+              <FilterText filter="movieId" data={filters.movieId} />
+            )}
+            {"formatId" in filters && (
+              <FilterText filter="formatId" data={filters.formatId} />
+            )}
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+
+function getFormatDetails(
+  format: Format,
+  bookings: Booking[],
+  filters: DetailsLoaderData["filters"],
+) {
+  const empty = bookings.length === 0;
+  const multiple = bookings.length > 1;
+
+  return (
+    <>
+      <Link
+        className="text-5xl link inline-flex items-center gap-3"
+        to="https://www.imax.com"
+      >
+        {format.name} <ExternalLinkIcon className="h-auto w-1em" />
+      </Link>
+
+      {!empty && (
+        <div className="text-muted-foreground">
+          Experienced {bookings.length} time{multiple && "s"}
+          {"year" in filters && (
+            <FilterText filter="year" data={filters.year} />
+          )}
+          {"movieId" in filters && (
+            <FilterText filter="movieId" data={filters.movieId} />
+          )}
+          {"locationId" in filters && (
+            <FilterText filter="locationId" data={filters.locationId} />
+          )}
+        </div>
+      )}
+    </>
   );
 }

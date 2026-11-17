@@ -4,6 +4,7 @@ from sqlmodel import select
 
 from api.dependencies import SessionDep
 from api.models.movies import Movie, MovieCreate, MovieRead
+from tmdb.client import details_movie
 
 
 def read_movie(id: int, session: SessionDep) -> MovieRead | None:
@@ -27,7 +28,8 @@ def create_movie(model: MovieCreate, session: SessionDep) -> MovieRead:
     already present movie is returned.
 
     The returned `MovieRead` has all the attribute values from the provided `model`,
-    plus a database assigned `id`.
+    plus a database assigned `id` and extra fields which are fetched here to make the model more
+    detailed.
     """
 
     # does a movie already exist with same external id
@@ -38,8 +40,24 @@ def create_movie(model: MovieCreate, session: SessionDep) -> MovieRead:
     if present is not None:  # do not create new
         return MovieRead.model_validate(present)
 
+    # fetch additional fields from tmdb
+    details = details_movie(model.external_id)
+
     # movie with None id
-    movie = Movie.model_validate(model)
+    movie = Movie.model_validate(
+        Movie(
+            # use all moviecreate fields
+            name=model.name,
+            external_id=model.external_id,
+            poster_path=model.poster_path,
+            release_date=model.release_date,
+            # use details for futher fields
+            backdrop_path=details.backdrop_path,
+            homepage=details.homepage,
+            runtime=details.runtime,
+            tagline=details.tagline,
+        )
+    )
 
     session.add(movie)
     session.commit()  # assigned an id here by the db

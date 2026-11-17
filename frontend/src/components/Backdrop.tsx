@@ -1,4 +1,5 @@
-const bg = "./../../public/bg.svg";
+// default background
+const bg = "/bg.svg";
 
 export default function Backdrop() {
   return (

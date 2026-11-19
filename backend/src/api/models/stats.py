@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Self
 
 from sqlmodel import Field, SQLModel
@@ -16,10 +17,10 @@ class Stats(SQLModel):
     minutes: int = Field(
         description="Number of minutes spent at the movies, for the accounted for bookings."
     )
-    bookings_without_runtime: int = Field(
+    bookings_without_minutes: int = Field(
         description="Number of bookings that were related to movies that did not have a runtime, and were therefore not accounted for in counting total minutes."
     )
-    cost: int = Field(
+    cost: Decimal = Field(
         description="Amount spent at the movies, for the accounted for bookings."
     )
     bookings_without_cost: int = Field(
@@ -44,7 +45,7 @@ class Stats(SQLModel):
             locations=0,
             formats=0,
             minutes=0,
-            bookings_without_runtime=0,
-            cost=0,
+            bookings_without_minutes=0,
+            cost=Decimal(0),
             bookings_without_cost=0,
         )

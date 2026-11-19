@@ -1,5 +1,6 @@
-from sqlmodel import Field, SQLModel
 from datetime import date
+
+from sqlmodel import Field, SQLModel
 
 
 class MovieBase(SQLModel):

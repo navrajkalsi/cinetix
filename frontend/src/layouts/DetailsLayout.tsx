@@ -84,8 +84,6 @@ function getDetails(
   bookings: Booking[],
   filters: DetailsLoaderData["filters"],
 ) {
-  const empty = bookings.length === 0;
-  const mutiple = bookings.length > 1;
   const activeFilters = [] as Entity["type"][]; // for repeating fields that will be save due to filters
   if ("movieId" in filters && filters.movieId) activeFilters.push("movie");
   if ("locationId" in filters && filters.locationId)
@@ -134,25 +132,35 @@ function getPreview(entity: Entity) {
   // but then the inner div will take over and scale its height to maintain the aspect ratio
   return (
     <div className="aspect-2/3 max-w-2/5 h-full w-auto flex items-center">
-      <div className="shadow-booking-card aspect-2/3 w-full h-auto rounded-10xl overflow-auto">
-        {entity.type === "movie" && (
+      {entity.type === "movie" && (
+        <div className="shadow-booking-card aspect-2/3 w-full h-auto rounded-10xl overflow-auto">
           <img
             loading="lazy"
             className="size-full pointer-events-none"
             src={`https://image.tmdb.org/t/p/w780${entity.data.poster_path}`}
           />
-        )}
+        </div>
+      )}
 
-        {entity.type === "location" && (
+      {entity.type === "location" && (
+        <div className="shadow-booking-card aspect-2/3 w-full h-auto rounded-10xl overflow-auto">
           <iframe
             loading="lazy"
             className="size-full"
             src={`https://www.google.com/maps/embed/v1/place?q=place_id:${entity.data.external_id}&key=${mapsApiKey}`}
           />
-        )}
+        </div>
+      )}
 
-        {entity.type === "format" && <div>format</div>}
-      </div>
+      {entity.type === "format" && (
+        <div className="aspect-2/3 w-full h-auto rounded-10xl overflow-auto flex">
+          <img
+            loading="lazy"
+            className="grow pointer-events-none"
+            src={`/${entity.data.backdrop_path}`}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -264,12 +272,7 @@ function getFormatDetails(
 
   return (
     <>
-      <Link
-        className="text-5xl link inline-flex items-center gap-3"
-        to="https://www.imax.com"
-      >
-        {format.name} <ExternalLinkIcon className="h-auto w-1em" />
-      </Link>
+      <div className="text-5xl">{format.name}</div>
 
       {!empty && (
         <div className="text-muted-foreground">

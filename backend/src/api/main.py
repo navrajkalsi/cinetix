@@ -5,7 +5,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routers import bookings, formats, locations, movies
+from api.routers import bookings, formats, locations, movies, stats
 from config import config
 
 from .database import init_db, remove_db
@@ -46,3 +46,4 @@ app.include_router(bookings.router)
 app.include_router(movies.router)
 app.include_router(locations.router)
 app.include_router(formats.router)
+app.include_router(stats.router)

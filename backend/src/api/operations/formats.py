@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from sqlmodel import select
 
 from api.dependencies import SessionDep
-from api.models.formats import Format, FormatCreate, FormatRead
+from api.models.formats import FORMATS, Format, FormatCreate, FormatDetails, FormatRead
 
 
 def read_format(id: int, session: SessionDep) -> FormatRead | None:
@@ -37,8 +37,10 @@ def create_format(model: FormatCreate, session: SessionDep) -> FormatRead:
     if present is not None:  # do not create new
         return FormatRead.model_validate(present)
 
+    details = FormatDetails(name=model.name, backdrop_path=FORMATS[model.name])
+
     # format with None id
-    format = Format.model_validate(model)
+    format = Format.model_validate(details)
 
     session.add(format)
     session.commit()  # assigned an id here by the db

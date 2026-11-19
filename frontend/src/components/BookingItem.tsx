@@ -39,7 +39,7 @@ export default function BookingItem({ booking, primary, secondary }: Props) {
   };
 
   return (
-    <div className="bg-background/80 rounded-5xl flex gap-4 p-4 h-fit m-1">
+    <div className="bg-background/80 rounded-5xl flex gap-4 p-4 h-fit m-1 max-w-full">
       {primary !== "movie" && (
         <div
           className="aspect-2/3 rounded-xl max-h-full h-full w-auto bg-center bg-cover"

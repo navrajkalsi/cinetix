@@ -6,6 +6,7 @@ import type { LoaderData } from "@/loaders";
 import { FilterText } from "@/components/FilterText";
 import EmtpyBookings from "@/components/EmptyBookings";
 import { useEffect, useRef } from "react";
+import { Separator } from "@/components/ui/separator";
 
 export type BookingsData = Extract<LoaderData, { path: "bookings" }>;
 const today = new Date();
@@ -67,6 +68,10 @@ export default function Bookings() {
               <BookingCard booking={booking} key={booking.id} ringGlow />
             ))}
           </div>
+        )}
+
+        {upcomingBookings.length > 0 && recentBookings.length > 0 && (
+          <Separator orientation="vertical" className="w-1 mb-16 mt-4" />
         )}
 
         <div className="w-fit h-full flex pb-20 p-10 gap-15">

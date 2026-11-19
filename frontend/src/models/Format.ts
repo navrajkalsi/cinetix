@@ -6,6 +6,7 @@ interface FormatBase {
 // Model recived from database api
 export interface Format extends FormatBase {
   id: number;
+  backdrop_path: string;
 }
 
 // Model for creating a new format in the database from user input

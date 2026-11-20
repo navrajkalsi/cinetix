@@ -11,8 +11,10 @@ import {
   formatLoader,
   locationLoader,
   movieLoader,
+  statsLoader,
 } from "./loaders";
 import Backdrop from "./components/Backdrop";
+import Stats from "./components/Stats";
 
 export type Page = "bookings" | "movie" | "location" | "format";
 
@@ -71,6 +73,8 @@ const router = createBrowserRouter([
         loader: formatLoader,
         Component: Details,
       },
+
+      { path: "stats", loader: statsLoader, Component: Stats },
     ],
   },
 ]);

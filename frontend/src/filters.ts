@@ -37,4 +37,5 @@ export const BookingsFilters = ["year", "locationId", "formatId"] as const,
   BookingNewFilters = [] as const,
   MovieFilters = ["locationId", "formatId"] as const,
   LocationFilters = ["year", "movieId", "formatId"] as const,
-  FormatFilters = ["year", "movieId", "locationId"] as const;
+  FormatFilters = ["year", "movieId", "locationId"] as const,
+  StatsFilters = ["year"] as const;

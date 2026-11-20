@@ -1,6 +1,12 @@
 import type Stats from "@/models/Stats";
-import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useEffect, useState, type JSX } from "react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Carousel,
   type CarouselApi,
@@ -9,14 +15,53 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import {
+  FilmIcon,
+  GhostIcon,
+  MapPinCheckIcon,
+  ProjectorIcon,
+} from "lucide-react";
+import type { LoaderData } from "@/loaders";
+import { useLoaderData } from "react-router";
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemSeparator,
+  ItemTitle,
+} from "./ui/item";
+import { Separator } from "./ui/separator";
 
 interface Props {
-  model: Stats;
+  stats: Stats;
 }
 
-export default function Stats({ model }: Props) {
-  const slides = [1, 2, 3, 4, 5];
+export type StatsData = Extract<LoaderData, { path: "stats" }>;
 
+interface Slide {
+  index: number;
+  title: string;
+  jsx: (stats: Stats) => JSX.Element;
+}
+
+function demo(stats: Stats) {
+  return <></>;
+}
+
+const Slides: Slide[] = [
+  { index: 1, title: "Overview", jsx: overviewSlide },
+  { index: 2, title: "Movie", jsx: demo },
+  { index: 3, title: "Location", jsx: demo },
+  { index: 4, title: "Format", jsx: demo },
+  { index: 5, title: "Time", jsx: demo },
+  { index: 6, title: "Cost", jsx: demo },
+];
+
+export default function Stats() {
+  const { path, stats, filters }: StatsData = useLoaderData();
+
+  // for manual indexing
   const [api, setApi] = useState<CarouselApi>();
   const [snaps, setSnaps] = useState<number[]>([]);
   const [current, setCurrent] = useState(0);
@@ -40,20 +85,14 @@ export default function Stats({ model }: Props) {
     };
   }, [api]);
 
+  if (stats.bookings === 0) return emptySlide(stats.year);
+
   return (
-    <div className="flex w-full max-w-[10rem] flex-col items-center gap-3 sm:max-w-xs">
-      <Carousel className="w-full" setApi={setApi}>
+    <div className="flex size-full flex-col items-center gap-3 m-auto bg-background/50 justify-center">
+      <Carousel setApi={setApi} opts={{ loop: true }}>
         <CarouselContent>
-          {slides.map((slide) => (
-            <CarouselItem key={slide}>
-              <div className="p-1">
-                <Card>
-                  <CardContent className="flex aspect-square items-center justify-center p-6">
-                    <span className="font-semibold text-4xl">{slide}</span>
-                  </CardContent>
-                </Card>
-              </div>
-            </CarouselItem>
+          {Slides.map((slide) => (
+            <CarouselItem key={slide.index}>{slide.jsx(stats)}</CarouselItem>
           ))}
         </CarouselContent>
         <CarouselPrevious />
@@ -73,5 +112,107 @@ export default function Stats({ model }: Props) {
         ))}
       </div>
     </div>
+  );
+}
+
+const bolden = (s: string) => (
+  <span className="font-bold text-accent">{s}</span>
+);
+
+function emptySlide(year: number | null) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Nothing to see here :(</CardTitle>
+      </CardHeader>
+
+      <CardContent>
+        <GhostIcon />
+
+        <div>
+          {year ? (
+            <>You have no bookings for {bolden(year.toString())}</>
+          ) : (
+            <>You have no bookings added to {bolden("Cinetix")}</>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function overviewSlide(stats: Stats) {
+  return (
+    <Card className="size-full [--card-spacing:--spacing(8)]">
+      <CardHeader>
+        <CardTitle className="text-xl text-center">
+          {stats.year ? (
+            <>
+              Your <span className="font-bold text-accent">{stats.year}</span>{" "}
+              at the movies.
+            </>
+          ) : (
+            "You at the movies."
+          )}
+        </CardTitle>
+      </CardHeader>
+
+      <Separator className="h-0.5" />
+
+      <CardContent className="flex flex-col gap-3">
+        <Item variant="muted" className="flex flex-row items-center">
+          <ItemMedia variant="icon">
+            <FilmIcon />
+          </ItemMedia>
+          <ItemContent className="flex-row justify-between items-center">
+            <ItemDescription>Movies watched</ItemDescription>
+            <ItemTitle>{stats.movies}</ItemTitle>
+          </ItemContent>
+        </Item>
+
+        <Item variant="muted">
+          <ItemMedia variant="icon">
+            <MapPinCheckIcon />
+          </ItemMedia>
+          <ItemContent className="flex-row justify-between items-center">
+            <ItemDescription>Locations visited</ItemDescription>
+            <ItemTitle>{stats.locations}</ItemTitle>
+          </ItemContent>
+        </Item>
+
+        <Item variant="muted">
+          <ItemMedia variant="icon">
+            <ProjectorIcon />
+          </ItemMedia>
+          <ItemContent className="flex-row justify-between items-center">
+            <ItemDescription>Formats experienced</ItemDescription>
+            <ItemTitle>{stats.formats}</ItemTitle>
+          </ItemContent>
+        </Item>
+      </CardContent>
+
+      <Separator className="h-0.5" />
+
+      <CardFooter className="justify-center">
+        Swipe to next slides to discover more!
+      </CardFooter>
+    </Card>
+  );
+}
+
+function moviesSlide(stats: Stats) {
+  return (
+    <Card>
+      <CardContent>
+        {stats.year ? (
+          <>
+            Your <span className="font-bold text-accent">{stats.year}</span> at
+            the movies.
+          </>
+        ) : (
+          "You at the movies."
+        )}
+      </CardContent>
+    </Card>
   );
 }

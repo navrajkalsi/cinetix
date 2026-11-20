@@ -5,6 +5,7 @@ import {
   LocationFilters,
   MovieFilters,
   parseFilters,
+  StatsFilters,
   type Filters,
 } from "./filters";
 import { getBooking, getBookings } from "./api/bookings";
@@ -16,6 +17,9 @@ import type {
   LocationData,
   MovieData,
 } from "./layouts/DetailsLayout";
+import { getStats } from "./api/stats";
+import type Stats from "./models/Stats";
+import type { StatsData } from "./components/Stats";
 
 export type LoaderData =
   | {
@@ -48,13 +52,18 @@ export type LoaderData =
     id: number;
     bookings: Booking[];
     filters: Omit<Filters, "formatId">; // user might want to see per year bookings
+  }
+  | {
+    path: "stats";
+    stats: Stats;
+    filters: Pick<Filters, "year">;
   };
 
 // bookings list route loader
 export async function bookingsLoader({ request }: LoaderFunctionArgs) {
   const today = new Date();
 
-  let filters = parseFilters(
+  const filters = parseFilters(
     new URL(request.url).searchParams,
     BookingsFilters,
   );
@@ -87,7 +96,7 @@ export async function bookingLoader({ params }: LoaderFunctionArgs) {
 
 // movie page loader
 export async function movieLoader({ request, params }: LoaderFunctionArgs) {
-  let filters: MovieData["filters"] = parseFilters(
+  const filters: MovieData["filters"] = parseFilters(
     new URL(request.url).searchParams,
     MovieFilters,
   );
@@ -100,7 +109,7 @@ export async function movieLoader({ request, params }: LoaderFunctionArgs) {
 
 // location page loader
 export async function locationLoader({ request, params }: LoaderFunctionArgs) {
-  let filters: LocationData["filters"] = parseFilters(
+  const filters: LocationData["filters"] = parseFilters(
     new URL(request.url).searchParams,
     LocationFilters,
   );
@@ -118,7 +127,7 @@ export async function locationLoader({ request, params }: LoaderFunctionArgs) {
 
 // format page loader
 export async function formatLoader({ request, params }: LoaderFunctionArgs) {
-  let filters: FormatData["filters"] = parseFilters(
+  const filters: FormatData["filters"] = parseFilters(
     new URL(request.url).searchParams,
     FormatFilters,
   );
@@ -126,6 +135,18 @@ export async function formatLoader({ request, params }: LoaderFunctionArgs) {
   const bookings = await getBookings({ formatId: id, ...filters }); // fetch based on filters
 
   const data: FormatData = { path: "format", id, bookings, filters };
+  return data;
+}
+
+// stats data loader
+export async function statsLoader({ request }: LoaderFunctionArgs) {
+  const filters: StatsData["filters"] = parseFilters(
+    new URL(request.url).searchParams,
+    StatsFilters,
+  );
+
+  const stats = await getStats(filters.year);
+  const data: StatsData = { path: "stats", stats, filters };
   return data;
 }
 

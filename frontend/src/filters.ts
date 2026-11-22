@@ -6,7 +6,8 @@ export type Filters = Record<Filter, FilterData>;
 const yearPattern = /^\d{4}$/; // only 4 digits
 const idPattern = /^\d+$/; // at least one digit
 
-const parseYear = (s: string) => (yearPattern.test(s) ? Number(s) : undefined);
+export const parseYear = (s: string) =>
+  yearPattern.test(s) ? Number(s) : undefined;
 const parseId = (s: string) => (idPattern.test(s) ? Number(s) : undefined);
 
 const parsers: Record<Filter, (s: string) => FilterData> = {
@@ -37,5 +38,4 @@ export const BookingsFilters = ["year", "locationId", "formatId"] as const,
   BookingNewFilters = [] as const,
   MovieFilters = ["locationId", "formatId"] as const,
   LocationFilters = ["year", "movieId", "formatId"] as const,
-  FormatFilters = ["year", "movieId", "locationId"] as const,
-  StatsFilters = ["year"] as const;
+  FormatFilters = ["year", "movieId", "locationId"] as const;

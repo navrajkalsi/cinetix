@@ -4,12 +4,9 @@ from typing import Self
 from sqlmodel import Field, SQLModel
 
 
-class Stats(SQLModel):
-    """User statistics for a given year or all time."""
+class StatsBase(SQLModel):
+    """Base user statistics, queried initally from the database."""
 
-    year: int | None = Field(
-        default=None, description="Specific year the stats belong to, if any."
-    )
     bookings: int = Field(description="Number of bookings/visits.")
     movies: int = Field(description="Number of movies watched.")
     locations: int = Field(description="Number of locations visited.")
@@ -26,14 +23,25 @@ class Stats(SQLModel):
     bookings_without_cost: int = Field(
         description="Number of bookings that did not have any amount spent, and were therefore not accounted for in counting total cost."
     )
-    movie_id: int | None = Field(
-        default=None, description="Movie watched the most number of times."
+
+
+class Stats(StatsBase):
+    """User statistics for a given year or all time."""
+
+    year: int | None = Field(
+        default=None, description="Specific year the stats belong to, if any."
     )
-    location_id: int | None = Field(
-        default=None, description="Location visited the most number of times."
+    most_watched_movies: list[tuple[int, int]] = Field(
+        default_factory=list,
+        description="Most watched movie IDs with number of watches.",
     )
-    format_id: int | None = Field(
-        default=None, description="Format experienced the most number of times."
+    most_visited_locations: list[tuple[int, int]] = Field(
+        default_factory=list,
+        description="Most visited location IDs with number of visits.",
+    )
+    most_experienced_formats: list[tuple[int, int]] = Field(
+        default_factory=list,
+        description="Most experienced format IDs with number of experiences.",
     )
 
     @classmethod

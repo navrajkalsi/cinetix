@@ -5,7 +5,6 @@ import {
   LocationFilters,
   MovieFilters,
   parseFilters,
-  StatsFilters,
   type Filters,
 } from "./filters";
 import { getBooking, getBookings } from "./api/bookings";
@@ -17,9 +16,7 @@ import type {
   LocationData,
   MovieData,
 } from "./layouts/DetailsLayout";
-import { getStats } from "./api/stats";
-import type Stats from "./models/Stats";
-import type { StatsData } from "./components/Stats";
+import type { Stats } from "./models/Stats";
 
 export type LoaderData =
   | {
@@ -135,18 +132,6 @@ export async function formatLoader({ request, params }: LoaderFunctionArgs) {
   const bookings = await getBookings({ formatId: id, ...filters }); // fetch based on filters
 
   const data: FormatData = { path: "format", id, bookings, filters };
-  return data;
-}
-
-// stats data loader
-export async function statsLoader({ request }: LoaderFunctionArgs) {
-  const filters: StatsData["filters"] = parseFilters(
-    new URL(request.url).searchParams,
-    StatsFilters,
-  );
-
-  const stats = await getStats(filters.year);
-  const data: StatsData = { path: "stats", stats, filters };
   return data;
 }
 

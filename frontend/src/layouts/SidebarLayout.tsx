@@ -1,7 +1,11 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import Backdrop from "@/components/Backdrop";
 import FiltersSidebar from "@/components/FiltersSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Outlet, useMatch } from "react-router";
+
+const queryClient = new QueryClient();
 
 export default function FiltersLayout() {
   // show sidebar by default only for the first bookings page
@@ -10,14 +14,17 @@ export default function FiltersLayout() {
   // remount the sidebar to collapse it when visiting other pages
   return (
     <div className="size-full max-w-full max-h-full flex">
-      <SidebarProvider
-        defaultOpen={!!bookings}
-        key={bookings ? " bookings" : "other"}
-      >
-        <FiltersSidebar />
-        <Outlet />
-        <Backdrop />
-      </SidebarProvider>
+      <QueryClientProvider client={queryClient}>
+        <SidebarProvider
+          defaultOpen={!!bookings}
+          key={bookings ? " bookings" : "other"}
+        >
+          <FiltersSidebar showStats={!!bookings} />
+          <Outlet />
+          <Backdrop />
+        </SidebarProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </div>
   );
 }

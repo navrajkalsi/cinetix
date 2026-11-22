@@ -30,7 +30,10 @@ import FiltersSelect from "./FiltersSelect";
 import FiltersYearInput from "./FiltersYearInput";
 import { useLoaderFilters, type LoaderData } from "@/loaders";
 import type { Filters, Filter } from "@/filters";
-import { useMatch, useNavigate, type NavigateFunction } from "react-router";
+import { useNavigate, type NavigateFunction } from "react-router";
+import { useState } from "react";
+import { Dialog, DialogContent } from "./ui/dialog";
+import Stats from "./Stats";
 
 const pages = [
   {
@@ -55,58 +58,76 @@ const pages = [
   },
 ];
 
-export default function FiltersSidebar() {
+interface Props {
+  showStats: boolean;
+}
+
+export default function FiltersSidebar({ showStats }: Props) {
   const [movies, locations, formats] = useLookupArrays();
   const { toggleSidebar } = useSidebar();
   const navigate = useNavigate();
-  // load stats only for the first bookings page
-  const bookings = useMatch("/bookings");
+  const [statsOpen, setStatsOpen] = useState(false);
 
   const filters = useLoaderFilters();
 
   return (
-    <Sidebar variant="floating" collapsible="icon">
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={toggleSidebar} tooltip="Toggle Sidebar">
-              <SidebarIcon />
-              <span>Collapse Sidebar</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-
-      <SidebarContent>
-        {pagesGroup}
-        <SidebarSeparator className="bg-muted-foreground h-0.5 rounded-full" />
-        {filtersGroup(movies, locations, formats, filters, navigate)}
-      </SidebarContent>
-
-      <SidebarFooter>
-        <SidebarMenu>
-          {!!bookings && (
+    <>
+      <Sidebar variant="floating" collapsible="icon">
+        <SidebarHeader>
+          <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
-                tooltip={`Stats for ${filters && "year" in filters && filters.year ? filters.year : "all years"}`}
+                onClick={toggleSidebar}
+                tooltip="Toggle Sidebar"
               >
-                <ChartSplineIcon />
-                <span>Stats</span>
+                <SidebarIcon />
+                <span>Collapse Sidebar</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
-          )}
+          </SidebarMenu>
+        </SidebarHeader>
 
-          <SidebarMenuItem>
-            <SidebarMenuButton>
-              <CircleUserIcon />
-              <span>Profile</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
+        <SidebarContent>
+          {pagesGroup}
+          <SidebarSeparator className="bg-muted-foreground h-0.5 rounded-full" />
+          {filtersGroup(movies, locations, formats, filters, navigate)}
+        </SidebarContent>
 
-      <SidebarRail />
-    </Sidebar>
+        <SidebarFooter>
+          <SidebarMenu>
+            {showStats && (
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip={`Stats for ${filters && "year" in filters && filters.year ? filters.year : "all years"}`}
+                  onClick={() => setStatsOpen(true)}
+                >
+                  <ChartSplineIcon />
+                  <span>Stats</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )}
+
+            <SidebarMenuItem>
+              <SidebarMenuButton>
+                <CircleUserIcon />
+                <span>Profile</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+
+        <SidebarRail />
+      </Sidebar>
+
+      <Dialog open={statsOpen} onOpenChange={setStatsOpen}>
+        <DialogContent
+          className="flex items-center justify-center w-1/2 h-3/5 sm:max-w-full bg-transparent"
+          showCloseButton={false}
+        >
+          <Stats />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

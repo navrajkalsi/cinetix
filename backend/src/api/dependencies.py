@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends
-from sqlmodel import Session
+from sqlalchemy.orm import Session
 
 from api.database import get_session
 

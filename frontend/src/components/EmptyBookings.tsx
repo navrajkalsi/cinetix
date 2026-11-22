@@ -24,7 +24,7 @@ export default function EmtpyBookings({ filters, future = false }: Props) {
       : undefined;
 
   return (
-    <Empty className="border border-dashed size-fit m-auto flex-initial bg-background">
+    <Empty className="border border-dashed size-fit m-auto flex-initial bg-background/80">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <TrashIcon />

@@ -1,4 +1,4 @@
-import type Stats from "@/models/Stats";
+import type { Stats } from "@/models/Stats";
 
 export async function getStats(
   year?: number,

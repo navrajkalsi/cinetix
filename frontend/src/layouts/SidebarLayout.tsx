@@ -10,6 +10,16 @@ const queryClient = new QueryClient();
 export default function FiltersLayout() {
   // show sidebar by default only for the first bookings page
   const bookings = useMatch("/bookings");
+  const movies = useMatch("/movies");
+  const locations = useMatch("/locations");
+  const formats = useMatch("/formats");
+
+  const current =
+    (!!bookings && "Bookings") ||
+    (!!movies && "Movies") ||
+    (!!locations && "Locations") ||
+    (!!formats && "Formats") ||
+    undefined;
 
   // remount the sidebar to collapse it when visiting other pages
   return (
@@ -19,7 +29,7 @@ export default function FiltersLayout() {
           defaultOpen={!!bookings}
           key={bookings ? " bookings" : "other"}
         >
-          <FiltersSidebar showStats={!!bookings} />
+          <FiltersSidebar showStats={!!bookings} current={current} />
           <Outlet />
           <Backdrop />
         </SidebarProvider>

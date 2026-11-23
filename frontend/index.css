@@ -198,6 +198,10 @@
   box-shadow: 0 0 25px 25px black;
 }
 
+@utility shadow-list-item {
+  box-shadow: 0 0 25px 10px black;
+}
+
 @utility highlight {
   @apply after:content-[""] after:absolute after:h-1 after:bg-accent after:left-0 after:-bottom-1 after:w-0 after:rounded-full;
   /* transition: width 0.5s; */

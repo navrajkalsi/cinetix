@@ -34,6 +34,7 @@ import { useNavigate, type NavigateFunction } from "react-router";
 import { useState } from "react";
 import { Dialog, DialogContent } from "./ui/dialog";
 import Stats from "./Stats";
+import { Button } from "./ui/button";
 
 const pages = [
   {
@@ -56,13 +57,14 @@ const pages = [
     link: "/formats",
     icon: FilmIcon,
   },
-];
+] as const;
 
 interface Props {
   showStats: boolean;
+  current?: "Bookings" | "Movies" | "Locations" | "Formats";
 }
 
-export default function FiltersSidebar({ showStats }: Props) {
+export default function FiltersSidebar({ showStats, current }: Props) {
   const [movies, locations, formats] = useLookupArrays();
   const { toggleSidebar } = useSidebar();
   const navigate = useNavigate();
@@ -87,8 +89,8 @@ export default function FiltersSidebar({ showStats }: Props) {
           </SidebarMenu>
         </SidebarHeader>
 
-        <SidebarContent>
-          {pagesGroup}
+        <SidebarContent className="gap-5">
+          {pagesGroup(navigate, current)}
           <SidebarSeparator className="bg-muted-foreground h-0.5 rounded-full" />
           {filtersGroup(movies, locations, formats, filters, navigate)}
         </SidebarContent>
@@ -131,21 +133,32 @@ export default function FiltersSidebar({ showStats }: Props) {
   );
 }
 
-const pagesGroup = (
-  <SidebarGroup>
-    <SidebarGroupLabel>Pages</SidebarGroupLabel>
-    <SidebarMenu>
-      {pages.map((page) => (
-        <SidebarMenuItem key={page.title}>
-          <SidebarMenuButton tooltip={page.title}>
-            <page.icon />
-            <span>{page.title}</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      ))}
-    </SidebarMenu>
-  </SidebarGroup>
-);
+function pagesGroup(navigate: NavigateFunction, current: Props["current"]) {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>Pages</SidebarGroupLabel>
+      <SidebarMenu className="gap-2.5">
+        {pages.map((page) => (
+          <SidebarMenuItem key={page.title}>
+            <SidebarMenuButton
+              tooltip={page.title}
+              render={
+                <Button
+                  variant={current === page.title ? "default" : "outline"}
+                  className="justify-start"
+                />
+              }
+              onClick={() => navigate(page.link)}
+            >
+              <page.icon />
+              <span>{page.title}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        ))}
+      </SidebarMenu>
+    </SidebarGroup>
+  );
+}
 
 // is hidden when the sidebar is collapsed
 // TODO make visible when at least one filter is active

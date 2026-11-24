@@ -65,7 +65,7 @@ export default function Bookings() {
         {upcomingBookings.length > 0 && (
           <div className="w-fit h-full flex pb-20 p-10 gap-15">
             {upcomingBookings.map((booking) => (
-              <BookingCard booking={booking} key={booking.id} ringGlow />
+              <BookingCard booking={booking} key={booking.id} ringGlow visit />
             ))}
           </div>
         )}
@@ -76,7 +76,7 @@ export default function Bookings() {
 
         <div className="w-fit h-full flex pb-20 p-10 gap-15">
           {recentBookings.map((booking) => (
-            <BookingCard booking={booking} key={booking.id} />
+            <BookingCard booking={booking} key={booking.id} visit />
           ))}
         </div>
       </div>

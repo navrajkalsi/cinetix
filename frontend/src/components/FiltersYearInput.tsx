@@ -4,8 +4,8 @@ import { CheckIcon, XIcon } from "lucide-react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 
 interface Props {
-  value?: number;
-  onValueChange: (v: number | undefined) => void;
+  value: number | null;
+  onValueChange: (v: number | null) => void;
 }
 
 const minYear = 2000;
@@ -20,11 +20,11 @@ export default function FiltersYearInput({ value, onValueChange }: Props) {
     setInputValue(
       Number.isNaN(e.target.valueAsNumber) ||
         !Number.isInteger(e.target.valueAsNumber)
-        ? undefined
+        ? null
         : e.target.valueAsNumber,
     );
 
-  const handleClick = (newValue: number | undefined) => {
+  const handleClick = (newValue: number | null) => {
     const inputTarget = input.current;
 
     if (!inputTarget) return; // skip
@@ -63,7 +63,7 @@ export default function FiltersYearInput({ value, onValueChange }: Props) {
           <Button
             variant="ghost"
             size="icon-sm"
-            onClick={() => handleClick(undefined)}
+            onClick={() => handleClick(null)}
           >
             <XIcon />
           </Button>

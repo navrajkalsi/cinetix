@@ -29,7 +29,7 @@ export default function FiltersLayout() {
           defaultOpen={!!bookings}
           key={bookings ? " bookings" : "other"}
         >
-          <FiltersSidebar showStats={!!bookings} current={current} />
+          <FiltersSidebar current={current} />
           <Outlet />
           <Backdrop />
         </SidebarProvider>

@@ -18,7 +18,9 @@ import {
   ClapperboardIcon,
   FileVideoCameraIcon,
   FilmIcon,
+  FunnelIcon,
   MapPinIcon,
+  PlusIcon,
   SidebarIcon,
 } from "lucide-react";
 import useLookupArrays from "@/hooks/useLookupArrays";
@@ -34,7 +36,6 @@ import { useNavigate, type NavigateFunction } from "react-router";
 import { useState } from "react";
 import { Dialog, DialogContent } from "./ui/dialog";
 import Stats from "./Stats";
-import { Button } from "./ui/button";
 
 const pages = [
   {
@@ -60,13 +61,12 @@ const pages = [
 ] as const;
 
 interface Props {
-  showStats: boolean;
   current?: "Bookings" | "Movies" | "Locations" | "Formats";
 }
 
-export default function FiltersSidebar({ showStats, current }: Props) {
+export default function FiltersSidebar({ current }: Props) {
   const [movies, locations, formats] = useLookupArrays();
-  const { toggleSidebar } = useSidebar();
+  const { open, setOpen, toggleSidebar } = useSidebar();
   const navigate = useNavigate();
   const [statsOpen, setStatsOpen] = useState(false);
 
@@ -92,21 +92,40 @@ export default function FiltersSidebar({ showStats, current }: Props) {
         <SidebarContent className="gap-5">
           {pagesGroup(navigate, current)}
           <SidebarSeparator className="bg-muted-foreground h-0.5 rounded-full" />
-          {filtersGroup(movies, locations, formats, filters, navigate)}
+          {filtersGroup(
+            movies,
+            locations,
+            formats,
+            filters,
+            navigate,
+            open,
+            setOpen,
+          )}
         </SidebarContent>
 
         <SidebarFooter>
           <SidebarMenu>
-            {showStats && (
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip={`Stats for ${filters && "year" in filters && filters.year ? filters.year : "all years"}`}
-                  onClick={() => setStatsOpen(true)}
-                >
-                  <ChartSplineIcon />
-                  <span>Stats</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+            {current === "Bookings" && (
+              <>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    tooltip="Create new booking"
+                    onClick={() => navigate("/bookings/new")}
+                  >
+                    <PlusIcon />
+                    <span>Add Booking</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    tooltip={`Stats for ${filters && "year" in filters && filters.year ? filters.year : "all years"}`}
+                    onClick={() => setStatsOpen(true)}
+                  >
+                    <ChartSplineIcon />
+                    <span>Stats</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </>
             )}
 
             <SidebarMenuItem>
@@ -142,12 +161,7 @@ function pagesGroup(navigate: NavigateFunction, current: Props["current"]) {
           <SidebarMenuItem key={page.title}>
             <SidebarMenuButton
               tooltip={page.title}
-              render={
-                <Button
-                  variant={current === page.title ? "default" : "outline"}
-                  className="justify-start"
-                />
-              }
+              isActive={current === page.title}
               onClick={() => navigate(page.link)}
             >
               <page.icon />
@@ -169,9 +183,12 @@ function filtersGroup(
   formats: Format[],
   filters: LoaderData["filters"],
   navigate: NavigateFunction,
+  open: boolean,
+  setOpen: (open: boolean) => void,
 ) {
   if (!filters) return <></>;
 
+  const year = "year" in filters ? (filters.year ?? null) : null;
   const movie =
     "movieId" in filters
       ? (movies.find((m) => m.id === filters.movieId) ?? null)
@@ -185,15 +202,40 @@ function filtersGroup(
       ? (formats.find((f) => f.id === filters.formatId) ?? null)
       : null;
 
+  const activeCount =
+    (year ? 1 : 0) + (movie ? 1 : 0) + (location ? 1 : 0) + (format ? 1 : 0);
+
+  if (!open && activeCount)
+    return (
+      <SidebarGroup>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton isActive onClick={() => setOpen(true)}>
+              <FunnelIcon />
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
+    );
+
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Filters</SidebarGroupLabel>
+      <SidebarGroupLabel className="flex gap-2.5">
+        Filters
+        {activeCount > 0 && (
+          <span className="bg-foreground rounded-full aspect-square h-5 w-auto text-[1.2em] font-bold font-heading text-background flex justify-center items-center">
+            {activeCount}
+          </span>
+        )}
+      </SidebarGroupLabel>
       <SidebarMenu>
-        <SidebarMenuItem key="movie" className="flex flex-col gap-2.5">
+        <SidebarMenuItem className="flex flex-col gap-2.5">
           {"year" in filters && (
             <FiltersYearInput
-              value={filters.year}
-              onValueChange={(e) => applyFiler({ year: e }, navigate)}
+              value={year}
+              onValueChange={(e) =>
+                applyFiler({ year: e ?? undefined }, navigate)
+              }
             />
           )}
 

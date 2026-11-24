@@ -1,5 +1,5 @@
 import type { BookingComplete } from "@/models/Booking";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Card, CardContent } from "./ui/card";
 import { Item, ItemDescription, ItemTitle } from "./ui/item";
 import {
@@ -24,6 +24,8 @@ interface Props {
   hoverScale?: boolean;
   // add box shadow
   ringGlow?: boolean;
+  // visit booking page on click
+  visit?: boolean;
   className?: string;
 }
 
@@ -54,9 +56,13 @@ export default function BookingCard({
   contentVisible,
   hoverScale = true,
   ringGlow = false,
+  visit = false,
   className,
 }: Props) {
   const bg = `https://image.tmdb.org/t/p/w780${booking.movie.poster_path}`;
+  const navigate = useNavigate();
+
+  const handleClick = () => visit && navigate(`/bookings/${booking.id}`);
 
   return (
     <Card
@@ -65,9 +71,11 @@ export default function BookingCard({
         hoverScale && "hover:scale-105",
         ringGlow &&
         "border-muted-foreground/50 border-0 outline-5 outline-foreground/50 outline-offset-5",
+        visit && "cursor-pointer",
         className,
       )}
       style={{ backgroundImage: `url(${bg})` }}
+      onClick={handleClick}
     >
       {contentVisible !== false && (
         <CardContent

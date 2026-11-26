@@ -40,3 +40,4 @@ demo.*
 tickets
 notes*
 seed.err
+seed_data.py

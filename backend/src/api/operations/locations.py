@@ -17,7 +17,7 @@ def read_locations(session: SessionDep) -> Sequence[LocationRead]:
 
     return [
         LocationRead.model_validate(location)
-        for location in session.exec(select(Location)).all()
+        for location in session.execute(select(Location)).all()
     ]
 
 
@@ -32,7 +32,7 @@ def create_location(model: LocationCreate, session: SessionDep) -> LocationRead:
     """
 
     # does a location already exist with same external id
-    present = session.exec(
+    present = session.execute(
         select(Location).where(Location.external_id == model.external_id)
     ).first()
 

@@ -3,49 +3,46 @@ from typing import Literal
 from sqlalchemy import String
 from sqlmodel import Field, SQLModel
 
-# add union from a dict, that contains the format name with icon file
-FORMATS = {
-    "UltraAVX": "ultraavx.svg",
-    "IMAX 70MM": "imax-70mm.svg",
-    "IMAX": "imax.svg",
-    "4DX": "4dx.svg",
-    "VIP": "vip.svg",
-    "ScreenX": "screenx.svg",
-    "Regular": "regular.svg",
-}
-
-FormatName = Literal[
-    "UltraAVX", "IMAX 70MM", "IMAX", "4DX", "VIP", "ScreenX", "Regular"
+# format backdrop as svgs can be accessed in frontend using the lowercase format names and the filename.
+Formats = Literal[
+    "VIP",
+    "Regular",
+    "3D",
+    "UltraAVX",
+    "UltraAVX 3D",
+    "UltraAVX D-Box",
+    "IMAX",
+    "IMAX 3D",
+    "IMAX 3D HFR",
+    "IMAX HFR",
+    "IMAX 70MM 3D",
+    "IMAX 70MM",
+    "4DX",
+    "D-Box",
+    "ScreenX",
+    "70MM",
+    "HFR",
 ]
 
 
 class FormatBase(SQLModel):
     """Fields shared by every format model."""
 
-    name: FormatName = Field(
+    name: Formats = Field(
         sa_type=String, unique=True, index=True, description="Name of the format."
     )
 
 
-class FormatCreate(FormatBase):
-    """Request body for creating a new format."""
+# Formats cannot be created through public API
 
 
-class FormatDetails(FormatBase):
-    """Expanded format model with additional details."""
-
-    backdrop_path: str = Field(
-        description="Backdrop image path, served from the frontend root."
-    )
-
-
-class FormatRead(FormatDetails):
+class FormatRead(FormatBase):
     """Response body for quering a format from the database."""
 
     id: int
 
 
-class Format(FormatDetails, table=True):
+class Format(FormatBase, table=True):
     """A row in the `formats` table."""
 
     __tablename__: str = "formats"

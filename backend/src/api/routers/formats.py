@@ -3,8 +3,8 @@ from collections.abc import Sequence
 from fastapi import APIRouter, HTTPException
 
 from api.dependencies import SessionDep
-from api.models.formats import FormatCreate, FormatRead
-from api.operations.formats import create_format, read_format, read_formats
+from api.models.formats import FormatRead
+from api.operations.formats import read_format, read_formats
 
 router = APIRouter(
     prefix="/formats",
@@ -32,8 +32,4 @@ def get_formats(session: SessionDep) -> Sequence[FormatRead]:
     return read_formats(session)
 
 
-@router.post("/")
-def post_format(model: FormatCreate, session: SessionDep) -> FormatRead:
-    """Adds a new format record in the database if no format is found with same `name`."""
-
-    return create_format(model, session)
+# Formats cannot be created through public api

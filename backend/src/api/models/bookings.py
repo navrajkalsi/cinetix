@@ -7,6 +7,8 @@ from sqlalchemy import String
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlmodel import CheckConstraint, Field, SQLModel
 
+from api.models.formats import Formats
+
 
 class BookingBase(SQLModel):
     """Fields shared by every booking model.
@@ -89,3 +91,17 @@ class Booking(BookingBase, table=True):
     )
 
     id: int | None = Field(default=None, primary_key=True)
+
+
+class BookingSeed(SQLModel):
+    """Model used for seeding all database tables at once. Not visible via public API."""
+
+    external_id: str | None = Field(default=None, min_length=1)
+    date: datetime.date
+    # No timezone info is stored
+    time: datetime.time | None = Field(default=None)
+    seats: list[str] = Field(default_factory=list, sa_type=ARRAY(String))
+    price: Decimal | None = Field(default=None, ge=0, decimal_places=2)
+    movie: str
+    location: str
+    format: Formats

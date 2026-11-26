@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from sqlmodel import select
 
 from api.dependencies import SessionDep
-from api.models.formats import FORMATS, Format, FormatCreate, FormatDetails, FormatRead
+from api.models.formats import Format, FormatRead, Formats
 
 
 def read_format(id: int, session: SessionDep) -> FormatRead | None:
@@ -17,31 +17,25 @@ def read_formats(session: SessionDep) -> Sequence[FormatRead]:
 
     return [
         FormatRead.model_validate(format)
-        for format in session.exec(select(Format)).all()
+        for format in session.execute(select(Format)).all()
     ]
 
 
-def create_format(model: FormatCreate, session: SessionDep) -> FormatRead:
+def create_format(name: Formats, session: SessionDep) -> FormatRead:
     """Creates a new format row in the database.
 
     If a format already exists with the same `name`, no new format is created and the
     already present format is returned.
-
-    The returned `FormatRead` has all the attribute values from the provided `model`,
-    plus a database assigned `id`.
     """
 
     # does a location already exist with same external id
-    present = session.exec(select(Format).where(Format.name == model.name)).first()
+    present = session.execute(select(Format).where(Format.name == name)).first()
 
     if present is not None:  # do not create new
         return FormatRead.model_validate(present)
 
-    details = FormatDetails(name=model.name, backdrop_path=FORMATS[model.name])
-
     # format with None id
-    format = Format.model_validate(details)
-
+    format = Format(name=name)
     session.add(format)
     session.commit()  # assigned an id here by the db
     session.refresh(format)  # fetch the format with id filled

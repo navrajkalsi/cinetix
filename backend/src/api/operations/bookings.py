@@ -57,7 +57,7 @@ def read_bookings(
         statement = statement.where(Booking.format_id == format_id)
 
     # order
-    bookings = session.exec(statement.order_by(desc(Booking.date))).all()
+    bookings = session.execute(statement.order_by(desc(Booking.date))).all()
 
     return [BookingRead.model_validate(booking) for booking in bookings]
 

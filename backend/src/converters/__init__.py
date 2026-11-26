@@ -1,5 +1,5 @@
 from api.models.bookings import BookingCreate
-from api.models.formats import Format, FormatCreate
+from api.models.formats import Format
 from api.models.locations import Location, LocationCreate
 from api.models.movies import Movie, MovieCreate
 from maps.client import search_place
@@ -35,10 +35,6 @@ def transaction_to_location_create(t: Transaction) -> LocationCreate:
         address=maps_result.address,
         external_id=maps_result.id,
     )
-
-
-def transaction_to_format_create(t: Transaction) -> FormatCreate:
-    return FormatCreate(name=t.format)
 
 
 def transaction_to_booking_create(

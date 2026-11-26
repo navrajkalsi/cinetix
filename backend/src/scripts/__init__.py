@@ -3,12 +3,11 @@ import json
 import requests
 
 from api.models.bookings import Booking, BookingCreate
-from api.models.formats import Format, FormatCreate
+from api.models.formats import Format
 from api.models.locations import Location, LocationCreate
 from api.models.movies import Movie, MovieCreate
 from converters import (
     transaction_to_booking_create,
-    transaction_to_format_create,
     transaction_to_location_create,
     transaction_to_movie_create,
 )

@@ -21,7 +21,7 @@ export default function RankCard({
   return (
     <Card className="size-full justify-evenly">
       <CardContent className="size-full">
-        <div className="size-full relative rounded-3xl overflow-hidden">
+        <div className="size-full relative rounded-3xl overflow-hidden flex flex-col justify-center items-center">
           {children}
           <div className="bg-black/20 absolute size-full z-10 top-0 left-0" />
           <div className="z-10 absolute right-3 bottom-2 font-heading text-9xl font-extrabold">

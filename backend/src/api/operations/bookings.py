@@ -4,7 +4,14 @@ from datetime import date
 from sqlmodel import desc, select
 
 from api.dependencies import SessionDep
-from api.models.bookings import Booking, BookingCreate, BookingRead
+from api.models.bookings import Booking, BookingCreate, BookingRead, BookingSeed
+from api.models.locations import LocationCreate
+from api.models.movies import MovieCreate
+from api.operations.formats import create_format
+from api.operations.locations import create_location
+from api.operations.movies import create_movie
+from maps.client import search_place
+from tmdb.client import search_movie
 
 
 def read_booking(id: int, session: SessionDep) -> BookingRead | None:
@@ -59,7 +66,7 @@ def read_bookings(
     # order
     bookings = session.execute(statement.order_by(desc(Booking.date))).all()
 
-    return [BookingRead.model_validate(booking) for booking in bookings]
+    return [BookingRead.model_validate(booking[0]) for booking in bookings]
 
 
 def create_booking(model: BookingCreate, session: SessionDep) -> BookingRead:
@@ -120,3 +127,72 @@ def remove_booking(id: int, session: SessionDep) -> BookingRead | None:
 #         session.refresh(booking)
 #
 #     return booking
+
+
+def seed_booking(
+    model: BookingSeed,
+    session: SessionDep,
+    movie_id: int | None = None,
+    location_id: int | None = None,
+    format_id: int | None = None,
+) -> BookingRead | str:
+    """
+    Creates a booking from a seeding model for booking.
+    Optional `movie_id`, `location_id` and `format_id` can also be provided if the caller wants to
+    bypass the database check. The provided ids are not validated though.
+    Returns a reason `str` if the booking could not be created for some reason.
+    """
+
+    if movie_id is None:
+        tmdb = search_movie(model.movie)
+
+        if tmdb is None:
+            return f"No results found on TMDB for {model.movie}."
+
+        if tmdb.poster_path is None:
+            return "Primary TMDB movie does not have a poster."
+
+        movie = create_movie(
+            MovieCreate(
+                name=tmdb.title,
+                external_id=tmdb.id,
+                poster_path=tmdb.poster_path,
+                release_date=tmdb.release_date,
+            ),
+            session,
+        )
+        movie_id = movie.id
+
+    if location_id is None:
+        maps = search_place(model.location)
+
+        if maps is None:
+            return f"No results found on Google Maps for {model.location}."
+
+        location = create_location(
+            LocationCreate(
+                name=maps.name,
+                address=maps.address,
+                external_id=maps.id,
+            ),
+            session,
+        )
+        location_id = location.id
+
+    if format_id is None:
+        format = create_format(model.format, session)
+        format_id = format.id
+
+    booking = BookingCreate(
+        external_id=model.external_id,
+        date=model.date,
+        time=model.time,
+        seats=model.seats,
+        price=model.price,
+        source="manual",
+        movie_id=movie_id,
+        location_id=location_id,
+        format_id=format_id,
+    )
+
+    return create_booking(booking, session)

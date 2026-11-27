@@ -40,11 +40,17 @@ export default function ListLayout({ entity }: Props) {
       {entity === "formats" &&
         formats.map((format, i) => (
           <ListItem key={i} title={format.name} page={"/formats/" + format.id}>
-            <img
-              aria-hidden
-              src={format.backdrop_path}
-              className="size-full p-4"
-            />
+            {format.name
+              .toLowerCase()
+              .split(" ")
+              .map((tag, i) => (
+                <img
+                  key={i}
+                  aria-hidden
+                  src={`${tag}.svg`}
+                  className="w-full max-h-1/4 p-8"
+                />
+              ))}
           </ListItem>
         ))}
     </div>

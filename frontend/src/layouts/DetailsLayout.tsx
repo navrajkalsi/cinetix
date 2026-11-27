@@ -130,6 +130,7 @@ function getPreview(entity: Entity) {
   // the first div will shrink in width to maintain ratio, but will lose the ratio when h is much more than width
   // in that case the w will be capped at 40%
   // but then the inner div will take over and scale its height to maintain the aspect ratio
+
   return (
     <div className="aspect-2/3 max-w-2/5 h-full w-auto flex items-center">
       {entity.type === "movie" && (
@@ -153,12 +154,18 @@ function getPreview(entity: Entity) {
       )}
 
       {entity.type === "format" && (
-        <div className="aspect-2/3 w-full h-auto rounded-10xl overflow-auto flex">
-          <img
-            loading="lazy"
-            className="grow pointer-events-none"
-            src={`/${entity.data.backdrop_path}`}
-          />
+        <div className="aspect-2/3 w-full h-auto rounded-10xl overflow-auto flex flex-col justify-evenly items-center">
+          {entity.data.name
+            .toLowerCase()
+            .split(" ")
+            .map((format, i) => (
+              <img
+                key={i}
+                loading="lazy"
+                className="pointer-events-none max-h-1/4 w-full"
+                src={`/${format}.svg`}
+              />
+            ))}
         </div>
       )}
     </div>

@@ -16,7 +16,7 @@ def read_formats(session: SessionDep) -> Sequence[FormatRead]:
     """Returns the list of all the formats in the database."""
 
     return [
-        FormatRead.model_validate(format)
+        FormatRead.model_validate(format[0])
         for format in session.execute(select(Format)).all()
     ]
 
@@ -28,11 +28,11 @@ def create_format(name: Formats, session: SessionDep) -> FormatRead:
     already present format is returned.
     """
 
-    # does a location already exist with same external id
+    # does a format already exist with same name
     present = session.execute(select(Format).where(Format.name == name)).first()
 
     if present is not None:  # do not create new
-        return FormatRead.model_validate(present)
+        return FormatRead.model_validate(present[0])
 
     # format with None id
     format = Format(name=name)

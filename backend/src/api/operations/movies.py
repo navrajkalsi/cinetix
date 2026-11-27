@@ -17,7 +17,8 @@ def read_movies(session: SessionDep) -> Sequence[MovieRead]:
     """Returns the list of all the movies in the database."""
 
     return [
-        MovieRead.model_validate(movie) for movie in session.exec(select(Movie)).all()
+        MovieRead.model_validate(movie[0])
+        for movie in session.execute(select(Movie)).all()
     ]
 
 
@@ -33,12 +34,12 @@ def create_movie(model: MovieCreate, session: SessionDep) -> MovieRead:
     """
 
     # does a movie already exist with same external id
-    present = session.exec(
+    present = session.execute(
         select(Movie).where(Movie.external_id == model.external_id)
     ).first()
 
     if present is not None:  # do not create new
-        return MovieRead.model_validate(present)
+        return MovieRead.model_validate(present[0])
 
     # fetch additional fields from tmdb
     details = details_movie(model.external_id)

@@ -16,7 +16,7 @@ def read_locations(session: SessionDep) -> Sequence[LocationRead]:
     """Returns the list of all the formats in the database."""
 
     return [
-        LocationRead.model_validate(location)
+        LocationRead.model_validate(location[0])
         for location in session.execute(select(Location)).all()
     ]
 
@@ -37,7 +37,7 @@ def create_location(model: LocationCreate, session: SessionDep) -> LocationRead:
     ).first()
 
     if present is not None:  # do not create new
-        return LocationRead.model_validate(present)
+        return LocationRead.model_validate(present[0])
 
     # location with None id
     location = Location.model_validate(model)

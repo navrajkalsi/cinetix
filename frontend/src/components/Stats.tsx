@@ -243,12 +243,17 @@ function formatsSlide(stats: StatsFull) {
             participle="Experienced"
             key={index}
           >
-            <img
-              src={format.backdrop_path}
-
-              aria-hidden
-              className="size-full object-contain object-center p-2"
-            />
+            {format.name
+              .toLowerCase()
+              .split(" ")
+              .map((tag, i) => (
+                <img
+                  key={i}
+                  src={`/${tag}.svg`}
+                  aria-hidden
+                  className="w-full max-h-1/4 p-4"
+                />
+              ))}
           </RankCard>
         ))}
       </CardContent>

@@ -4,11 +4,13 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlmodel import Session
 
+from api.operations.seed import seed_formats
 from api.routers import bookings, formats, locations, movies, stats
 from config import config
 
-from .database import init_db, remove_db
+from .database import engine, init_db, remove_db
 
 # Defaults
 DESCRIPTION = "api to manage movies database operations"
@@ -21,6 +23,8 @@ with Path("pyproject.toml").open("rb") as f:
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     init_db()
+    with Session(engine) as session:
+        seed_formats(session)
     yield
     # remove_db()
 

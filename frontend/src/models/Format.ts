@@ -1,13 +1,7 @@
-// Model with common fields for all format models.
-interface FormatBase {
+// Model received from database api
+export interface Format {
+  id: number;
   name: string;
 }
 
-// Model recived from database api
-export interface Format extends FormatBase {
-  id: number;
-  backdrop_path: string;
-}
-
-// Model for creating a new format in the database from user input
-export interface FormatCreate extends FormatBase { }
+// format cannot be created through frontend
